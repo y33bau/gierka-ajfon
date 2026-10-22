@@ -1,0 +1,14 @@
+PIĘTNO NOCY NA IPHONIE / IPADZIE NA PEŁNYM EKRANIE
+
+iPhone nie pozwala stronom internetowym przejść na pełny ekran. Pozwala za to dodać stronę
+do ekranu początkowego jako aplikację: wtedy uruchamia się bez paska Safari, na całym ekranie.
+
+1. Wrzuć zawartość tego folderu (web) do internetu, np. na GitHub Pages lub Netlify Drop
+   (app.netlify.com/drop: przeciągasz folder, dostajesz adres strony).
+   Plik index.html otwarty z aplikacji Pliki na telefonie NIE zadziała jak gra.
+2. Na iPhonie otwórz adres strony w Safari.
+3. Stuknij Udostępnij (kwadrat ze strzałką), potem „Do ekranu początkowego”, potem „Dodaj”.
+4. Uruchamiaj grę ikoną z ekranu początkowego. Trzymaj telefon poziomo.
+
+Na iPadzie gra przechodzi na pełny ekran także zwyczajnie w Safari, po kliknięciu rozdziału.
+Na Androidzie (Chrome) też, a dodatkowo można ją zainstalować z menu: „Dodaj do ekranu głównego”.
