@@ -749,12 +749,14 @@ const geoC=new THREE.PlaneGeometry(2,2);
 // sprites face the camera but take light as if tilted toward the sky, so torches above still light them
 for(const g of [geo32,geo64,geoC,geoT,geo64w]){const n=g.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,.8,.6);n.needsUpdate=true}
 const GLOW=[[255,42,42],[127,208,255]],GLOW_PROP=GLOW.concat([[255,106,26],[255,179,71]]);
+// rim colours [texture r,g,b, glow r,g,b]: a faint cold rim for fighters, a warm golden halo for NPCs
+const OUTLINE={char:[44,38,48,62,54,70],npc:[120,96,56,128,100,54]};
 function procFrame(img,x,y,size,h,kind){
   const w=size;h=h||size;
   const c=canvas(w,h),g=c.getContext('2d');g.drawImage(img,x,y,w,h,0,0,w,h);
   const tex=texFrom(c);
   if(kind==='fx')return{n:new THREE.MeshBasicMaterial({map:tex,alphaTest:.5,side:THREE.DoubleSide,fog:false,transparent:true,opacity:.9,color:0xe6ddd0})};
-  const d=g.getImageData(0,0,w,h).data,glow=kind==='prop'?GLOW_PROP:GLOW;
+  const id=g.getImageData(0,0,w,h),d=id.data,glow=kind==='prop'||kind==='propc'||kind==='npc'?GLOW_PROP:GLOW;
   const ec=canvas(w,h),eg=ec.getContext('2d'),ed=eg.createImageData(w,h);
   const sc=canvas(w,h),sg=sc.getContext('2d'),sd=sg.createImageData(w,h);
   for(let i=0;i<d.length;i+=4){
@@ -762,6 +764,13 @@ function procFrame(img,x,y,size,h,kind){
     if(d[i+3]>0){sd.data[i]=sd.data[i+1]=sd.data[i+2]=255;sd.data[i+3]=255;
       if(glow.some(q=>q[0]===d[i]&&q[1]===d[i+1]&&q[2]===d[i+2])){ed.data[i]=d[i];ed.data[i+1]=d[i+1];ed.data[i+2]=d[i+2]}}
   }
+  // outline: every empty pixel touching the figure gets a rim colour that also glows a little, so figures read against any floor
+  const ol=kind==='npc'?OUTLINE.npc:(kind===undefined||kind===null||kind==='propc')?OUTLINE.char:null;
+  if(ol){const src=new Uint8ClampedArray(d);
+    for(let py=0;py<h;py++)for(let px=0;px<w;px++){const i=(py*w+px)*4;if(src[i+3])continue;
+      if(!((px>0&&src[i-1])||(px<w-1&&src[i+7])||(py>0&&src[i-w*4+3])||(py<h-1&&src[i+w*4+3])))continue;
+      d[i]=ol[0];d[i+1]=ol[1];d[i+2]=ol[2];d[i+3]=255;ed.data[i]=ol[3];ed.data[i+1]=ol[4];ed.data[i+2]=ol[5];sd.data[i]=sd.data[i+1]=sd.data[i+2]=sd.data[i+3]=255}
+    g.putImageData(id,0,0)}
   eg.putImageData(ed,0,0);sg.putImageData(sd,0,0);
   const em=texFrom(ec);
   if(kind==='ghost')return{n:new THREE.MeshBasicMaterial({map:tex,alphaTest:.5,side:THREE.DoubleSide,transparent:true,opacity:.85,fog:false})};
@@ -785,7 +794,7 @@ function buildAnims(imgs){
     possessed:{walk:row(vu,0),attack:row(vu,1,0,2),death:row(vu,1,2,4)},
     knight:{walk:row(od,0),attack:row(od,1,0,2),death:row(od,1,2,4)},
     collector:{front:row('collector',0),walk:row('collector',1),attack:row('collector',2),drain:row('collector',3),hurt:row('collector',4,0,2),taunt:row('collector',4,2,4),death:row('collector',5)},
-    elder:row(an,2),marga:row(an,3),wit:row(an,4),
+    elder:row(an,2,0,4,'npc'),marga:row(an,3,0,4,'npc'),wit:row(an,4,0,4,'npc'),
     warden:{walk:row(od,4),attack:row(od,5,0,2),death:row(od,5,2,4)},
     ghoul:{walk:row(vu,2),attack:row(vu,3,0,2),death:row(vu,3,2,4)},
     bat:{walk:row(vu,4),attack:row(vu,4),death:row(vu,5,0,2)},
@@ -794,14 +803,14 @@ function buildAnims(imgs){
       madman:{walk:row('zl_en_a',0),attack:row('zl_en_a',1,0,2),death:row('zl_en_a',1,2,4),sheet:1},
       hound:{walk:row('zl_en_a',2),attack:row('zl_en_a',3,0,2),death:row('zl_en_a',3,2,4),sheet:1},
       rotknight:{walk:row('zl_en_a',4),attack:row('zl_en_a',5,0,2),death:row('zl_en_a',5,2,4),sheet:1},
-      monk:{walk:row('zl_en_b',0,0,4,'prop'),attack:row('zl_en_b',1,0,2,'prop'),death:row('zl_en_b',1,2,4,'prop'),sheet:1},
+      monk:{walk:row('zl_en_b',0,0,4,'propc'),attack:row('zl_en_b',1,0,2,'propc'),death:row('zl_en_b',1,2,4,'propc'),sheet:1},
       fireball:row('zl_en_b',2,0,4,'prop'),
-      izolda:row('zl_en_b',3,0,4,'prop'),ottokar:row('zl_en_b',4,0,4,'prop'),aurel:row('zl_en_b',5,0,4,'prop')}:{
+      izolda:row('zl_en_b',3,0,4,'npc'),ottokar:row('zl_en_b',4,0,4,'npc'),aurel:row('zl_en_b',5,0,4,'npc')}:{
       madman:{walk:row(vu,0),attack:row(vu,1,0,2),death:row(vu,1,2,4)},
       hound:{walk:row(vu,2),attack:row(vu,3,0,2),death:row(vu,3,2,4)},
       rotknight:{walk:row(od,0),attack:row(od,1,0,2),death:row(od,1,2,4)},
       monk:{walk:row(vu,0),attack:row(vu,1,0,2),death:row(vu,1,2,4)},
-      izolda:row(an,2),ottokar:row(an,4),aurel:row(an,2)}),
+      izolda:row(an,2,0,4,'npc'),ottokar:row(an,4,0,4,'npc'),aurel:row(an,2,0,4,'npc')}),
     // Morhad: Z6 (walk, wind-up/slam, death) and Z6b (charge, leap/dive, enraged roar), 64 px cells
     beast:imgs.morhad?(()=>{const m=(img,c,r)=>procFrame(imgs[img],c*64,r*64,64,64);return{walk:[m('morhad',0,0),m('morhad',1,0)],attack:[m('morhad',0,1),m('morhad',1,1)],death:[m('morhad',0,2),m('morhad',1,2)],
       charge:[m('morhad_b',0,0),m('morhad_b',1,0)],leap:[m('morhad_b',0,1),m('morhad_b',1,1)],rage:[m('morhad_b',0,2),m('morhad_b',1,2)],sheet:1}})():{walk:[bs(0,0),bs(1,0)],attack:[bs(0,1),bs(1,1)],death:[bs(0,2),bs(1,2)]},
@@ -829,10 +838,10 @@ const colCache={};const col=h=>colCache[h]||(colCache[h]=new THREE.Color(h));
 
 // post-processing: low-res target, tilt-shift blur at top and bottom, vignette
 const rt=new THREE.WebGLRenderTarget(16,9,{minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter});
-const postMat=new THREE.ShaderMaterial({uniforms:{tD:{value:rt.texture},res:{value:new THREE.Vector2(480,270)},hurt:{value:0},flash:{value:0}},
+const postMat=new THREE.ShaderMaterial({uniforms:{tD:{value:rt.texture},res:{value:new THREE.Vector2(480,270)},hurt:{value:0},flash:{value:0},sharp:{value:0}},
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-  fragmentShader:`uniform sampler2D tD;uniform vec2 res;uniform float hurt;uniform float flash;varying vec2 vUv;
-  void main(){float d=abs(vUv.y-0.52);float b=smoothstep(0.2,0.5,d)*2.2;vec3 c=vec3(0.);float tot=0.;
+  fragmentShader:`uniform sampler2D tD;uniform vec2 res;uniform float hurt;uniform float flash;uniform float sharp;varying vec2 vUv;
+  void main(){float d=abs(vUv.y-0.52);float b=smoothstep(0.2,0.5,d)*2.2*(1.0-sharp);vec3 c=vec3(0.);float tot=0.;
     for(int i=-2;i<=2;i++)for(int j=-2;j<=2;j++){vec2 o=vec2(float(i),float(j))*b/res;float w=1.0-0.12*float(i*i+j*j);c+=texture2D(tD,vUv+o).rgb*w;tot+=w;}
     c/=tot;float v=smoothstep(0.95,0.32,length((vUv-0.5)*vec2(1.2,1.0)));c*=mix(0.45,1.0,v);
     c=mix(c,c*vec3(1.0,0.86,0.9)+vec3(0.012,0.006,0.018),0.6);c=mix(c,vec3(c.r*1.2+0.15,c.g*0.5,c.b*0.5),hurt);c=mix(c,c*2.4+vec3(0.16,0.19,0.27),flash);
@@ -1286,7 +1295,7 @@ function syncScene(dt){
   let tx,tz;
   if(S){tx=pl.x/16;tz=pl.y/16}else{idleA+=dt*.08;const I=W.idle;tx=I[0]+Math.sin(idleA)*I[2];tz=I[1]+Math.cos(idleA*.7)*I[3]}
   camTarget.x+=(tx-camTarget.x)*Math.min(1,dt*8);camTarget.z+=(tz-camTarget.z)*Math.min(1,dt*8);if(!S||S.t<.1){camTarget.x=tx;camTarget.z=tz}
-  let sx=0,sz=0;if(S&&S.shakeT>0){sx=rnd(-1,1)*S.shakeM;sz=rnd(-1,1)*S.shakeM}
+  let sx=0,sz=0;if(S&&S.shakeT>0){const pxw=2*DIST*Math.tan(12*Math.PI/180)/RT_H;S.shkT=(S.shkT||0)-dt;if(S.shkT<=0||!S.shk){S.shkT=.04;S.shk=[Math.round(rnd(-1,1)*S.shakeM/pxw)*pxw,Math.round(rnd(-1,1)*S.shakeM/pxw)*pxw/Math.sin(PITCH)]}sx=S.shk[0];sz=S.shk[1]}
   cam.position.set(camTarget.x+sx,Math.sin(PITCH)*DIST,camTarget.z+Math.cos(PITCH)*DIST+sz);cam.lookAt(camTarget.x+sx,.8,camTarget.z+sz);
   const z0=S&&S.zones[0];if(z0){W.zoneLight.x=z0.x/16;W.zoneLight.z=z0.y/16}
   for(const L of LSRC){let k=L.base;
@@ -1305,7 +1314,7 @@ function syncScene(dt){
   // weather and dawn (chapter I)
   const fl=S?S.flash:0,dawn=CH!==2&&S&&S.opening?Math.min(1,(3.4-S.opening)/2.4):0,AT=ATM[CH];
   amb.intensity=AT.ai+fl*1.4+dawn*.9;hemi.intensity=AT.hi+fl*.8+dawn*.5;if(dawn>0){TMPC.setHex(AT.amb);amb.color.copy(TMPC.lerp(DAWN,dawn))}else amb.color.setHex(AT.amb);
-  postMat.uniforms.flash.value=fl*.45;
+  postMat.uniforms.flash.value=fl*.45;postMat.uniforms.sharp.value=S&&S.shakeT>0?1:Math.max(0,postMat.uniforms.sharp.value-dt*4);
   rain.visible=CH===1;if(rain.visible){rain.material.opacity=.32*(1-dawn*.7);for(let i=0;i<RAIN_N;i++){const d=DROPS[i];d.y-=d.s*dt;d.x-=d.s*.12*dt;if(d.y<0){d.y+=12;d.x=rnd(-15,15);d.z=rnd(-10,10);if(S&&i%9===0)S.parts.push({k:'d',x:(camTarget.x+d.x)*16,y:(camTarget.z+d.z)*16,z:1,vx:rnd(-6,6),vy:rnd(-3,3),vz:rnd(8,14),c:'#6a7a96',life:.25})}
     const x=camTarget.x+d.x,z=camTarget.z+d.z,o=i*6;rainPos[o]=x;rainPos[o+1]=d.y;rainPos[o+2]=z;rainPos[o+3]=x+.07;rainPos[o+4]=d.y-.55;rainPos[o+5]=z}rainGeo.attributes.position.needsUpdate=true}
   for(const o of propObjs){let f;
@@ -1476,6 +1485,8 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;clock+=dt;up
 const names=Object.keys(SPRITE_DATA),imgs={};
 Promise.all(names.map(n=>new Promise((res,rej)=>{const im=new Image();im.onload=()=>{imgs[n]=im;res()};im.onerror=rej;im.src=SPRITE_DATA[n]}))).then(()=>{
   A=buildAnims(imgs);decals(imgs);
+  // a dead NPC no longer glows
+  for(const k of ['elder','wit','izolda','ottokar'])if(A[k]&&A[k][3])A[k][3].n.emissive.setHex(0x000000);
   const TINT={madman:0xe0a890,hound:0xb89078,rotknight:0xa8b880,monk:0xffa060,izolda:0xc4b4ec,ottokar:0xf0d090,aurel:0xa8c8f0};
   for(const k in TINT){const a=A[k];if(a.sheet||(Array.isArray(a)&&imgs.zl_en_b))continue;for(const f of Array.isArray(a)?a:Object.values(a).flat())f.n.color.setHex(TINT[k])}
   for(const ch of [1,2,3]){initWorld(ch);useWorld(ch);ROOT=W.group;[null,buildBrzeznica,buildDolne,buildStolica][ch](imgs);
