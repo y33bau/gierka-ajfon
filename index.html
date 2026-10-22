@@ -168,7 +168,7 @@ button:focus-visible{outline:2px solid var(--bone);outline-offset:3px}
       <div class="overlay" id="title">
         <div class="kicker">Roguelike w ciemności · Demo HD-2D</div>
         <h1>Piętno <em>Nocy</em></h1>
-        <p class="lede">Nosisz znak paktu, który po zmroku przyzywa martwych. Twoja broń walczy sama, a ty tylko przeżyj. Zbieraj ogniki z poległych, szukaj kapliczek i doczekaj końca nocy: najpierw w spalonej wiosce, potem pod ziemią, a w końcu w gnijącej złotej stolicy.</p>
+        <p class="lede">Jesteś Naznaczeńcem. Nosisz znak Paktu, który po zmroku przyzywa najstraszniejsze koszmary i budzi zmarłych. Walcz z siłami ciemności i zdobywaj doświadczenie, aby przebić się przez hordy potworów i wreszcie zaznać spokoju…</p>
         <div class="keys" id="keysDesk"><span>Ruch</span><b>WASD / strzałki</b><span>Unik (zużywa staminę)</span><b>Spacja / Shift</b><span>Rozmowa</span><b>E</b><span>Ulepszenia</span><b>1 · 2 · 3</b></div>
         <div class="keys" id="keysTouch" hidden><span>Ruch</span><b>przeciągnij lewą stroną ekranu</b><span>Unik i rozmowa</span><b>przyciski po prawej</b></div>
         <div class="btnrow"><button class="go" id="start1" disabled>Wczytywanie…</button><button class="go alt" id="start2" disabled>Wczytywanie…</button><button class="go alt" id="start3" disabled>Wczytywanie…</button></div>
@@ -195,7 +195,9 @@ const SPRITE_DATA={"protagonist_a": "data:image/png;base64,iVBORw0KGgoAAAANSUhEU
 (()=>{
 const $=id=>document.getElementById(id);
 if(!window.THREE){$('screen').insertAdjacentHTML('beforeend','<div id="err">Nie udało się wczytać biblioteki 3D. Odśwież stronę.</div>');return}
-const TS=16,MW=64,MH=56,WW=MW*TS,WH=MH*TS,NIGHT=720,BREAK_AT=360,PITCH=55*Math.PI/180,DIST=30,RT_H=405;
+const TS=16,MW=84,MH=73,WW=MW*TS,WH=MH*TS,NIGHT=720,BREAK_AT=360,PITCH=55*Math.PI/180,DIST=30,
+  // the 3D scene is drawn at this height and scaled up: higher = sharper sprites; phones get a lighter setting
+  RT_H=(typeof matchMedia==='function'&&matchMedia('(pointer:coarse)').matches)?540:720;
 const P={ink:'#08070a',bone:'#d8cfb8',bone2:'#9d9584',blood:'#951518',blood2:'#560a0d',ember:'#ff6a1a',ember2:'#ffb347',st0:'#0d0c10',st1:'#1b1a1f',st2:'#24232a',st3:'#34323b',st4:'#46434e',inlay:'#5a4a22',
   pale:'#7f8a76',pale2:'#56604f',flesh1:'#4a1f1c',flesh2:'#6b2c26',bat:'#1d161b',rag1:'#3d3127'};
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -208,10 +210,34 @@ let CH=2,W=null,map,PROPS,START,SHRINES,region,walls,cliffs,pillars,lavas,brazie
 const WORLDS={};
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?21:map[y*MW+x];
 const solidAt=(px,py)=>SOLID.has(tileAt(Math.floor(px/TS),Math.floor(py/TS)));
-function mapKit(fillWith){const map=new Uint8Array(MW*MH).fill(fillWith),under=new Uint8Array(MW*MH),PROPS=[];
-  const set=(x,y,v)=>{if(x>0&&y>0&&x<MW-1&&y<MH-1)map[y*MW+x]=v};const fill=(x0,y0,w,h,v)=>{for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)set(x,y,v)};
-  const prop=(k,x,y,solid,extra)=>{PROPS.push(Object.assign({k,x,y},extra||{}));for(const [sx,sy] of solid){if(sx>0&&sy>0&&sx<MW-1&&sy<MH-1){under[sy*MW+sx]=map[sy*MW+sx];set(sx,sy,31)}}};
+function mapKit(fillWith){const map=new Uint8Array(GW*GH).fill(fillWith),under=new Uint8Array(GW*GH),PROPS=[];
+  const set=(x,y,v)=>{if(x>0&&y>0&&x<GW-1&&y<GH-1)map[y*GW+x]=v};const fill=(x0,y0,w,h,v)=>{for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)set(x,y,v)};
+  const prop=(k,x,y,solid,extra)=>{PROPS.push(Object.assign({k,x,y},extra||{}));for(const [sx,sy] of solid){if(sx>0&&sy>0&&sx<GW-1&&sy<GH-1){under[sy*GW+sx]=map[sy*GW+sx];set(sx,sy,31)}}};
   return{map,under,PROPS,set,fill,prop}}
+
+// Map scale: every chapter is generated on the original 64x56 grid (GW x GH) and then stretched by MK in both directions.
+// FT(i) is the first big-map tile of source tile i, MP(u) maps a continuous source coordinate, GT(X) is the source tile of big-map tile X.
+const MK=1.3,GW=64,GH=56,FT=i=>Math.ceil(i*MK-1e-9),MP=u=>{const i=Math.floor(u);return FT(i)+(u-i)*(FT(i+1)-FT(i))};
+const GTX=[],GTY=[];
+const SR=B=>({x:FT(B.x),y:FT(B.y),w:FT(B.x+B.w)-FT(B.x),h:FT(B.y+B.h)-FT(B.y)});
+// pillars and braziers stay single tiles; inlaid gold lines stay one tile thick; everything else is stretched block by block
+const POINT_T=new Set([22,27]),LINE_T={29:20,51:50};
+function upscaleWorld(w){const sm=w.map,su=w.under,map=new Uint8Array(MW*MH),under=new Uint8Array(MW*MH);
+  const sat=(x,y)=>(x<0||y<0||x>=GW||y>=GH)?21:sm[y*GW+x];
+  const floorNear=(x,y)=>{const c={};for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const t=sat(x+dx,y+dy);if(t===21||POINT_T.has(t)||t===31||LINE_T[t])continue;c[t]=(c[t]||0)+1}let b=20,bn=-1;for(const k in c)if(c[k]>bn){bn=c[k];b=+k}return b};
+  for(let Y=0;Y<MH;Y++)for(let X=0;X<MW;X++){const sx=GTX[X],sy=GTY[Y],t=sat(sx,sy),i=Y*MW+X;let v=t;
+    if(POINT_T.has(t)){if(X!==FT(sx)||Y!==FT(sy))v=floorNear(sx,sy)}
+    else if(LINE_T[t]){const hz=LINE_T[t]&&(sat(sx-1,sy)===t||sat(sx+1,sy)===t),vt=sat(sx,sy-1)===t||sat(sx,sy+1)===t;
+      if(!((X===FT(sx)||hz)&&(Y===FT(sy)||vt)))v=LINE_T[t]}
+    else if(t===31)under[i]=su[sy*GW+sx];
+    map[i]=v}
+  for(const p of w.PROPS){p.x=MP(p.x);p.y=MP(p.y)}
+  const px=v=>MP(v/TS)*TS;
+  w.start={x:px(w.start.x),y:px(w.start.y)};w.shrines=w.shrines.map(s=>({x:px(s.x),y:px(s.y)}));
+  for(const n of w.npcs){n.x=px(n.x);n.y=px(n.y);if(n.solid)n.solid=[FT(n.solid[0]),FT(n.solid[1])]}
+  const reg=w.region;w.region=(x,y)=>reg(GTX[x]??Math.floor(x/MK),GTY[y]??Math.floor(y/MK));
+  w.idle=[MP(w.idle[0]),MP(w.idle[1]),w.idle[2]*MK,w.idle[3]*MK];w.map=map;w.under=under;return w}
+for(let X=0;X<MW;X++){let i=0;while(FT(i+1)<=X)i++;GTX[X]=i}for(let Y=0;Y<MH;Y++){let i=0;while(FT(i+1)<=Y)i++;GTY[Y]=i}
 
 // Chapter II: the Lower City (layout from the M9 concept)
 function genDolne(){
@@ -222,7 +248,7 @@ function genDolne(){
   for(const x of [9,15,21,27]){set(x,2,20);prop('king_statue',x+.5,2.92,[[x,2]]);set(x,48,20);prop('king_statue',x+.5,48.92,[[x,48]])}
   for(const y of [11,15,19,28,32,36])for(const x of [10,18,26])set(x,y,22);
   for(let x=3;x<35;x++){set(x,23,29);set(x,24,29)}
-  fill(35,1,5,MH-2,23);fill(35,23,5,2,25);
+  fill(35,1,5,GH-2,23);fill(35,23,5,2,25);
   fill(40,6,22,36,20);fill(41,13,20,2,24);fill(41,33,20,2,24);fill(49,13,3,2,20);fill(49,33,3,2,20);
   fill(53,42,6,3,32);fill(42,45,19,7,32);
   [[7,21],[7,26],[14,21],[14,26],[22,21],[22,26],[30,21],[30,26],[8,5],[29,5],[8,43],[29,43],[16,46],[21,46],[46,50],[58,46],[42,21],[42,26],[60,21],[60,26],[44,9],[58,9],[44,38],[58,38]].forEach(([x,y])=>set(x,y,27));
@@ -242,8 +268,8 @@ function genDolne(){
   prop('chains',41.5,10.92,[[41,10]]);prop('chains',41.5,38.92,[[41,38]]);
   prop('black_powder',59.5,30.92,[[59,30]]);prop('black_powder',57.5,50.92,[[57,50]]);prop('black_powder',59.5,46.92,[[59,46]]);prop('clan_banner',61.5,7.92,[[61,7]]);
   const r=rng(31);
-  for(let i=0,n=0;i<500&&n<28;i++){const x=3+((r()*58)|0),y=3+((r()*(MH-6))|0);if(map[y*MW+x]!==20)continue;prop('dwarf_bones',x+.5,y+.92,[]);n++}
-  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){if(map[y*MW+x]!==20)continue;const q=r();if(q<.03)set(x,y,30);else if(q<.12)set(x,y,26)}
+  for(let i=0,n=0;i<500&&n<28;i++){const x=3+((r()*58)|0),y=3+((r()*(GH-6))|0);if(map[y*GW+x]!==20)continue;prop('dwarf_bones',x+.5,y+.92,[]);n++}
+  for(let y=1;y<GH-1;y++)for(let x=1;x<GW-1;x++){if(map[y*GW+x]!==20)continue;const q=r();if(q<.03)set(x,y,30);else if(q<.12)set(x,y,26)}
   return{map,under,PROPS,start:{x:6*TS+8,y:23*TS+14},shrines:[{x:4*TS+8,y:38*TS+12},{x:60*TS+8,y:40*TS+12}],
     region:(x,y)=>x>=40&&y>=42?'mine':x>=40?'forge':'hall',
     npcs:[{id:'tharm',art:'tharm',name:'Duch kowala Tharma',x:52*TS+8,y:24*TS+12,lines:THARM_LINES}],idle:[18,23,12,8]};
@@ -253,11 +279,11 @@ function genDolne(){
 // codes: 40 road, 41 ash, 42 dead grass, 43 charred planks, 44 rubble, 45 water, 46 graveyard, 47 blood mud, 48 house wall, 21 palisade/outside
 function genBrzeznica(){
   const {map,under,PROPS,set,fill,prop}=mapKit(21);const r=rng(1349);
-  const at=(x,y)=>map[y*MW+x];
-  fill(2,2,MW-4,MH-4,42);
-  for(let y=2;y<MH-2;y++)for(let x=2;x<MW-2;x++){const v=Math.sin(x*.31)+Math.cos(y*.27)+Math.sin((x+y)*.17)+(r()-.5)*.8;if(v>1.35)set(x,y,41)}
+  const at=(x,y)=>map[y*GW+x];
+  fill(2,2,GW-4,GH-4,42);
+  for(let y=2;y<GH-2;y++)for(let x=2;x<GW-2;x++){const v=Math.sin(x*.31)+Math.cos(y*.27)+Math.sin((x+y)*.17)+(r()-.5)*.8;if(v>1.35)set(x,y,41)}
   // the two roads and the village square
-  fill(2,27,MW-4,3,40);fill(30,2,3,MH-4,40);
+  fill(2,27,GW-4,3,40);fill(30,2,3,GH-4,40);
   for(let y=21;y<36;y++)for(let x=23;x<40;x++)if(Math.hypot((x-31)/7.8,(y-28)/6.6)<1)set(x,y,40);
   // graveyard to the north-east and a stagnant pond to the south-east
   fill(43,15,17,9,46);
@@ -291,7 +317,7 @@ function genBrzeznica(){
   // clutter along the roads and yards
   for(const [k,x,y] of [['dead_horse',22,31],['wheel',36,26],['barrel',27,22],['barrel',17,12],['wheel',44,12],['burnt_hay',57,25],['barrel',21,37],['dead_horse',40,48],['burnt_hay',27,8],['wheel',13,33]])prop(k,x+.5,y+.92,[[x,y]]);
   // dead trees along the palisade and in the corners
-  for(let i=0;i<500;i++){const side=i%4,t=r();let x,y;if(side===0){x=3+((t*(MW-6))|0);y=3+((r()*2)|0)}else if(side===1){x=3+((t*(MW-6))|0);y=MH-4-((r()*2)|0)}else if(side===2){x=3+((r()*2)|0);y=3+((t*(MH-6))|0)}else{x=MW-4-((r()*2)|0);y=3+((t*(MH-6))|0)}
+  for(let i=0;i<500;i++){const side=i%4,t=r();let x,y;if(side===0){x=3+((t*(GW-6))|0);y=3+((r()*2)|0)}else if(side===1){x=3+((t*(GW-6))|0);y=GH-4-((r()*2)|0)}else if(side===2){x=3+((r()*2)|0);y=3+((t*(GH-6))|0)}else{x=GW-4-((r()*2)|0);y=3+((t*(GH-6))|0)}
     if(r()>.32)continue;const c=at(x,y);if(c!==42&&c!==41)continue;if(PROPS.some(p=>p.k==='dead_tree'&&Math.abs(p.x-x)<2.5&&Math.abs(p.y-y)<2.5))continue;prop('dead_tree',x+.5,y+.92,[[x,y]])}
   return{map,under,PROPS,start:{x:31*TS+8,y:51*TS+8},shrines:[{x:24*TS+8,y:14*TS+8},{x:47*TS+8,y:48*TS+8}],region:()=>'village',
     npcs:[{id:'elder',art:'elder',name:'Umierający przy studni',x:29.6*TS,y:26.4*TS,lines:ELDER_LINES},
@@ -306,10 +332,10 @@ const SHACKS=[[3,37,4,3],[15,37,3,3],[20,39,4,2],[24,36,3,3],[3,46,3,3],[15,44,3
 const HOUSES=[[3,3,7,6],[11,3,6,6],[3,12,7,6],[12,12,8,6],[3,22,7,6],[13,22,7,5],[47,3,6,6],[55,3,6,7]];
 const DOMES=[[32,19,3.6,'c'],[26.5,15.6,1.4,'c'],[37.5,15.6,1.4,'c'],[14,6,1.7,'h'],[16,15,1.8,'h'],[6.5,25,1.7,'h'],[50,6,1.7,'h'],[10.5,43,1.6,'s'],[32,3.9,1.6,'p']];
 function genStolica(){
-  const {map,under,PROPS,set,fill,prop}=mapKit(21);const r=rng(4242);const at=(x,y)=>map[y*MW+x];
+  const {map,under,PROPS,set,fill,prop}=mapKit(21);const r=rng(4242);const at=(x,y)=>map[y*GW+x];
   const free=(x,y)=>[50,52,53,55,56,57].includes(at(x,y));
   const place=(k,x,y,extra,solid=true)=>{if(!free(x,y)||(x>=31&&x<=32))return;prop(k,x+.5,y+.92,solid?[[x,y]]:[],extra)};
-  fill(2,2,MW-4,MH-4,50);
+  fill(2,2,GW-4,GH-4,50);
   for(const B of [CATH,PALACE,CHAPEL])fill(B.x,B.y,B.w,B.h,58);
   for(const [x,y,w,h] of HOUSES)fill(x,y,w,h,58);
   // the fire monastery: a walled cloister with a pyre in the middle
@@ -380,7 +406,7 @@ const cam=new THREE.PerspectiveCamera(24,16/9,.5,120);
 const amb=new THREE.AmbientLight(0x5a4f78,.85);scene.add(amb);
 const hemi=new THREE.HemisphereLight(0x302848,0x1a0a06,.55);scene.add(hemi);
 const moon=new THREE.DirectionalLight(0xd0c0ff,0);moon.position.set(-6,14,-10);scene.add(moon);scene.add(moon.target);
-const ATM={1:{amb:0x4a5878,ai:.95,hs:0x3a4a70,hg:0x1a120c,hi:.5,fog:0x0a0c14,fd:.014,clear:0x05060b},2:{amb:0x5a4f78,ai:.85,hs:0x302848,hg:0x1a0a06,hi:.55,fog:0x050308,fd:.015,clear:0x030205},3:{amb:0x50466a,ai:.78,hs:0x7a6038,hg:0x1c0a08,hi:.5,fog:0x16110e,fd:.012,clear:0x0c0907,mi:.42,mc:0xd8c8ff}};
+const ATM={1:{amb:0x4a5878,ai:.95,hs:0x3a4a70,hg:0x1a120c,hi:.5,fog:0x0a0c14,fd:.014,clear:0x05060b},2:{amb:0x463c58,ai:.7,hs:0x282038,hg:0x140805,hi:.42,fog:0x030204,fd:.018,clear:0x020103},3:{amb:0x50466a,ai:.78,hs:0x7a6038,hg:0x1c0a08,hi:.5,fog:0x16110e,fd:.012,clear:0x0c0907,mi:.42,mc:0xd8c8ff}};
 const DAWN=new THREE.Color(0xc0a898),TMPC=new THREE.Color();
 function applyAtmos(){const a=ATM[CH];amb.color.setHex(a.amb);amb.intensity=a.ai;hemi.color.setHex(a.hs);hemi.groundColor.setHex(a.hg);hemi.intensity=a.hi;scene.fog.color.setHex(a.fog);scene.fog.density=a.fd;renderer.setClearColor(a.clear);moon.intensity=a.mi||0;if(a.mc)moon.color.setHex(a.mc);if(typeof setAmbience==='function')setAmbience()}
 const phong=(o)=>new THREE.MeshPhongMaterial(Object.assign({shininess:0,specular:0x000000},o));
@@ -428,16 +454,22 @@ function buildDolne(I){
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){let t=tileAt(tx,ty);const rc=(r()*8)|0;if(t===31)t=W.under[ty*MW+tx]||20;
     if(VOID.has(t))continue;
     if(t===21)tile(rc,2,tx,ty);
-    else if(t===29)tile(tx===18&&ty===23?7:tx===18?2:0,1,tx,ty);
+    else if(t===29)tile(tx===FT(18)&&ty===FT(23)?7:tx===FT(18)?2:0,1,tx,ty);
     else if(t===32)tile([0,5,6,7][rc&3],7,tx,ty);
     else if(region(tx,ty)==='forge'){if(nearLava(tx,ty))tile(4+(rc&3),5,tx,ty);else tile(rc,r()<.1?3:0,tx,ty)}
     else if(t===26)tile(rc,2,tx,ty);
     else tile(rc,0,tx,ty);
   }
-  for(let tx=42;tx<61;tx++)if(tileAt(tx,48)===32)tile(1,7,tx,48);
+  for(let tx=FT(42);tx<FT(61);tx++)if(tileAt(tx,FT(48))===32)tile(1,7,tx,FT(48));
   floorAO(fg,new Set([22,31]));
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++)if(tileAt(tx,ty)===30)fg.drawImage(DEC.bones[(r()*4)|0],tx*16-8,ty*16-8);
-  const floor=new THREE.Mesh(floorGeo,phong({map:texFrom(fc),alphaTest:.5}));floor.position.set(MW/2,0,MH/2);floor.receiveShadow=true;ROOT.add(floor);
+  // decay: damp black stains, old blood, cracks and more bones; the gold inlay is dulled with grime
+  for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++)if(tileAt(tx,ty)===29){fg.fillStyle='rgba(12,8,6,.5)';fg.fillRect(tx*16,ty*16,16,16)}
+  const okT=(x,y)=>{const t=tileAt(x,y);return !VOID.has(t)&&t!==21&&t!==24};
+  for(let i=0;i<340;i++){const x=(r()*MW)|0,y=(r()*MH)|0;if(!okT(x,y))continue;const rr=5+r()*20;const gr=fg.createRadialGradient(x*16+8,y*16+8,0,x*16+8,y*16+8,rr);gr.addColorStop(0,`rgba(3,2,4,${.25+r()*.3})`);gr.addColorStop(1,'rgba(3,2,4,0)');fg.fillStyle=gr;fg.fillRect(x*16+8-rr,y*16+8-rr,rr*2,rr*2)}
+  for(let i=0;i<120;i++){const x=(r()*MW)|0,y=(r()*MH)|0;if(!okT(x,y))continue;const q=r();
+    if(q<.35)fg.drawImage(DEC[r()<.5?'pool':'spray'][(r()*4)|0],x*16-8,y*16-8);else if(q<.7)fg.drawImage(DEC.crack[(r()*4)|0],x*16-8,y*16-8);else fg.drawImage(DEC.bones[(r()*4)|0],x*16-8,y*16-8)}
+  const floor=new THREE.Mesh(floorGeo,phong({map:texFrom(fc),alphaTest:.5,color:0x988e94}));floor.position.set(MW/2,0,MH/2);floor.receiveShadow=true;ROOT.add(floor);
   // walls: carved hall stone, forge brick with glowing seams, mine timber; caps from row 6
   const capMat=cutaway(phong({map:texFrom(tcut(Wl,1,6),true)}));
   const wallGeo=new THREE.BoxGeometry(1,3,1);wallGeo.translate(0,1.5,0);
@@ -445,7 +477,7 @@ function buildDolne(I){
   const groups=variants.map(()=>[]);
   const wreg=(x,y)=>{let m=0,f=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const t=tileAt(x+dx,y+dy);if(t===21)continue;if(t===32)m=1;else if(region(x+dx,y+dy)==='forge')f=1}return m?'mine':f?'forge':'hall'};
   for(const [x,y] of walls){const g=wreg(x,y);groups[g==='mine'?6:g==='forge'?4+((x+y)&1):((x*7+y*3)%4)].push([x,y])}
-  groups.forEach((list,i)=>{if(!list.length)return;const side=cutaway(phong({map:variants[i]}));instanced(wallGeo,[side,side,capMat,capMat,side,side],list,([x,y])=>M4.makeTranslation(x+.5,0,y+.5))});
+  groups.forEach((list,i)=>{if(!list.length)return;const side=cutaway(phong({map:variants[i],color:0x9a9096}));instanced(wallGeo,[side,side,capMat,capMat,side,side],list,([x,y])=>M4.makeTranslation(x+.5,0,y+.5))});
   const cliffT=texFrom(tcut(Wl,2,3),true);cliffT.repeat.set(1,10);
   const cliffGeo=new THREE.BoxGeometry(1,10,1);cliffGeo.translate(0,-5.03,0);
   instanced(cliffGeo,phong({map:cliffT}),cliffs,([x,y])=>M4.makeTranslation(x+.5,0,y+.5),false,true);
@@ -458,15 +490,15 @@ function buildDolne(I){
   const capGeo=new THREE.BoxGeometry(1.05,.32,1.05);capGeo.translate(0,4.12,0);
   instanced(capGeo,cutaway(phong({map:stoneT})),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
   const bandGeo=new THREE.CylinderGeometry(.395,.395,.14,8);bandGeo.translate(0,1.9,0);
-  instanced(bandGeo,cutaway(phong({color:0x8a6a2a,emissive:0x2a1c05})),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
+  instanced(bandGeo,cutaway(phong({color:0x4e3c1c})),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
   lavaFrames=[0,1,2,3].map(i=>tcut(F,i,5));
   const lavaGeo=new THREE.PlaneGeometry(1,1);lavaGeo.rotateX(-Math.PI/2);
   instanced(lavaGeo,new THREE.MeshBasicMaterial({map:lavaTex}),lavas,([x,y])=>M4.makeTranslation(x+.5,-.32,y+.5),false,false);
-  const abT=texFrom(tcut(F,3,6),true);abT.repeat.set(5,MH);
-  const abyss=new THREE.Mesh(new THREE.PlaneGeometry(5,MH),new THREE.MeshBasicMaterial({map:abT,color:0x8a6a6a}));abyss.rotation.x=-Math.PI/2;abyss.position.set(37.5,-10,MH/2);ROOT.add(abyss);
+  const abT=texFrom(tcut(F,3,6),true);abT.repeat.set(5*MK,MH);
+  const abyss=new THREE.Mesh(new THREE.PlaneGeometry(FT(40)-FT(35),MH),new THREE.MeshBasicMaterial({map:abT,color:0x8a6a6a}));abyss.rotation.x=-Math.PI/2;abyss.position.set((FT(35)+FT(40))/2,-10,MH/2);ROOT.add(abyss);
   const brT=texFrom(tcut(F,2,4),true);brT.repeat.set(5,2);
-  const bridge=new THREE.Mesh(new THREE.BoxGeometry(5,.3,2),phong({map:brT}));bridge.position.set(37.5,-.15,24);bridge.receiveShadow=true;bridge.castShadow=true;ROOT.add(bridge);
-  for(const z of [23.08,24.92]){const rail=new THREE.Mesh(new THREE.BoxGeometry(5,.34,.14),phong({map:stoneT}));rail.position.set(37.5,.17,z);rail.castShadow=true;rail.receiveShadow=true;ROOT.add(rail)}
+  const bridge=new THREE.Mesh(new THREE.BoxGeometry(FT(40)-FT(35),.3,FT(25)-FT(23)),phong({map:brT}));bridge.position.set((FT(35)+FT(40))/2,-.15,(FT(23)+FT(25))/2);bridge.receiveShadow=true;bridge.castShadow=true;ROOT.add(bridge);
+  for(const z of [FT(23)+.08,FT(25)-.08]){const rail=new THREE.Mesh(new THREE.BoxGeometry(FT(40)-FT(35),.34,.14),phong({map:stoneT}));rail.position.set((FT(35)+FT(40))/2,.17,z);rail.castShadow=true;rail.receiveShadow=true;ROOT.add(rail)}
   const R={brazier_0:[0,0,32,32],brazier_1:[32,0,32,32],brazier_2:[64,0,32,32],brazier_3:[96,0,32,32],king_statue:[0,32,32,64],anvil:[32,32,32,32],mine_cart:[64,32,32,32],pickaxe_rack:[96,32,32,32],
     healing_shrine:[32,64,32,32],depleted_shrine:[64,64,32,32],chains:[96,64,32,32],fallen_pillar:[0,96,64,32],dwarf_bones:[64,96,32,32],bellows:[96,96,32,32],furnace_0:[0,128,64,32],furnace_1:[64,128,64,32],
     sarcophagus:[0,160,32,32],rune_lantern:[32,160,32,32],black_powder:[64,160,32,32],clan_banner:[96,160,32,32]};
@@ -578,8 +610,8 @@ function buildStolica(I){
   for(const [x,y,t] of walls){
     if(t===21)G.outer[(x+y)&1].push([x,y]);
     else if(t===59)G.shack[(x*3+y)&1].push([x,y]);
-    else if(inB(CATH,x,y))G.cath[(x+y)&1].push([x,y]);else if(inB(PALACE,x,y))G.palace.push([x,y]);else if(inB(CHAPEL,x,y))G.chapel.push([x,y]);
-    else if(x>=43&&y>=14&&y<=32)G.mon[(x+y)&1].push([x,y]);
+    else if(inB(SR(CATH),x,y))G.cath[(x+y)&1].push([x,y]);else if(inB(SR(PALACE),x,y))G.palace.push([x,y]);else if(inB(SR(CHAPEL),x,y))G.chapel.push([x,y]);
+    else if(GTX[x]>=43&&GTY[y]>=14&&GTY[y]<=32)G.mon[(x+y)&1].push([x,y]);
     else G.house[(x*7+y*3)%4].push([x,y])}
   G.outer.forEach(l=>addWalls(l,4,stackE(ZW,[[rc(),2],[rc(),2],[rc(),2],[rc(),2]]),capT2,0x9a9088));
   G.house.forEach(l=>addWalls(l,3.2,stackE(ZW,[[rc(),0],[rc(),1],[rc(),1]]),capT));
@@ -599,12 +631,12 @@ function buildStolica(I){
     const lan=new THREE.Mesh(new THREE.CylinderGeometry(rad*.16,rad*.18,rad*.35,8),drumM);lan.position.set(x,base+rad*1.55+rad*.17,z);
     const spire=new THREE.Mesh(new THREE.ConeGeometry(rad*.2,rad*.55,8),goldM);spire.position.set(x,base+rad*1.9+rad*.27,z);
     for(const m of [drum,cup,ring,lan,spire]){m.castShadow=true;m.receiveShadow=true;ROOT.add(m)}};
-  for(const [x,z,rad,k] of DOMES)dome(x,z,rad,{c:4,h:3.2,s:3,p:4.5}[k]);
+  for(const [x,z,rad,k] of DOMES)dome(MP(x),MP(z),rad*MK,{c:4,h:3.2,s:3,p:4.5}[k]);
   // slate pyramid roofs and thatched shacks
   const slT=texFrom(tcut(ZW,1,4),true);slT.repeat.set(3,2);
   const slate=cutCircle(phong({map:slT,flatShading:true})),thatch=cutCircle(phong({map:texFrom(tcut(I.br_walls,1,5),true),color:0xb8a080,flatShading:true})),pyr=new THREE.ConeGeometry(Math.SQRT1_2,1,4);pyr.rotateY(Math.PI/4);
-  for(const [x,y,w,h] of [[3,3,7,6],[3,12,7,6],[13,22,7,5],[55,3,6,7]]){const m=new THREE.Mesh(pyr,slate);m.scale.set(w,2.2,h);m.position.set(x+w/2,3.2+1.1,y+h/2);m.castShadow=true;m.receiveShadow=true;ROOT.add(m)}
-  for(const [x,y,w,h] of SHACKS){const m=new THREE.Mesh(pyr,thatch);m.scale.set(w+.3,1.1,h+.3);m.position.set(x+w/2,1.7+.55,y+h/2);m.castShadow=true;m.receiveShadow=true;ROOT.add(m)}
+  for(const B of [[3,3,7,6],[3,12,7,6],[13,22,7,5],[55,3,6,7]]){const {x,y,w,h}=SR({x:B[0],y:B[1],w:B[2],h:B[3]});const m=new THREE.Mesh(pyr,slate);m.scale.set(w,2.2,h);m.position.set(x+w/2,3.2+1.1,y+h/2);m.castShadow=true;m.receiveShadow=true;ROOT.add(m)}
+  for(const B of SHACKS){const {x,y,w,h}=SR({x:B[0],y:B[1],w:B[2],h:B[3]});const m=new THREE.Mesh(pyr,thatch);m.scale.set(w+.3,1.1,h+.3);m.position.set(x+w/2,1.7+.55,y+h/2);m.castShadow=true;m.receiveShadow=true;ROOT.add(m)}
   // cloister pillars of the fire monastery
   const pilT=texFrom(tcut(ZW,0,2),true);pilT.repeat.set(2,3);const stoneT=texFrom(tcut(ZG,1,0),true);
   const pilGeo=new THREE.CylinderGeometry(.34,.36,3,8);pilGeo.translate(0,1.5,0);
@@ -698,7 +730,7 @@ const LPOOL=[];for(let i=0;i<10;i++){const l=new THREE.PointLight(0xffffff,0,8,2
 const plLight=new THREE.PointLight(0xffd2a0,2.1,13,2);plLight.castShadow=true;plLight.shadow.mapSize.set(1024,1024);plLight.shadow.camera.near=.2;plLight.shadow.camera.far=16;plLight.shadow.bias=-.004;scene.add(plLight);
 
 function initWorld(ch){
-  const w=ch===1?genBrzeznica():ch===2?genDolne():genStolica();
+  const w=upscaleWorld(ch===1?genBrzeznica():ch===2?genDolne():genStolica());
   Object.assign(w,{ch,group:new THREE.Group(),propObjs:[],npcMeshes:{},walls:[],cliffs:[],pillars:[],lavas:[],braziers:[],waters:[],rots:[],LSRC:[]});
   for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;
   scene.add(w.group);
@@ -710,25 +742,25 @@ function initWorld(ch){
     if(t===22)w.pillars.push([x,y]);if(t===24)w.lavas.push([x,y]);if(t===27)w.braziers.push([x,y]);if(t===45)w.waters.push([x,y])}
   const lsrc=(col,int,dist,x,y,z,kind,extra)=>{const o=Object.assign({col,base:int,dist,x,y,z,kind,ph:Math.random()*9},extra||{});w.LSRC.push(o);return o};
   if(ch===2){
-    w.braziers.forEach(([x,y])=>lsrc(0xff7a2a,1.6,8,x+.5,1.7,y+.6,'fire'));
-    for(let x=43;x<60;x+=5){lsrc(0xff4a10,1.6,7,x,.6,13.5,'lava');lsrc(0xff4a10,1.6,7,x,.6,33.5,'lava')}
-    for(let z=4;z<MH-2;z+=8)lsrc(0x7a1408,1.3,12,37.5,-4,z,'abyss');
-    lsrc(0xff5a14,1.9,7,45,1.2,7.6,'fire');lsrc(0xff5a14,1.9,7,57,1.2,7.6,'fire');
-    lsrc(0x5fb0ff,.9,4,34.5,1,22,'rune');lsrc(0x5fb0ff,.9,4,34.5,1,27,'rune');lsrc(0x5fb0ff,.9,4,40.5,1,22,'rune');lsrc(0x5fb0ff,.9,4,40.5,1,27,'rune');
+    w.braziers.forEach(([x,y])=>lsrc(0xff6a1a,1.35,7,x+.5,1.6,y+.6,'fire'));
+    for(let x=43;x<60;x+=4){lsrc(0xff4a10,1.6,7,MP(x),.6,MP(13.5),'lava');lsrc(0xff4a10,1.6,7,MP(x),.6,MP(33.5),'lava')}
+    for(let z=4;z<MH-2;z+=8)lsrc(0x7a1408,1.3,12,MP(37.5),-4,z,'abyss');
+    lsrc(0xff5a14,1.9,7,MP(45),1.2,MP(7.6),'fire');lsrc(0xff5a14,1.9,7,MP(57),1.2,MP(7.6),'fire');
+    for(const p of w.PROPS)if(p.k==='rune_lantern')lsrc(0x4a90e0,.55,3.5,p.x,1,p.y-.9,'rune');
     w.shrines.forEach((s,i)=>lsrc(0x5fb0ff,1.2,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
-    lsrc(0x5fb0ff,1.3,6,52.5,1.4,25.05,'npc',{npc:'tharm'});
-    lsrc(0xd8e4ff,0,14,51,2.2,8,'gate');
+    lsrc(0x5fb0ff,1.3,6,w.npcs[0].x/16,1.4,w.npcs[0].y/16+.3,'npc',{npc:'tharm'});
+    lsrc(0xd8e4ff,0,14,MP(51),2.2,MP(8),'gate');
   }else if(ch===3){
     w.braziers.forEach(([x,y])=>lsrc(0xff7a2a,1.6,8,x+.5,1.7,y+.6,'fire'));
     for(const p of w.PROPS){if(p.fire)lsrc(0xff6a1a,p.big?2.6:1.6,p.big?11:7,p.x,1.3,p.y-.2,'fire');if(p.k==='street_lantern')lsrc(0xffb060,1,5,p.x,1.5,p.y-.1,'fire')}
     for(const [x,y] of w.rots)if((x*13+y*7)%11===0)lsrc(0xe05a20,.8,3.5,x+.5,.4,y+.5,'rot');
     w.shrines.forEach((s,i)=>lsrc(0x5fb0ff,1.2,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
     for(const n of w.npcs)lsrc(0xffc070,1.2,5,n.x/16,1.3,n.y/16-.4,'npc',{npc:n.id});
-    lsrc(0xffcf70,1.8,12,32,7,12.5,'dome');
+    lsrc(0xffcf70,1.8,12,MP(32),7,MP(19),'dome');
   }else{
     for(const p of w.PROPS)if(p.fire)lsrc(0xff7a2a,p.big?2.2:1.7,p.big?10:8,p.x,1.3,p.y-.2,'fire');
     w.shrines.forEach((s,i)=>lsrc(0xffc070,1.1,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
-    lsrc(0xffb060,1.3,6,39.6,1.1,25.2,'npc',{npc:'marga'});
+    lsrc(0xffb060,1.3,6,w.npcs[1].x/16+.2,1.1,w.npcs[1].y/16+.4,'npc',{npc:'marga'});
   }
   w.zoneLight=lsrc(0xff6a1a,0,7,0,1,0,'zone');w.merchantLight=lsrc(0xffb060,1.4,6,0,1.1,0,'merchant');
   WORLDS[ch]=w;
@@ -742,7 +774,8 @@ function useWorld(ch){CH=ch;W=WORLDS[ch];
 // sprite planes: 32 game px = 2 world units; feet line sits 2 px above the cell bottom
 // depth of the visible ground strip (tiles) for the minimap frame; 13 tiles at the old 40° camera
 const VIEW_H=13*Math.sin(40*Math.PI/180)/Math.sin(PITCH);
-const SQ=1/Math.cos(PITCH)*.82;
+// sprites stand upright and are stretched to undo the camera tilt so that their pixels come out square, as drawn
+const SQ=1/Math.cos(PITCH);
 const geo32=new THREE.PlaneGeometry(2,2).translate(0,.875,0);
 const geo64=new THREE.PlaneGeometry(4,4).translate(0,1.875,0);
 const geoC=new THREE.PlaneGeometry(2,2);
@@ -750,6 +783,7 @@ const geoC=new THREE.PlaneGeometry(2,2);
 for(const g of [geo32,geo64,geoC,geoT,geo64w]){const n=g.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,.8,.6);n.needsUpdate=true}
 const GLOW=[[255,42,42],[127,208,255]],GLOW_PROP=GLOW.concat([[255,106,26],[255,179,71]]);
 // rim colours [texture r,g,b, glow r,g,b]: a faint cold rim for fighters, a warm golden halo for NPCs
+const SELF_LIT=.16;
 const OUTLINE={char:[44,38,48,62,54,70],npc:[120,96,56,128,100,54]};
 function procFrame(img,x,y,size,h,kind){
   const w=size;h=h||size;
@@ -757,11 +791,12 @@ function procFrame(img,x,y,size,h,kind){
   const tex=texFrom(c);
   if(kind==='fx')return{n:new THREE.MeshBasicMaterial({map:tex,alphaTest:.5,side:THREE.DoubleSide,fog:false,transparent:true,opacity:.9,color:0xe6ddd0})};
   const id=g.getImageData(0,0,w,h),d=id.data,glow=kind==='prop'||kind==='propc'||kind==='npc'?GLOW_PROP:GLOW;
-  const ec=canvas(w,h),eg=ec.getContext('2d'),ed=eg.createImageData(w,h);
+  const ec=canvas(w,h),eg=ec.getContext('2d'),ed=eg.createImageData(w,h),selfLit=kind!=='prop';
   const sc=canvas(w,h),sg=sc.getContext('2d'),sd=sg.createImageData(w,h);
   for(let i=0;i<d.length;i+=4){
     ed.data[i+3]=255;
     if(d[i+3]>0){sd.data[i]=sd.data[i+1]=sd.data[i+2]=255;sd.data[i+3]=255;
+      if(selfLit){ed.data[i]=d[i]*SELF_LIT;ed.data[i+1]=d[i+1]*SELF_LIT;ed.data[i+2]=d[i+2]*SELF_LIT}
       if(glow.some(q=>q[0]===d[i]&&q[1]===d[i+1]&&q[2]===d[i+2])){ed.data[i]=d[i];ed.data[i+1]=d[i+1];ed.data[i+2]=d[i+2]}}
   }
   // outline: every empty pixel touching the figure gets a rim colour that also glows a little, so figures read against any floor
@@ -841,7 +876,7 @@ const rt=new THREE.WebGLRenderTarget(16,9,{minFilter:THREE.NearestFilter,magFilt
 const postMat=new THREE.ShaderMaterial({uniforms:{tD:{value:rt.texture},res:{value:new THREE.Vector2(480,270)},hurt:{value:0},flash:{value:0},sharp:{value:0}},
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
   fragmentShader:`uniform sampler2D tD;uniform vec2 res;uniform float hurt;uniform float flash;uniform float sharp;varying vec2 vUv;
-  void main(){float d=abs(vUv.y-0.52);float b=smoothstep(0.2,0.5,d)*2.2*(1.0-sharp);vec3 c=vec3(0.);float tot=0.;
+  void main(){float d=abs(vUv.y-0.52);float b=smoothstep(0.3,0.52,d)*1.3*(1.0-sharp);vec3 c=vec3(0.);float tot=0.;
     for(int i=-2;i<=2;i++)for(int j=-2;j<=2;j++){vec2 o=vec2(float(i),float(j))*b/res;float w=1.0-0.12*float(i*i+j*j);c+=texture2D(tD,vUv+o).rgb*w;tot+=w;}
     c/=tot;float v=smoothstep(0.95,0.32,length((vUv-0.5)*vec2(1.2,1.0)));c*=mix(0.45,1.0,v);
     c=mix(c,c*vec3(1.0,0.86,0.9)+vec3(0.012,0.006,0.018),0.6);c=mix(c,vec3(c.r*1.2+0.15,c.g*0.5,c.b*0.5),hurt);c=mix(c,c*2.4+vec3(0.16,0.19,0.27),flash);
@@ -856,7 +891,7 @@ function initAudio(){if(AC)return;try{AC=new (window.AudioContext||window.webkit
   [41.2,41.5,61.7].forEach(f=>{const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=f;o.connect(lp);o.start()});
   const lfo=AC.createOscillator();lfo.frequency.value=.05;const lgn=AC.createGain();lgn.gain.value=70;lfo.connect(lgn);lgn.connect(lp.frequency);lfo.start();
   const ns=AC.createBufferSource();ns.buffer=NB;ns.loop=true;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2600;bp.Q.value=.35;rainGain=AC.createGain();rainGain.gain.value=0;ns.connect(bp);bp.connect(rainGain);rainGain.connect(master);ns.start();setAmbience()}catch(e){AC=null}}
-let rainGain=null;function setAmbience(){if(rainGain)rainGain.gain.value=CH===1?.05:0}
+let rainGain=null;function setAmbience(){if(rainGain)rainGain.gain.value=CH===1?.022:0}
 function noise(dur,freq,q,gain,type,to){if(!AC)return;const t=AC.currentTime,s=AC.createBufferSource();s.buffer=NB;const f=AC.createBiquadFilter();f.type=type||'lowpass';f.frequency.setValueAtTime(freq,t);f.Q.value=q;if(to)f.frequency.exponentialRampToValueAtTime(to,t+dur);
   const g=AC.createGain();g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(master);s.start(t,Math.random());s.stop(t+dur+.05)}
 function tone(f0,f1,dur,gain,type,delay=0){if(!AC)return;const t=AC.currentTime+delay,o=AC.createOscillator();o.type=type||'square';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+dur);
@@ -1039,7 +1074,7 @@ function updEproj(dt){for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.
 function spawnTick(dt){
   if(pl.dead||S.phase!=='play'||S.opening||S.stage==='break')return;S.spawnT-=dt;if(S.spawnT>0)return;S.spawnT=.5;
   const target=Math.min(ENEMY_CAP,6+S.t*ENEMY_RAMP)*(S.lvl>=LATE_LVL?LATE_MUL:1);let n=Math.min(5,Math.floor(target-S.enemies.length));
-  while(n-->0){const p=ringSpot();if(!p)continue;const r=Math.random(),t=S.t;
+  while(n-->0){const p=ringSpot()||ringSpot(170,260);if(!p)continue;const r=Math.random(),t=S.t;
     if(CH===3){if(t>35&&r<.12){for(let i=0;i<3;i++)spawnEnemy('hound',p[0]+rnd(-10,10),p[1]+rnd(-8,8));n-=2;continue}
       spawnEnemy(t>110&&r<.2?'monk':t>70&&r<.4?'rotknight':t>35&&r<.6?'hound':'madman',p[0],p[1]);continue}
     if(t>25&&r<.11){for(let i=0;i<3;i++)spawnEnemy('bat',p[0]+rnd(-10,10),p[1]+rnd(-8,8));n-=2;continue}
@@ -1307,7 +1342,7 @@ function syncScene(dt){
   const nearL=LSRC.filter(L=>L.k>0).sort((a,b)=>a.d-b.d);
   LPOOL.forEach((l,i)=>{const L=nearL[i];if(!L||L.d>26){l.intensity=0;return}l.color.setHex(L.col);l.distance=L.dist;l.position.set(L.x,L.y,L.z);l.intensity=L.k*Math.min(1,(26-L.d)/4)});
   if(S&&S.t>0&&Math.random()<dt*30){const a=Math.random()*Math.PI*2,d=Math.random()*200;S.parts.push(CH===3?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(30,70),vx:rnd(-3,3),vy:rnd(-1,1),vz:rnd(-5,-2),c:Math.random()<.6?'#c8a040':'#7a6030',life:rnd(4,7)}:CH===1?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(30,70),vx:rnd(-6,2),vy:rnd(-1,1),vz:rnd(-9,-5),c:Math.random()<.6?'#6a6670':'#8a8490',life:rnd(3,6)}:{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(4,40),vx:rnd(-3,3),vy:rnd(-2,2),vz:rnd(-1,2),c:Math.random()<.7?'#5c5566':'#7d6a58',life:rnd(2,4)})}
-  if(S&&CH===2&&Math.abs(pl.x/16-37.5)<16&&Math.random()<dt*14)S.parts.push({k:'e',x:rnd(35.2,39.8)*16,y:(camTarget.z+rnd(-7,7))*16,z:-rnd(20,90),vx:rnd(-2,2),vy:0,vz:rnd(14,30),c:Math.random()<.6?'#ff6a1a':'#ffb347',life:rnd(2,4)});
+  if(S&&CH===2&&Math.abs(pl.x/16-MP(37.5))<16&&Math.random()<dt*14)S.parts.push({k:'e',x:rnd(MP(35.2),MP(39.8))*16,y:(camTarget.z+rnd(-7,7))*16,z:-rnd(20,90),vx:rnd(-2,2),vy:0,vz:rnd(14,30),c:Math.random()<.6?'#ff6a1a':'#ffb347',life:rnd(2,4)});
   const lf=((clock*5)|0)%4;if(CH===2&&lf!==lavaFrame&&lavaFrames.length){lavaFrame=lf;lavaG.clearRect(0,0,16,16);lavaG.drawImage(lavaFrames[lf],0,0);lavaTex.needsUpdate=true}
   if(CH===3&&W.rotTex){const rf=((clock*2.5)|0)%4;if(rf!==W.rotF){W.rotF=rf;W.rotG.clearRect(0,0,16,16);W.rotG.drawImage(W.rotFrames[rf],0,0);W.rotTex.needsUpdate=true}}
   const wf=((clock*3)|0)%4;if(CH===1&&wf!==waterFrame&&waterFrames.length){waterFrame=wf;waterG.clearRect(0,0,16,16);waterG.drawImage(waterFrames[wf],0,0);waterTex.needsUpdate=true}
@@ -1401,7 +1436,7 @@ const MCOL={20:'#34303c',26:'#34303c',30:'#34303c',29:'#8a6a2a',32:'#3b3128',25:
 function buildMini(){const c=canvas(MW,MH),g=c.getContext('2d');for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const t=tileAt(x,y);let col=MCOL[t];if(t===20&&region(x,y)==='forge')col='#3a2a26';if(col){g.fillStyle=col;g.fillRect(x,y,1,1)}}
   for(const p of PROPS)if(p.fire){g.fillStyle='#ff8a2a';g.fillRect(p.x|0,p.y|0,1,1)}
   for(const s of SHRINES){g.fillStyle='#7fd0ff';g.fillRect((s.x>>4),(s.y>>4),1,1)}
-  if(CH===2){g.fillStyle='#e8e0c8';g.fillRect(49,6,4,1)}if(CH===3){g.fillStyle='#e0b84a';for(const [x,y,rr] of [[32,6.5,4],[23.5,5.5,2],[40.5,5.5,2],[16,6,2],[49.5,5.5,2],[17,16.5,2]])for(let yy=-rr;yy<=rr;yy++)for(let xx=-rr;xx<=rr;xx++)if(xx*xx+yy*yy<=rr*rr)g.fillRect(Math.floor(x+xx),Math.floor(y+yy),1,1)}W.mini=c}
+  if(CH===2){g.fillStyle='#e8e0c8';g.fillRect(FT(49),FT(6),FT(53)-FT(49),1)}if(CH===3){g.fillStyle='#e0b84a';for(const [x0,y0,r0] of DOMES){const x=MP(x0),y=MP(y0),rr=Math.round(r0*MK);for(let yy=-rr;yy<=rr;yy++)for(let xx=-rr;xx<=rr;xx++)if(xx*xx+yy*yy<=rr*rr)g.fillRect(Math.floor(x+xx),Math.floor(y+yy),1,1)}}W.mini=c}
 function resetFog(){const g=MINI.fog.getContext('2d');g.globalCompositeOperation='source-over';g.fillStyle='#050407';g.fillRect(0,0,MW,MH)}
 resetFog();
 function drawMini(dt){
