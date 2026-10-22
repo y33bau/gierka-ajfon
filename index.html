@@ -53,6 +53,8 @@ body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:h
 .bar{height:.6em;background:rgba(0,0,0,.65);outline:1px solid #000;box-shadow:inset 0 0 0 1px #2c2123}
 .bar i{display:block;height:100%;width:100%;background:var(--blood);transition:width .12s}
 .stam{display:flex;gap:0;margin-top:-.25em}
+.buffs{display:flex;flex-direction:column;gap:.1em;margin-top:.35em;font-size:.95em;color:#f0d58a;text-shadow:0 1px 2px #000,0 0 6px #000;font-variant-numeric:tabular-nums lining-nums}
+.buffs .tr{color:#ff9a6a}
 .stam .seg{flex:1}
 .right{text-align:right;line-height:1.3;text-shadow:0 1px 0 #000,0 0 6px #000}
 .time{font-size:1.35em;font-weight:600;font-variant-numeric:tabular-nums lining-nums;letter-spacing:.02em}
@@ -139,7 +141,7 @@ button:focus-visible{outline:2px solid var(--bone);outline-offset:3px}
       <div id="hud" hidden>
         <div id="xpbar" class="fb xp"><span class="trk"><i id="xp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div>
         <div class="hud-row">
-          <div class="left"><span class="lvl-tag" id="lvlTag">Poziom 1</span><div class="fb hp" id="hpbar"><span class="trk"><b class="g" id="hpg"></b><i id="hp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div><div class="stam" id="stam" aria-label="Stamina uników"></div></div>
+          <div class="left"><span class="lvl-tag" id="lvlTag">Poziom 1</span><div class="fb hp" id="hpbar"><span class="trk"><b class="g" id="hpg"></b><i id="hp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div><div class="stam" id="stam" aria-label="Stamina uników"></div><div class="buffs" id="buffs"></div></div>
           <div class="right"><div class="time" id="time">Do otwarcia wrót 3:00</div><div class="small" id="kills">Zabici: 0</div><div class="small coin" id="coins">0</div></div>
         </div>
         <canvas id="mini" width="128" height="112" aria-label="Minimapa"></canvas><div id="miniF"><b></b><b></b><b></b><b></b></div>
@@ -210,6 +212,10 @@ let CH=2,W=null,map,PROPS,START,SHRINES,region,walls,cliffs,pillars,lavas,brazie
 const WORLDS={};
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?21:map[y*MW+x];
 const solidAt=(px,py)=>SOLID.has(tileAt(Math.floor(px/TS),Math.floor(py/TS)));
+// nearest spot whose 3x3 surroundings are walkable (codes in ok) and free of props; used to place NPCs
+function freeNear(map,PROPS,ok,x,y){for(let r=0;r<12;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const X=x+dx,Y=y+dy;let good=X>2&&Y>2&&X<GW-3&&Y<GH-3;
+  for(let j=-1;j<=1&&good;j++)for(let i=-1;i<=1;i++)if(!ok.includes(map[(Y+j)*GW+X+i])){good=false;break}
+  if(good&&!PROPS.some(p=>Math.abs(p.x-X-.5)<1.8&&Math.abs(p.y-Y-.5)<1.8))return[X,Y]}return[x,y]}
 function mapKit(fillWith){const map=new Uint8Array(GW*GH).fill(fillWith),under=new Uint8Array(GW*GH),PROPS=[];
   const set=(x,y,v)=>{if(x>0&&y>0&&x<GW-1&&y<GH-1)map[y*GW+x]=v};const fill=(x0,y0,w,h,v)=>{for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)set(x,y,v)};
   const prop=(k,x,y,solid,extra)=>{PROPS.push(Object.assign({k,x,y},extra||{}));for(const [sx,sy] of solid){if(sx>0&&sy>0&&sx<GW-1&&sy<GH-1){under[sy*GW+sx]=map[sy*GW+sx];set(sx,sy,31)}}};
@@ -272,7 +278,8 @@ function genDolne(){
   for(let y=1;y<GH-1;y++)for(let x=1;x<GW-1;x++){if(map[y*GW+x]!==20)continue;const q=r();if(q<.03)set(x,y,30);else if(q<.12)set(x,y,26)}
   return{map,under,PROPS,start:{x:6*TS+8,y:23*TS+14},shrines:[{x:4*TS+8,y:38*TS+12},{x:60*TS+8,y:40*TS+12}],
     region:(x,y)=>x>=40&&y>=42?'mine':x>=40?'forge':'hall',
-    npcs:[{id:'tharm',art:'tharm',name:'Duch kowala Tharma',x:52*TS+8,y:24*TS+12,lines:THARM_LINES}],idle:[18,23,12,8]};
+    npcs:[{id:'tharm',art:'tharm',name:'Duch kowala Tharma',x:52*TS+8,y:24*TS+12,lines:THARM_LINES},
+          (()=>{const [x,y]=freeNear(map,PROPS,[20,26,30],22,34);return{id:'mila',art:'mila',name:'Mila, amazonka',x:(x+.5)*TS,y:(y+.4)*TS,lines:MILA_LINES}})()],idle:[18,23,12,8]};
 }
 
 // Chapter I: the burned village of Brzeźnica
@@ -300,7 +307,7 @@ function genBrzeznica(){
   // square: well, gallows, Marga's cart
   prop('well',28.5,24.92,[[28,24]]);
   prop('gallows',35,32.92,[[34,32],[35,32]]);
-  prop('marga_cart',37,23.92,[[36,23],[37,23]]);
+  prop('marga_cart',52,25.92,[[51,25],[52,25]]);
   prop('crow_post',33.5,20.92,[[33,20]]);prop('covered_corpses',25.5,33.92,[[25,33]]);
   // fires still burning in the ruins
   for(const [x,y,big] of [[9,8],[42,8],[21,42],[8,19,1],[12,22,1],[54,45],[25,30],[46,24]])prop('debris_fire',x+.5,y+.92,[[x,y]],{fire:true,big:!!big,anim:'fire'});
@@ -321,8 +328,9 @@ function genBrzeznica(){
     if(r()>.32)continue;const c=at(x,y);if(c!==42&&c!==41)continue;if(PROPS.some(p=>p.k==='dead_tree'&&Math.abs(p.x-x)<2.5&&Math.abs(p.y-y)<2.5))continue;prop('dead_tree',x+.5,y+.92,[[x,y]])}
   return{map,under,PROPS,start:{x:31*TS+8,y:51*TS+8},shrines:[{x:24*TS+8,y:14*TS+8},{x:47*TS+8,y:48*TS+8}],region:()=>'village',
     npcs:[{id:'elder',art:'elder',name:'Umierający przy studni',x:29.6*TS,y:26.4*TS,lines:ELDER_LINES},
-          {id:'marga',art:'marga',name:'Marga, handlarka kości',x:39.4*TS,y:24.8*TS,lines:MARGA_LINES},
-          {id:'wit',art:'wit',name:'Brat Wit, więzień w dybach',x:27.5*TS,y:32.92*TS,lines:WIT_LINES,solid:[27,32]}],idle:[31,28,13,9]};
+          {id:'marga',art:'marga',name:'Marga, handlarka kości',x:54.4*TS,y:26.8*TS,lines:MARGA_LINES},
+          {id:'wit',art:'wit',name:'Brat Wit, więzień w dybach',x:14.5*TS,y:30.92*TS,lines:WIT_LINES,solid:[14,30]},
+          (()=>{const [x,y]=freeNear(map,PROPS,[40,41,42,47],27,15);return{id:'chojrak',art:'chojrak',name:'Chojrak, szlachetny paladyn',x:(x+.5)*TS,y:(y+.4)*TS,lines:CHOJRAK_LINES}})()],idle:[31,28,13,9]};
 }
 
 // Chapter III: Złotogród, the golden capital rotting under its domes
@@ -392,7 +400,8 @@ function genStolica(){
     region:(x,y)=>y>=35?'slums':x>=43&&y>=14&&y<=32?'monastery':'city',
     npcs:[{id:'izolda',art:'izolda',name:'Hrabina Izolda z Vermarów',x:6.5*TS,y:18.4*TS,lines:IZOLDA_LINES},
           {id:'ottokar',art:'ottokar',name:'Baron Ottokar, skarbnik korony',x:50*TS,y:9.4*TS,lines:OTTOKAR_LINES},
-          {id:'aurel',art:'aurel',name:'Młody Aurel z rodu Halderów',x:16.5*TS,y:27.4*TS,lines:AUREL_LINES}],idle:[32,30,11,8]};
+          {id:'aurel',art:'aurel',name:'Młody Aurel z rodu Halderów',x:16.5*TS,y:27.4*TS,lines:AUREL_LINES},
+          (()=>{const [x,y]=freeNear(map,PROPS,[50,52,53,55],24,42);return{id:'heri',art:'heri',name:'Heri, wojak z gwardii królewskiej',x:(x+.5)*TS,y:(y+.4)*TS,lines:HERI_LINES}})()],idle:[32,30,11,8]};
 }
 
 /* ============ THREE SETUP ============ */
@@ -749,6 +758,7 @@ function initWorld(ch){
     for(const p of w.PROPS)if(p.k==='rune_lantern')lsrc(0x4a90e0,.55,3.5,p.x,1,p.y-.9,'rune');
     w.shrines.forEach((s,i)=>lsrc(0x5fb0ff,1.2,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
     lsrc(0x5fb0ff,1.3,6,w.npcs[0].x/16,1.4,w.npcs[0].y/16+.3,'npc',{npc:'tharm'});
+    for(const n of w.npcs)if(n.id==='mila')lsrc(0xffc070,1.1,5,n.x/16,1.3,n.y/16-.4,'npc',{npc:n.id});
     lsrc(0xd8e4ff,0,14,MP(51),2.2,MP(8),'gate');
   }else if(ch===3){
     w.braziers.forEach(([x,y])=>lsrc(0xff7a2a,1.6,8,x+.5,1.7,y+.6,'fire'));
@@ -761,6 +771,7 @@ function initWorld(ch){
     for(const p of w.PROPS)if(p.fire)lsrc(0xff7a2a,p.big?2.2:1.7,p.big?10:8,p.x,1.3,p.y-.2,'fire');
     w.shrines.forEach((s,i)=>lsrc(0xffc070,1.1,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
     lsrc(0xffb060,1.3,6,w.npcs[1].x/16+.2,1.1,w.npcs[1].y/16+.4,'npc',{npc:'marga'});
+    for(const n of w.npcs)if(n.id==='chojrak')lsrc(0xfff0c0,1.2,5,n.x/16,1.3,n.y/16-.4,'npc',{npc:n.id});
   }
   w.zoneLight=lsrc(0xff6a1a,0,7,0,1,0,'zone');w.merchantLight=lsrc(0xffb060,1.4,6,0,1.1,0,'merchant');
   WORLDS[ch]=w;
@@ -830,6 +841,7 @@ function buildAnims(imgs){
     knight:{walk:row(od,0),attack:row(od,1,0,2),death:row(od,1,2,4)},
     collector:{front:row('collector',0),walk:row('collector',1),attack:row('collector',2),drain:row('collector',3),hurt:row('collector',4,0,2),taunt:row('collector',4,2,4),death:row('collector',5)},
     elder:row(an,2,0,4,'npc'),marga:row(an,3,0,4,'npc'),wit:row(an,4,0,4,'npc'),
+    ...(imgs.npc_new?{chojrak:row('npc_new',0,0,4,'npc'),mila:row('npc_new',1,0,4,'npc'),heri:row('npc_new',2,0,4,'npc'),npcNew:1}:{chojrak:row(ha,0,0,4,'npc'),mila:row(ha,0,0,4,'npc'),heri:row(ha,0,0,4,'npc')}),
     warden:{walk:row(od,4),attack:row(od,5,0,2),death:row(od,5,2,4)},
     ghoul:{walk:row(vu,2),attack:row(vu,3,0,2),death:row(vu,3,2,4)},
     bat:{walk:row(vu,4),attack:row(vu,4),death:row(vu,5,0,2)},
@@ -946,9 +958,13 @@ const LATE_LVL=20,LATE_MUL=1.1;
 // effective numbers of a skill at its current level, with the global runes (might, haste, area) and the bone whetstone applied
 function stat(k){const L=S.sk[k]||0,u=SKUP[k];let d=1,a=1;const o={cd:SKILL_CD*Math.pow(.95,S.sk.haste||0),n:1,f:{}};
   for(let i=0;i<L-1&&i<u.ups.length;i++){const p=u.ups[i];if(p.dmg)d+=p.dmg;if(p.area)a+=p.area;if(p.cd)o.cd*=1-p.cd;if(p.n)o.n+=p.n;if(p.f)for(const q in p.f)o.f[q]=(o.f[q]||0)+p.f[q]}
+  if(S.heri>0)o.n+=1;
   o.dmg=d*might()*SKILL_DMG;o.area=a*(1+.08*(S.sk.area||0));return o}
 const ACTIVE=['sword','frost','earth','golem','blood','inferno','quen'],PASSIVE=['might','heart','shadow','haste','area'],MAX_ACT=4,MAX_PAS=2,DODGE_REGEN=1.8;
 const THARM_LINES=['Żywy... w Dolnym Mieście. Ostatni raz widziałem żywego, gdy gasły nasze kuźnie.','Kopaliśmy głębiej, niż pozwalały runy. Pod lawą coś spało. Obudziliśmy to kilofami.','Moi bracia wciąż kopią, choć nie mają już oczu. Nie żałuj ich.','Mój młot przepadł, ale błogosławieństwo kuźni wciąż się we mnie tli. Weź je.'];
+const CHOJRAK_LINES=['Stój, wędrowcze. Nie lękaj się, nie jestem jednym z nich.','Zakon splugawił wszystko, czemu przysięgałem. Ja wciąż pamiętam słowa przysięgi.','Klęknij. Niech światło, którego tu już nie ma, przejdzie przez moje dłonie na ciebie.','Idź. Przez trzy minuty żadna rana cię nie złamie.'];
+const MILA_LINES=['Uważaj, gdzie stawiasz stopy. Ostatni, który mnie zaskoczył, leży tam w kawałkach.','Jestem Mila. Moje siostry zeszły tu po złoto krasnoludów. Zostałam tylko ja.','Słowa są tanie. Pokaż, ile jesteś wart: dwudziestu martwych w piętnaście uderzeń serca.','Zaczynaj! Liczę.'],MILA_RETRY=['Jeszcze raz? Dwudziestu martwych w piętnaście uderzeń serca. Zaczynaj!'];
+const HERI_LINES=['Stój. Nie dobywaj miecza, nie jestem twoim wrogiem.','Jestem Heri, niegdyś chorąży gwardii królewskiej. Przysięgałem koronie, której już nie ma.','Honor nie gnije razem z miastem. Dopóki ktoś o nim pamięta, żyje.','Weź mój znak. Przez trzy minuty każda twoja broń uderzy o raz więcej.'];
 const ELDER_LINES=['Ty... nosisz znak. Widzę, jak krwawi przez płaszcz.','Najpierw przyszedł zakon. Zamknęli ludzi w stodole i podpalili, żeby oczyścić wioskę.','A potem z popiołów wstali nasi zmarli. Moja córka też. Wciąż woła mnie po imieniu.','Nie dożyję świtu. Kiedy wstanę... nie wahaj się.'];
 const MARGA_LINES=['Hm. Piętnowany. Dawno nie widziałam żadnego żywego.','Zbieraj złoto z trupów. Martwym się nie przyda, a mnie owszem.','O północy rozłożę kram. Za monety dostaniesz rzeczy, o których zakon woli milczeć.','A teraz idź. One już cię czują.'];
 const WIT_LINES=['Najemniku! Tutaj! Rozbij te dyby, błagam!','Tak, noszę barwy zakonu. Tak, stałem przy stodole z pochodnią. Rozkaz to rozkaz!','Masz, weź sakiewkę. Piętnaście sztuk złota. Tylko nie zostawiaj mnie z nimi...'];
@@ -975,7 +991,7 @@ function blood(x,y,n,nx,ny,spread=1){const b=Math.atan2(ny,nx);for(let i=0;i<n;i
 function decalAt(cv,x,y,a=1){dg.globalAlpha=a;dg.drawImage(cv,Math.round(x-16),Math.round(y-16));dg.globalAlpha=1;decalDirty=true}
 function pool(x,y,w,h){if(DEC.pool){decalAt(DEC.pool[w<14?0:w<19?1:w<30?2:3],x,y);return}x=Math.round(x);y=Math.round(y);dg.fillStyle=P.blood2;dg.fillRect(x-w/2,y-h/2+1,w,h-2);dg.fillStyle=P.blood;dg.fillRect(x-w/4,y-1,w/2,2);decalDirty=true}
 function heal(n){if(pl.dead||pl.hp>=pl.max)return 0;const h=Math.min(n,pl.max-pl.hp);pl.hp+=h;return h}
-const might=()=>1+.12*(S.sk.might||0)+.1*(S.whet||0);
+const might=()=>(1+.12*(S.sk.might||0)+.1*(S.whet||0))*(S.fury>0?1.2:1);
 function spriteMesh(geo){const m=new THREE.Mesh(geo,A.fx.slash[0].n);scene.add(m);return m}
 function addVfx(anim,dur,x,y,h,size,mode,rot=0,flip=1){const m=spriteMesh(geoC);setFrame(m,anim[0]);S.vfx.push({mesh:m,anim,t:0,dur,x,y,h,size,mode,rot,flip});return m}
 
@@ -991,7 +1007,7 @@ function damageEnemy(e,dmg,nx,ny,kb=1,src){if(e.dead)return false;if(e.type==='j
   if(Math.random()<.6)blood(e.x,e.y,2,nx||rnd(-1,1),ny||rnd(-1,1));play('hit',.05);if(e.hp<=0)killEnemy(e,nx,ny);return true}
 function dropPick(k,x,y,v=1){const fr=k==='c'?A.pick.c:A.pick[v>=5?5:v>=2?2:1];const m=new THREE.Mesh(geoC,fr.n);scene.add(m);const g=new THREE.Mesh(glowGeo,k==='c'?wispGlow.c:wispGlow[v>=5?5:v>=2?2:1]);scene.add(g);
   S.picks.push({k,x,y,v,mag:false,sp:0,ph:Math.random()*6,mesh:m,glow:g})}
-function killEnemy(e,nx,ny){e.dead=true;S.kills++;
+function killEnemy(e,nx,ny){e.dead=true;S.kills++;if(S.trial)S.trial.k++;
   const big=BIG.has(e.type),jz=e.type==='jerzak';
   if(e.type==='collector'){S.collector=null;S.stage='p2';const total=e.stolen+20,n=Math.min(40,total);say(`Poborca pada. Złoto wraca do ciebie: ${total} monet.`);shake(.4,.5);
     for(let i=0;i<n;i++){dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16));S.picks[S.picks.length-1].v=Math.floor(total/n)+(i<total%n?1:0)}for(let i=0;i<8;i++)dropPick('w',e.x+rnd(-20,20),e.y+rnd(-12,12),3)}
@@ -1086,11 +1102,12 @@ function events(){
   if(CH===1){const N=S.npc;
     ev('a',S.t>.5,()=>say('Noc zapada nad spaloną Brzeźnicą.'));
     ev('b',S.t>5,()=>say('Zbieraj ogniki z poległych. Przetrwaj do świtu.'));
-    ev('c',S.t>14,()=>say('Na placu, przy studni, ktoś jęczy. Obok, w dybach, ktoś krzyczy.'));
+    ev('c',S.t>14,()=>say('Na placu, przy studni, ktoś jęczy. Przy zachodniej drodze, w dybach, ktoś krzyczy.'));
     ev('s',S.t>24,()=>say('Przydrożne kapliczki z gromnicą leczą rany.'));
+    ev('pal',S.t>30,()=>say('Na północy, przy kapliczce, czuwa rycerz w jasnej zbroi.'));
     ev('d',S.t>36,()=>say('Ghule wyczuły krew.'));
     ev('el',S.t>62&&N.elder.state==='alive',()=>{N.elder.state='dead';N.elder.deadAt=S.t;const n=W.npcs[0];pool(n.x,n.y,14,6)});
-    ev('er',N.elder.state==='dead'&&S.t>(N.elder.deadAt||1e9)+14,()=>{N.elder.state='risen';const n=W.npcs[0];spawnEnemy('possessed',n.x,n.y+2,{elder:true,rise:1.2,hp:120,max:120});play('rise',0);S.flash=1;say('Starzec spod studni wstaje. Jego oczy płoną.')});
+    ev('er',N.elder.state==='dead'&&S.t>(N.elder.deadAt||1e9)+14,()=>{N.elder.state='risen';const n=W.npcs[0];spawnEnemy('rotknight',n.x,n.y+2,{elder:true,rise:1.2,hp:220,max:220});play('rise',0);S.flash=1;shake(.12,.6);say('Starzec spod studni wstaje w zardzewiałej zbroi. Zgnilizna wylewa się spod przyłbicy.')});
     ev('k',S.t>70,()=>say('Nadciąga zakon. Fanatycy w zbrojach.'));
     ev('mg',S.t>100&&N.marga.state==='alive',()=>{N.marga.state='gone';say('Latarnia handlarki gaśnie w deszczu.')});
     ev('w',S.t>150&&N.wit.state!=='dead',()=>{N.wit.state='dead';const n=W.npcs[2];pool(n.x,n.y+1,20,8);say('Krzyki od strony dybów nagle ucichły.')});
@@ -1100,6 +1117,7 @@ function events(){
     ev('b',S.t>5,()=>say('Zgnilizna bulgocze w kałużach. Brodzenie w niej spowalnia.'));
     ev('c',S.t>14,()=>say('W kamienicach na zachodzie ktoś pali świece. Arystokraci wciąż żyją.'));
     ev('s',S.t>24,()=>say('Kapliczki z niebieską runą leczą rany: przy placu i w slumsach.'));
+    ev('he',S.t>28,()=>say('W slumsach stoi wojak w czystym płaszczu gwardii. Nikt go nie atakuje.'));
     ev('d',S.t>36,()=>say('Wygłodniałe psy zwęszyły świeże mięso.'));
     ev('k',S.t>70,()=>say('Zgnili rycerze, dawna straż korony, wciąż pełnią wartę.'));
     ev('m',S.t>110,()=>say('Z klasztoru ognia schodzą mnisi. Ich modlitwa pali.'));
@@ -1109,6 +1127,7 @@ function events(){
   ev('a',S.t>.5,()=>say('Schodzisz do Dolnego Miasta. Tu nigdy nie było słońca.'));
   ev('b',S.t>5,()=>say('Za przepaścią, przy kuźni, tli się czyjaś dusza.'));
   ev('c',S.t>14,()=>say('Kapliczki z niebieską runą leczą rany: jedna w rogu sali, druga w kuźni.'));
+  ev('mi',S.t>28,()=>say('W głębi sali ktoś napina łuk. To nie krasnolud.'));
   ev('d',S.t>70,()=>say('Kamienni strażnicy budzą się w ścianach.'));
 
 }
@@ -1203,8 +1222,9 @@ function pick(i){if(!S||!S.choosing)return;const k=S.choices[i];if(!k)return;if(
   if(k==='quen'){const o=stat('quen');S.qc=Math.min(o.n,(S.qc||0)+1);S.qPop=.4}if(PASSIVE.includes(k))runeBurst(k);if(S.sk[k]===1)S.cd[k]=.3;
   S.pendLv--;chipsDirty=true;if(S.pendLv>0){openLevelUp();return}S.choosing=false;$('lvl').hidden=true;$('touch').hidden=!coarse}
 function nearNpc(){if(!S||pl.dead)return null;for(const n of W.npcs){if(S.npc[n.id].state!=='alive')continue;if(Math.hypot(pl.x-n.x,pl.y-n.y)<30)return n}return null}
-function openDialog(n){S.dialog=n;S.dlg=0;$('dlgWho').textContent=n.name;$('dlgTxt').textContent=n.lines[0];$('dialog').hidden=false}
-function advanceDialog(){const n=S.dialog;S.dlg++;if(S.dlg<n.lines.length){$('dlgTxt').textContent=n.lines[S.dlg];return}
+const NL=n=>n.id==='mila'&&S.npc.mila.retry?MILA_RETRY:n.lines;
+function openDialog(n){S.dialog=n;S.dlg=0;$('dlgWho').textContent=n.name;$('dlgTxt').textContent=NL(n)[0];$('dialog').hidden=false}
+function advanceDialog(){const n=S.dialog;S.dlg++;if(S.dlg<NL(n).length){$('dlgTxt').textContent=NL(n)[S.dlg];return}
   $('dialog').hidden=true;S.dialog=null;const st=S.npc[n.id];
   const motes=c=>{for(let i=0;i<30;i++)S.parts.push({k:'i',x:n.x+rnd(-6,6),y:n.y,z:rnd(0,20),vx:rnd(-10,10),vy:0,vz:rnd(10,26),c,life:rnd(1,2)})};
   if(n.id==='tharm'){st.state='fading';st.t=1.5;pl.max+=25;pl.hp=pl.max;play('bless',0);say('Ciepło kuźni wypełnia ci żyły. +25 do maks. życia.');motes('#7fd0ff')}
@@ -1213,6 +1233,9 @@ function advanceDialog(){const n=S.dialog;S.dlg++;if(S.dlg<n.lines.length){$('dl
   else if(n.id==='wit'){st.state='talked';S.coins+=15;play('coin',0);say('Bierzesz sakiewkę. Dyby zostają zamknięte.')}
   else if(n.id==='izolda'){st.state='talked';pl.max+=15;pl.hp=pl.max;play('heal',0);say('Flakon pachnie różami i octem. Rany się zamykają. +15 do maks. życia.');motes('#ffb347')}
   else if(n.id==='ottokar'){st.state='talked';S.coins+=40;play('coin',0);say('Baron rzuca ci sakiewkę przez szparę w drzwiach i zatrzaskuje rygle.')}
+  else if(n.id==='chojrak'){st.state='talked';const amt=Math.round(pl.max*.3);pl.max+=amt;pl.hp+=amt;S.bless={t:180,amt};play('bless',0);motes('#fff0b0');say(`Chojrak kładzie ci dłonie na ramionach. +${amt} do maks. życia na 3 minuty.`)}
+  else if(n.id==='mila'){st.state='trial';S.trial={t:15,k:0};play('bless',0);say('Próba Mili: zabij 20 wrogów w 15 sekund!')}
+  else if(n.id==='heri'){st.state='talked';S.heri=180;play('bless',0);motes('#b8c4dc');chipsDirty=true;say('Heri przypina ci swój znak. Każda umiejętność: +1 pocisk na 3 minuty.')}
   else if(n.id==='aurel'){st.state='talked';S.lvl++;S.need=xpNeed(S.lvl);S.pendLv++;play('bless',0);motes('#d8cfb8');say('Medalion jest ciepły od małej dłoni. Czujesz, jak rośnie w tobie siła.');openLevelUp()}}
 function updPlayer(dt){
   if(pl.dead){pl.deadT+=dt;return}
@@ -1263,6 +1286,12 @@ function update(dt){
   for(const [x,y] of lavas)if(Math.random()<dt*.25)S.parts.push({k:'e',x:x*16+rnd(2,14),y:y*16+rnd(2,14),z:0,vx:rnd(-3,3),vy:0,vz:rnd(10,22),c:'#f59e0b',life:rnd(.8,1.6)});
   updParts(dt);
   if(Math.random()<dt*.4&&S.enemies.length)play('growl',.8);
+  if(S.bless&&(S.bless.t-=dt)<=0){pl.max-=S.bless.amt;pl.hp=Math.min(pl.hp,pl.max);S.bless=null;say('Błogosławieństwo Chojraka gaśnie.')}
+  if(S.fury>0&&(S.fury-=dt)<=0)say('Szał Mili mija.');
+  if(S.heri>0&&(S.heri-=dt)<=0)say('Znak Heriego blednie.');
+  if(S.trial&&!pl.dead){S.trial.t-=dt;const st=S.npc.mila;
+    if(S.trial.k>=20){S.trial=null;st.state='talked';S.fury=120;play('bless',0);shake(.1,.4);say('Mila unosi łuk w salucie: „Walczysz jak jedna z nas”. +20% obrażeń na 2 minuty.')}
+    else if(S.trial.t<=0){S.trial=null;st.state='alive';st.retry=true;say('Mila kręci głową: „Za wolno. Wróć, gdy będziesz gotów”.')}}
   S.stamFlash=Math.max(0,(S.stamFlash||0)-dt);S.hurt=Math.max(0,S.hurt-dt);S.shakeT=Math.max(0,S.shakeT-dt);if(S.shakeT<=0)S.shakeM=0;
   if(pl.dead){S.endT-=dt;if(S.endT<=0)endGame(false)}
   else if(S.won&&!S.opening){S.opening=3.4;for(const e of S.enemies){scene.remove(e.mesh);for(let i=0;i<8;i++)S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(0,14),vx:rnd(-7,7),vy:0,vz:rnd(12,30),c:P.bone2,life:2})}S.enemies=[];if(CH===1){say('Świta. Martwi rozsypują się w popiół.')}else if(CH===3){say('Bestia milknie. Nad kopułami wstaje blady, złoty świt.');play('rumble',0)}else{say('Wrota kuźni rozwierają się z jękiem.');play('rumble',0);shake(.2,1.5)}}
@@ -1336,7 +1365,7 @@ function syncScene(dt){
   for(const L of LSRC){let k=L.base;
     if(L.kind==='fire')k*=.85+Math.sin(clock*13+L.ph)*.08+Math.random()*.12;else if(L.kind==='lava'||L.kind==='rot')k*=.9+Math.sin(clock*1.7+L.ph)*.1;else if(L.kind==='rune')k*=.75+.25*Math.sin(clock*2+L.ph);
     else if(L.kind==='shrine')k*=.3+.7*(S?S.shr[L.si]/60:1);else if(L.kind==='gate')k=S&&S.opening?2.8*Math.min(1,(3.4-S.opening)/1.4):0;
-    else if(L.kind==='npc'){const st=S?S.npc[L.npc]:{state:'alive'};k=st.state==='alive'||st.state==='talked'?L.base*(.8+.2*Math.sin(clock*3+L.ph)):st.state==='fading'?L.base*Math.max(0,st.t/1.5):0}
+    else if(L.kind==='npc'){const st=S?S.npc[L.npc]:{state:'alive'};k=st.state==='alive'||st.state==='talked'||st.state==='trial'?L.base*(.8+.2*Math.sin(clock*3+L.ph)):st.state==='fading'?L.base*Math.max(0,st.t/1.5):0}
     else if(L.kind==='merchant')k=S&&S.merchant?L.base*(.85+.15*Math.sin(clock*4)):0;else if(L.kind==='zone')k=z0?1.6*Math.min(1,z0.life)*(.85+Math.random()*.2):0;
     L.k=k;L.d=k>0?Math.hypot(L.x-camTarget.x,(L.z-camTarget.z)*1.3):1e9}
   const nearL=LSRC.filter(L=>L.k>0).sort((a,b)=>a.d-b.d);
@@ -1453,6 +1482,7 @@ function drawMini(dt){
 }
 /* ============ HUD & FLOW ============ */
 let lastHud='',chipsDirty=true;
+let lastBuffs=null;
 function hud(){if(!S)return;drawMini(1/60);const left=Math.max(0,(S.stage==='p1'?BREAK_AT:NIGHT)-S.t),m=Math.floor(left/60),s=Math.floor(left%60);
   const bl=S.enemies.filter(e=>(BIG.has(e.type)||e.type==='jerzak'||e.type==='collector')&&e.rise<=0),boss=bl.find(e=>BIG.has(e.type))||bl.find(e=>e.type==='collector')||bl[0];
   const key=`${pl.hp|0}|${pl.max}|${S.xp}|${S.need}|${S.lvl}|${m}:${s}|${S.kills}|${S.coins}|${boss?boss.hp|0:-1}|${S.stage}|${boss&&boss.stolen||0}|${S.merchant?S.merchant.wait|0:0}`;
@@ -1462,6 +1492,12 @@ function hud(){if(!S)return;drawMini(1/60);const left=Math.max(0,(S.stage==='p1'
   const st=$('stam');if(st.childElementCount!==pl.maxDodge){st.innerHTML=('<div class="seg fb st"><span class="trk"><i></i></span><b class=\"l\"></b><b class=\"m\"></b><b class=\"r\"></b></div>').repeat(pl.maxDodge)}
   for(let i=0;i<pl.maxDodge;i++){const seg=st.children[i],v=Math.max(0,Math.min(1,pl.dodge-i));seg.firstChild.firstChild.style.width=(v*100)+'%';seg.classList.toggle('full',v>=1)}
   st.classList.toggle('flash',(S.stamFlash||0)>0);
+  {const mm=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`,b=[];
+    if(S.trial)b.push(`<span class="tr">Próba Mili: ${S.trial.k}/20 · ${Math.ceil(S.trial.t)} s</span>`);
+    if(S.bless)b.push(`Błogosławieństwo +${S.bless.amt} życia · ${mm(S.bless.t)}`);
+    if(S.fury>0)b.push(`Szał Mili +20% obrażeń · ${mm(S.fury)}`);
+    if(S.heri>0)b.push(`Znak Heriego +1 pocisk · ${mm(S.heri)}`);
+    const h=b.join('<br>');if(h!==lastBuffs){lastBuffs=h;$('buffs').innerHTML=h}}
   if(S.hl&&clock-S.hl.t>3){S.hl=null;chipsDirty=true}
   if(chipsDirty){chipsDirty=false;const chip=k=>{const mx=SK[k].max||9;return`<span class="sk${S.hl&&S.hl.k===k?' hi':''}" title="${SK[k].name}"><i class="ic ic-${k}"></i><em>${'<b class="on"></b>'.repeat(S.sk[k])+'<b></b>'.repeat(Math.max(0,mx-S.sk[k]))}</em></span>`};
     $('chips').innerHTML=ACTIVE.filter(k=>S.sk[k]).map(chip).join('')+(PASSIVE.some(k=>S.sk[k])?'<span class="gap"></span>':'')+PASSIVE.filter(k=>S.sk[k]).map(chip).join('')}}
@@ -1523,6 +1559,7 @@ Promise.all(names.map(n=>new Promise((res,rej)=>{const im=new Image();im.onload=
   // a dead NPC no longer glows
   for(const k of ['elder','wit','izolda','ottokar'])if(A[k]&&A[k][3])A[k][3].n.emissive.setHex(0x000000);
   const TINT={madman:0xe0a890,hound:0xb89078,rotknight:0xa8b880,monk:0xffa060,izolda:0xc4b4ec,ottokar:0xf0d090,aurel:0xa8c8f0};
+  if(!A.npcNew)for(const [k,c] of [['chojrak',0xfff4d0],['mila',0xd8b890],['heri',0xb8c4dc]])for(const f of A[k])f.n.color.setHex(c);
   for(const k in TINT){const a=A[k];if(a.sheet||(Array.isArray(a)&&imgs.zl_en_b))continue;for(const f of Array.isArray(a)?a:Object.values(a).flat())f.n.color.setHex(TINT[k])}
   for(const ch of [1,2,3]){initWorld(ch);useWorld(ch);ROOT=W.group;[null,buildBrzeznica,buildDolne,buildStolica][ch](imgs);
     for(const n of W.npcs){const fr=A[n.art];const m=new THREE.Mesh(geo32,fr[0].n);if(fr[0].d){m.customDistanceMaterial=fr[0].d;m.castShadow=true}ROOT.add(m);W.npcMeshes[n.id]=m}
