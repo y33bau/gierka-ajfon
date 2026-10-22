@@ -38,6 +38,8 @@
 html,body{height:100%}
 body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none}
 #app{height:100%;box-sizing:border-box;display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+@supports (height:100dvh){html,body,#app{height:100dvh}}
+@media (max-height:500px){#app{padding-block:2px}}
 #stage{position:relative;width:100%;height:100%;display:grid;place-items:center;min-width:0}
 #screen{position:relative;overflow:hidden;background:#000;box-shadow:0 0 0 1px #000,0 0 80px rgba(163,22,26,.10)}
 #gl{display:block;width:100%;height:100%}
@@ -1399,6 +1401,12 @@ function fit(){const r=$('stage').getBoundingClientRect(),s=Math.min(r.width/320
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));renderer.setSize(w,h,false);
   const rh=RT_H,rw=Math.round(rh*w/h);rt.setSize(rw,rh);postMat.uniforms.res.value.set(rw,rh);cam.aspect=w/h;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);fit();
+// iPhone (above all as a home-screen app) often reports the new size late after rotating, so fit again on every signal and a moment later
+const refit=()=>{fit();setTimeout(fit,120);setTimeout(fit,400);setTimeout(fit,900)};
+addEventListener('orientationchange',refit);addEventListener('pageshow',refit);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refit()});
+if(window.visualViewport)visualViewport.addEventListener('resize',fit);
+if(window.ResizeObserver)new ResizeObserver(()=>fit()).observe($('stage'));
+if(screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener('change',refit);
 
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;clock+=dt;update(dt);if(A)syncScene(dt);draw();hud();rollPress=talkPress=false;requestAnimationFrame(frame)}
