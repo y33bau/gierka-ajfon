@@ -236,7 +236,7 @@ function mapKit(fillWith){const map=new Uint8Array(GW*GH).fill(fillWith),under=n
 // FT(i) is the first big-map tile of source tile i, MP(u) maps a continuous source coordinate, GTX/GTY give the source tile of a big-map tile.
 let MK=1.625,GW=64,GH=56,GTX=[],GTY=[];
 const FT=i=>Math.ceil(i*MK-1e-9),MP=u=>{const i=Math.floor(u);return FT(i)+(u-i)*(FT(i+1)-FT(i))};
-const GRID={1:[64,56],2:[64,56],3:[64,56],4:[80,70]};
+const GRID={1:[64,56],2:[64,56],3:[64,56],4:[80,70],5:[64,56]};
 function setGrid(ch){[GW,GH]=GRID[ch];MK=MW/GW;GTX=[];GTY=[];for(let X=0;X<MW;X++){let i=0;while(FT(i+1)<=X)i++;GTX[X]=i}for(let Y=0;Y<MH;Y++){let i=0;while(FT(i+1)<=Y)i++;GTY[Y]=i}}
 const SR=B=>({x:FT(B.x),y:FT(B.y),w:FT(B.x+B.w)-FT(B.x),h:FT(B.y+B.h)-FT(B.y)});
 // pillars and braziers stay single tiles; inlaid gold lines stay one tile thick; everything else is stretched block by block
@@ -330,7 +330,8 @@ function genBrzeznica(){
   // heads on stakes along the south road
   for(const y of [37,41,45,49])for(const x of [28,34])prop('impaled_head',x+.5,y+.92,[[x,y]]);
   // graveyard
-  for(let y=16;y<23;y+=3)for(let x=44;x<59;x+=3)prop(r()<.5?'grave_cross':'tombstone',x+.5+((r()-.5)*.6),y+.92,[[x,y]]);
+  prop('crypt_stairs',51.6,15.92,[[50,15],[51,15],[52,15]]);
+  for(let y=16;y<23;y+=3)for(let x=44;x<59;x+=3)if(!(Math.abs(x-51)<=2&&y<20))prop(r()<.5?'grave_cross':'tombstone',x+.5+((r()-.5)*.6),y+.92,[[x,y]]);
   prop('dead_tree',58.5,17.92,[[58,17]]);prop('crow_post',43.5,23.92,[[43,23]]);
   // wayside shrines heal the wounded
   prop('shrine',24.5,13.92,[[24,13]],{shrine:0});prop('shrine',47.5,47.92,[[47,47]],{shrine:1});
@@ -523,6 +524,62 @@ function genCzarnobor(seed){
         nn('wolch','wolch','Żerca Wołch',WOLCH_LINES,CZ.oak[0],CZ.oak[1]+4),nn('boginka','boginka_lure','',[],62+((r()*10)|0),10+((r()*10)|0),{lure:true})]})(),idle:[40,48,14,10]};
 }
 
+// Crypt under the Brzeźnica graveyard (side quest of chapter I), built from the Lower City tiles and props.
+// Random rooms joined by corridors: an entrance room, crypts full of sleeping dead, a shrine room and a boss hall with one single door.
+// A new layout is generated on every descent; a layout that fails the checks (unreachable room, too wide boss door) is thrown away.
+function genDungeon(seed){let w=null;for(let i=0;i<120&&!w;i++)w=genDungeonTry(seed+i*7717,false);return w||genDungeonTry(seed,true)}
+function genDungeonTry(seed,force){
+  const {map,under,PROPS,set,fill,prop}=mapKit(21);const r=rng(seed),at=(x,y)=>map[y*GW+x],ri=(a,b)=>a+((r()*(b-a+1))|0);
+  const rooms=[],cen=R=>[R.x+(R.w>>1),R.y+(R.h>>1)],D=(a,b)=>{const [x0,y0]=cen(a),[x1,y1]=cen(b);return Math.abs(x0-x1)+Math.abs(y0-y1)};
+  const fits=R=>R.x>=3&&R.y>=4&&R.x+R.w<=GW-3&&R.y+R.h<=GH-3&&rooms.every(o=>R.x+R.w+3<=o.x||o.x+o.w+3<=R.x||R.y+R.h+3<=o.y||o.y+o.h+3<=R.y);
+  for(let i=0;i<200&&!rooms.length;i++){const R={x:ri(3,GW-21),y:ri(4,GH-16),w:ri(15,18),h:ri(10,12),k:'boss'};if(fits(R))rooms.push(R)}
+  const B=rooms[0];if(!B)return null;
+  for(let i=0;i<400&&rooms.length<2;i++){const R={x:ri(3,GW-13),y:ri(4,GH-11),w:ri(9,11),h:ri(7,8),k:'start'};if(fits(R)&&D(R,B)>34)rooms.push(R)}
+  if(rooms.length<2)return null;
+  for(let i=0;i<900&&rooms.length<11;i++){const R={x:ri(3,GW-15),y:ri(4,GH-11),w:ri(8,13),h:ri(6,9),k:'crypt'};if(fits(R))rooms.push(R)}
+  if(rooms.length<7&&!force)return null;
+  for(const R of rooms)fill(R.x,R.y,R.w,R.h,20);
+  // corridors two tiles wide, L-shaped; a spanning tree over the rooms plus two extra loops
+  const cor=new Set(),dig=(x,y)=>{if(x<2||y<2||x>GW-3||y>GH-3)return;if(at(x,y)===21){set(x,y,20);cor.add(y*GW+x)}};
+  const link=(a,b)=>{const [x0,y0]=cen(a),[x1,y1]=cen(b);const h=(xa,xb,y)=>{for(let x=Math.min(xa,xb);x<=Math.max(xa,xb)+1;x++){dig(x,y);dig(x,y+1)}},v=(ya,yb,x)=>{for(let y=Math.min(ya,yb);y<=Math.max(ya,yb)+1;y++){dig(x,y);dig(x+1,y)}};
+    if(r()<.5){h(x0,x1,y0);v(y0,y1,x1)}else{v(y0,y1,x0);h(x0,x1,y1)}};
+  const rest=rooms.slice(1),inT=[rest[0]],out=rest.slice(1);
+  while(out.length){let bi=0,bj=0,bd=1e9;out.forEach((o,i)=>inT.forEach((t,j)=>{const d=D(o,t);if(d<bd){bd=d;bi=i;bj=j}}));link(out[bi],inT[bj]);inT.push(out.splice(bi,1)[0])}
+  for(let i=0;i<2;i++){const a=rest[ri(0,rest.length-1)],b=rest[ri(0,rest.length-1)];if(a!==b)link(a,b)}
+  // the boss hall: wall it off again, then dig one corridor from the nearest crypt (that crypt gets the healing shrine)
+  for(let y=B.y-1;y<=B.y+B.h;y++)for(let x=B.x-1;x<=B.x+B.w;x++)if(x<B.x||y<B.y||x>=B.x+B.w||y>=B.y+B.h){set(x,y,21);cor.delete(y*GW+x)}
+  const crypts=rooms.filter(R=>R.k==='crypt');if(!crypts.length)return null;
+  const pre=crypts.reduce((a,b)=>D(a,B)<=D(b,B)?a:b);pre.k='pre';link(pre,B);
+  let door=0;for(let y=B.y-1;y<=B.y+B.h;y++)for(let x=B.x-1;x<=B.x+B.w;x++)if((x<B.x||y<B.y||x>=B.x+B.w||y>=B.y+B.h)&&at(x,y)===20)door++;
+  if(!force&&(door<2||door>4))return null;
+  // decoration never goes next to a corridor mouth and solid props keep a free tile (two for loose clutter) around them
+  const KEEP=new Set();for(const k of cor){const x=k%GW,y=(k/GW)|0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)KEEP.add((y+dy)*GW+x+dx)}
+  const free=(x,y,d=1)=>{if(at(x,y)!==20||KEEP.has(y*GW+x))return false;for(let dy=-d;dy<=d;dy++)for(let dx=-d;dx<=d;dx++){const t=at(x+dx,y+dy);if((dx||dy)&&t!==20&&t!==21)return false}return true};
+  const wallTop=(R,k,n)=>{for(let i=0;i<n*8&&n>0;i++){const x=ri(R.x+1,R.x+R.w-2),y=R.y;if(at(x,y-1)!==21||!free(x,y,1))continue;prop(k,x+.5,y+.92,[[x,y]]);n--}};
+  const floorP=(R,k,n,w2)=>{for(let i=0;i<n*10&&n>0;i++){const x=ri(R.x+2,R.x+R.w-3-(w2?1:0)),y=ri(R.y+2,R.y+R.h-3);if(!free(x,y,2)||(w2&&!free(x+1,y,2)))continue;
+      if(w2)prop(k,x+1,y+.92,[[x,y],[x+1,y]]);else prop(k,x+.5,y+.92,[[x,y]]);n--}};
+  const stairs=(R,exit)=>{const c=R.x+(R.w>>1);for(let o=0;o<R.w;o++)for(const s of [1,-1]){const x=c+s*o;if(x-1<=R.x||x+1>=R.x+R.w-1)continue;
+      if([-1,0,1].every(dx=>at(x+dx,R.y-1)===21&&free(x+dx,R.y,0)&&!KEEP.has((R.y+1)*GW+x+dx))){prop('chapel_stairs',x+.6,R.y+.92,[[x-1,R.y],[x,R.y],[x+1,R.y]],{sheet:'trans',exit});return x}}return null};
+  const S0=rooms[1],sx=stairs(S0,'start'),bx=stairs(B,'boss');if(sx===null||bx===null)return null;
+  for(const [R,x] of [[S0,sx],[B,bx]])for(let dy=1;dy<=3;dy++)for(let dx=-2;dx<=2;dx++)KEEP.add((R.y+dy)*GW+x+dx);
+  for(const R of rooms){
+    const big=R.w>=11&&R.h>=8||R.k==='boss';
+    if(big){const P=[[R.x+2,R.y+2],[R.x+R.w-3,R.y+2],[R.x+2,R.y+R.h-3],[R.x+R.w-3,R.y+R.h-3]];if(R.k==='boss')P.push([R.x+2,R.y+(R.h>>1)],[R.x+R.w-3,R.y+(R.h>>1)]);for(const [x,y] of P)if(free(x,y,1))set(x,y,22)}
+    for(const [x,y] of [[R.x,R.y],[R.x+R.w-1,R.y],[R.x,R.y+R.h-1],[R.x+R.w-1,R.y+R.h-1]])if((R.k==='boss'||R.k==='start'||r()<.45)&&free(x,y,1))set(x,y,27);
+    if(R.k==='boss'){wallTop(R,'king_statue',2);wallTop(R,'clan_banner',2);floorP(R,'sarcophagus',2)}
+    else if(R.k==='start'){wallTop(R,'clan_banner',1);floorP(R,'fallen_pillar',1,true)}
+    else{wallTop(R,r()<.5?'clan_banner':'chains',ri(1,2));floorP(R,'sarcophagus',ri(0,3));if(r()<.5)floorP(R,'fallen_pillar',1,true);
+      for(const k of ['mine_cart','anvil','pickaxe_rack','rune_lantern'])if(r()<.3)floorP(R,k,1)}
+    for(let i=0;i<ri(2,5);i++){const x=ri(R.x+1,R.x+R.w-2),y=ri(R.y+1,R.y+R.h-2);if(at(x,y)===20)prop('dwarf_bones',x+.5,y+.92,[])}}
+  let shrine=null;for(let i=0;i<60&&!shrine;i++){const x=ri(pre.x+2,pre.x+pre.w-3),y=ri(pre.y+2,pre.y+pre.h-3);if(free(x,y,2)){prop('healing_shrine',x+.5,y+.92,[[x,y]],{shrine:0});shrine={x:x*TS+8,y:y*TS+12}}}
+  for(let y=1;y<GH-1;y++)for(let x=1;x<GW-1;x++){if(at(x,y)!==20)continue;const q=r();if(q<.03)set(x,y,30);else if(q<.12)set(x,y,26)}
+  // every room must be reachable from the entrance
+  const SOLT=new Set([21,22,27,31]),seen=new Uint8Array(GW*GH),st=[(S0.y+2)*GW+sx];seen[st[0]]=1;
+  while(st.length){const k=st.pop(),x=k%GW,y=(k/GW)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const n=(y+dy)*GW+x+dx;if(seen[n]||SOLT.has(map[n]))continue;seen[n]=1;st.push(n)}}
+  if(!force)for(const R of rooms){let ok=false;for(let y=R.y;y<R.y+R.h&&!ok;y++)for(let x=R.x;x<R.x+R.w;x++)if(seen[y*GW+x]){ok=true;break}if(!ok)return null}
+  return{map,under,PROPS,seed,start:{x:sx*TS+8,y:(S0.y+2)*TS+8},shrines:shrine?[shrine]:[],region:()=>'hall',npcs:[],idle:[...cen(S0),6,4],rooms:rooms.map(R=>({x:R.x,y:R.y,w:R.w,h:R.h,k:R.k}))};
+}
+
 /* ============ THREE SETUP ============ */
 const cvs=$('gl');
 let renderer;
@@ -535,6 +592,7 @@ const amb=new THREE.AmbientLight(0x5a4f78,.85);scene.add(amb);
 const hemi=new THREE.HemisphereLight(0x302848,0x1a0a06,.55);scene.add(hemi);
 const moon=new THREE.DirectionalLight(0xd0c0ff,0);moon.position.set(-6,14,-10);scene.add(moon);scene.add(moon.target);
 const ATM={1:{amb:0x4a5878,ai:.95,hs:0x3a4a70,hg:0x1a120c,hi:.5,fog:0x0a0c14,fd:.014,clear:0x05060b},2:{amb:0x463c58,ai:.7,hs:0x282038,hg:0x140805,hi:.42,fog:0x030204,fd:.018,clear:0x020103},3:{amb:0x50466a,ai:.78,hs:0x7a6038,hg:0x1c0a08,hi:.5,fog:0x16110e,fd:.012,clear:0x0c0907,mi:.42,mc:0xd8c8ff},
+  5:{amb:0x45405c,ai:.98,hs:0x2a2238,hg:0x140806,hi:.42,fog:0x040306,fd:.02,clear:0x020103},
   4:{amb:0x4a5a72,ai:1.02,hs:0x40566e,hg:0x101a12,hi:.56,fog:0x0b1216,fd:.016,clear:0x05080a,mi:.4,mc:0xa8c0e0}};
 const DAWN=new THREE.Color(0xc0a898),TMPC=new THREE.Color();
 function applyAtmos(){const a=ATM[CH];amb.color.setHex(a.amb);amb.intensity=a.ai;hemi.color.setHex(a.hs);hemi.groundColor.setHex(a.hg);hemi.intensity=a.hi;scene.fog.color.setHex(a.fog);scene.fog.density=a.fd;renderer.setClearColor(a.clear);moon.intensity=a.mi||0;if(a.mc)moon.color.setHex(a.mc);if(typeof setAmbience==='function')setAmbience()}
@@ -647,6 +705,42 @@ function buildDolne(I){
   }
 }
 
+// Crypt meshes: the Lower City floor (M4), carved hall walls (M5), its props (M6) and the chapel stairs (M8)
+function buildDungeon(I){
+  const F=I.dm_floor,Wl=I.dm_walls,r=rng(W.seed||5);
+  const fc=canvas(WW,WH),fg=fc.getContext('2d');
+  const tile=(c,row,tx,ty)=>fg.drawImage(F,c*16,row*16,16,16,tx*16,ty*16,16,16);
+  for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){let t=tileAt(tx,ty);const rc=(r()*8)|0;if(t===31)t=W.under[ty*MW+tx]||20;
+    if(t===21||t===26)tile(rc,2,tx,ty);else tile(rc,0,tx,ty)}
+  floorAO(fg,new Set([22,31]));
+  for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++)if(tileAt(tx,ty)===30)fg.drawImage(DEC.bones[(r()*4)|0],tx*16-8,ty*16-8);
+  const okT=(x,y)=>{const t=tileAt(x,y);return t!==21&&t!==22};
+  for(let i=0;i<300;i++){const x=(r()*MW)|0,y=(r()*MH)|0;if(!okT(x,y))continue;const rr=5+r()*20;const gr=fg.createRadialGradient(x*16+8,y*16+8,0,x*16+8,y*16+8,rr);gr.addColorStop(0,`rgba(3,2,4,${.25+r()*.3})`);gr.addColorStop(1,'rgba(3,2,4,0)');fg.fillStyle=gr;fg.fillRect(x*16+8-rr,y*16+8-rr,rr*2,rr*2)}
+  for(let i=0;i<140;i++){const x=(r()*MW)|0,y=(r()*MH)|0;if(!okT(x,y))continue;const q=r();
+    if(q<.35)fg.drawImage(DEC[r()<.5?'pool':'spray'][(r()*4)|0],x*16-8,y*16-8);else if(q<.7)fg.drawImage(DEC.crack[(r()*4)|0],x*16-8,y*16-8);else fg.drawImage(DEC.bones[(r()*4)|0],x*16-8,y*16-8)}
+  const floor=new THREE.Mesh(floorGeo,phong({map:texFrom(fc),alphaTest:.5,color:0x8a8088}));floor.position.set(MW/2,0,MH/2);floor.receiveShadow=true;ROOT.add(floor);
+  const capMat=cutaway(phong({map:texFrom(tcut(Wl,1,6),true)}));
+  const wallGeo=new THREE.BoxGeometry(1,3,1);wallGeo.translate(0,1.5,0);
+  const variants=[0,1,2,3].map(i=>stackTex(Wl,[[(i*3)%8,0],[(i*2+1)%8,1],[(i*5+4)%8,0]]));
+  const groups=variants.map(()=>[]);for(const [x,y] of walls)groups[(x*7+y*3)%4].push([x,y]);
+  groups.forEach((list,i)=>{if(!list.length)return;const side=cutaway(phong({map:variants[i],color:0x8a8088}));instanced(wallGeo,[side,side,capMat,capMat,side,side],list,([x,y])=>M4.makeTranslation(x+.5,0,y+.5))});
+  const pilT=texFrom(tcut(Wl,0,2),true);pilT.repeat.set(2,4);
+  const stoneT=texFrom(tcut(F,2,0),true);
+  const pilGeo=new THREE.CylinderGeometry(.36,.38,4,8);pilGeo.translate(0,2,0);
+  instanced(pilGeo,cutaway(phong({map:pilT})),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
+  const baseGeo=new THREE.BoxGeometry(.95,.35,.95);baseGeo.translate(0,.175,0);
+  instanced(baseGeo,phong({map:stoneT}),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
+  const capGeo=new THREE.BoxGeometry(1.05,.32,1.05);capGeo.translate(0,4.12,0);
+  instanced(capGeo,cutaway(phong({map:stoneT})),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
+  const R={brazier_0:[0,0,32,32],brazier_1:[32,0,32,32],brazier_2:[64,0,32,32],brazier_3:[96,0,32,32],king_statue:[0,32,32,64],anvil:[32,32,32,32],mine_cart:[64,32,32,32],pickaxe_rack:[96,32,32,32],
+    healing_shrine:[32,64,32,32],depleted_shrine:[64,64,32,32],chains:[96,64,32,32],fallen_pillar:[0,96,64,32],dwarf_bones:[64,96,32,32],sarcophagus:[0,160,32,32],rune_lantern:[32,160,32,32],clan_banner:[96,160,32,32]};
+  const TR={chapel_stairs:[0,0,64,32]};
+  const PF={};for(const k in R)PF[k]=procFrame(I.dm_props,...R[k],'prop');for(const k in TR)PF[k]=procFrame(I.trans,...TR[k],'prop');
+  for(const [x,y] of braziers){const frames=[0,1,2,3].map(i=>PF['brazier_'+i]);propObjs.push({mesh:mkProp(frames,x+.5,y+.92,R.brazier_0),frames,fps:6,ph:Math.random()*3})}
+  for(const p of PROPS){const sh=p.shrine!==undefined,frames=sh?[PF.healing_shrine,PF.depleted_shrine]:[PF[p.k]],rc=R[p.k]||TR[p.k];
+    const o={mesh:mkProp(frames,p.x,p.y,rc),frames,fps:0,ph:0,kind:sh?'shrine':'static',si:p.shrine};if(p.k==='dwarf_bones')o.mesh.castShadow=false;p.obj=o;propObjs.push(o)}
+}
+
 // Chapter I meshes: M1 ground, M2 walls, M3 props
 function buildBrzeznica(I){
   const F=I.br_ground,Wl=I.br_walls,r=rng(77);
@@ -684,6 +778,8 @@ function buildBrzeznica(I){
     debris_fire_0:[64,64,32,32],debris_fire_1:[96,64,32,32],debris_fire_2:[0,96,32,32],debris_fire_3:[32,96,32,32],wheel:[64,96,32,32],barrel:[96,96,32,32],marga_cart:[0,128,64,32],
     crow_post:[64,128,32,32],covered_corpses:[96,128,32,32],order_bonfire:[0,160,32,32],order_banner:[32,160,32,32],burnt_hay:[64,160,32,32],dead_horse:[96,160,32,32]};
   const PF={};for(const k in R)PF[k]=procFrame(I.br_props,R[k][0],R[k][1],R[k][2],R[k][3],'prop');
+  // stairs down into the crypt (Lower City transition sheet)
+  R.crypt_stairs=[0,0,64,32];PF.crypt_stairs=procFrame(I.trans,0,0,64,32,'prop');
   for(const p of PROPS){
     let frames,rc;
     if(p.anim==='fire'){frames=[0,1,2,3].map(i=>PF['debris_fire_'+i]);rc=R.debris_fire_0}
@@ -974,7 +1070,8 @@ function enrich(w,ch){
     w.wave={msg:'Z klasztoru wychodzi procesja ognia. Mnisi prowadzą tłum szaleńców.',list:[['monk',5],['madman',8]]}}
 }
 function initWorld(ch){setGrid(ch);
-  const w=upscaleWorld(ch===1?genBrzeznica():ch===2?genDolne():ch===3?genStolica():genCzarnobor((Math.random()*2147483647)|0));if(ch<4)enrich(w,ch);
+  const w=upscaleWorld(ch===1?genBrzeznica():ch===2?genDolne():ch===3?genStolica():ch===5?genDungeon((Math.random()*2147483647)|0):genCzarnobor((Math.random()*2147483647)|0));if(ch<4)enrich(w,ch);
+  if(ch===5)w.rooms=w.rooms.map(R=>Object.assign(SR(R),{k:R.k}));
   Object.assign(w,{ch,group:new THREE.Group(),propObjs:[],npcMeshes:{},walls:[],cliffs:[],pillars:[],lavas:[],braziers:[],waters:[],rots:[],LSRC:[]});
   for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;
   scene.add(w.group);
@@ -1013,7 +1110,12 @@ function initWorld(ch){setGrid(ch);
     w.stoneP=w.PROPS.filter(p=>p.stone!==undefined).sort((a,b)=>a.stone-b.stone).map(p=>({x:p.x*16,y:p.y*16}));
     w.altar={pc:'#7fd0ff',one:n=>`Kamień rozbłyska błękitem. Obudzone kamienie: ${n} z 5.`,all:'Krąg się zamyka. Stara moc leczy twoje rany i wyrzuca z ziemi 30 monet.'};
     w.barrows=w.PROPS.filter(p=>p.barrow).map(p=>({x:p.x*16,y:p.y*16+10}));
+  }else if(ch===5){
+    w.braziers.forEach(([x,y])=>lsrc(0xff6a1a,1.4,7,x+.5,1.6,y+.6,'fire'));
+    for(const p of w.PROPS){if(p.k==='rune_lantern')lsrc(0x4a90e0,.6,3.5,p.x,1,p.y-.9,'rune');if(p.exit)lsrc(0x9a8cff,1,5,p.x,1.2,p.y+.3,'rune')}
+    w.shrines.forEach((s,i)=>lsrc(0x5fb0ff,1.2,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
   }else{
+    {const cs=w.PROPS.find(p=>p.k==='crypt_stairs');if(cs){w.crypt={x:cs.x*16,y:(cs.y+.6)*16};lsrc(0x9a8cff,1.2,6,cs.x,1.2,cs.y+.3,'rune')}}
     for(const p of w.PROPS)if(p.fire)lsrc(0xff7a2a,p.big?2.2:1.7,p.big?10:8,p.x,1.3,p.y-.2,'fire');
     w.shrines.forEach((s,i)=>lsrc(0xffc070,1.1,5,s.x/16,1.2,s.y/16+.6,'shrine',{si:i}));
     lsrc(0xffb060,1.3,6,w.npcs[1].x/16+.2,1.1,w.npcs[1].y/16+.4,'npc',{npc:'marga'});
@@ -1077,7 +1179,7 @@ function procFrame(img,x,y,size,h,kind,lift=0){
     d:new THREE.MeshDistanceMaterial({map:tex,alphaTest:.5})};
 }
 
-let A=null;
+let A=null,IMGS=null;
 function buildAnims(imgs){
   const bz=beastSheet(),bs=(c,r)=>procFrame(bz,c*64,r*64,64,64);
   // sheets redrawn at 64x64 (same layout, cells twice as big) are detected by their width and drawn at the same size in the world
@@ -1424,7 +1526,7 @@ function killEnemy(e,nx,ny){e.dead=true;S.kills++;if(S.trial)S.trial.k++;
   if(CH===2)for(const p of PROPS){if(p.k!=='black_powder'||S.boom.has(p)||Math.hypot(e.x-p.x*16,e.y-p.y*16)>30)continue;S.boom.add(p);S.delayed.push({t:.15,fn:()=>powderBlast(p)})}
   const big=BIG.has(e.type),jz=e.type==='jerzak',ghost=e.type==='wisp'||e.type==='zmora';
   if(e.type==='wisp'){scene.remove(e.mesh);return}
-  if(e.type==='leszy'){S.stage='p2';S.leszy=null;say('Leszy rozpada się w próchno. Las wypuszcza cię z objęć.');for(let i=0;i<30;i++)dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16));for(let i=0;i<10;i++)dropPick('w',e.x+rnd(-20,20),e.y+rnd(-12,12),3)}
+  if(e.type==='leszy'&&!e.dgBoss){S.stage='p2';S.leszy=null;say('Leszy rozpada się w próchno. Las wypuszcza cię z objęć.');for(let i=0;i<30;i++)dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16));for(let i=0;i<10;i++)dropPick('w',e.x+rnd(-20,20),e.y+rnd(-12,12),3)}
   if(e.type==='boginka'){say('Boginka zapada się w błoto. Zostaje po niej garść monet topielców.');for(let i=0;i<25;i++)dropPick('c',e.x+rnd(-22,22),e.y+rnd(-14,14));for(let i=0;i<5;i++)dropPick('w',e.x+rnd(-16,16),e.y+rnd(-10,10),3)}
   if(e.type==='collector'){S.collector=null;S.stage='p2';const total=e.stolen+20,n=Math.min(40,total);say(`Poborca pada. Złoto wraca do ciebie: ${total} monet.`);shake(.4,.5);
     for(let i=0;i<n;i++){dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16));S.picks[S.picks.length-1].v=Math.floor(total/n)+(i<total%n?1:0)}for(let i=0;i<8;i++)dropPick('w',e.x+rnd(-20,20),e.y+rnd(-12,12),3)}
@@ -1438,6 +1540,7 @@ function killEnemy(e,nx,ny){e.dead=true;S.kills++;if(S.trial)S.trial.k++;
   if(S.corpses.length>160){const c=S.corpses.shift();scene.remove(c.mesh)}
   if(big&&e.type!=='leszy'){if(S.stage==='final')S.won=true;say(e.type==='strzyga'?'Strzyga Matka rozpada się w stado kruków i popiół. Drugie serce przestaje bić.':e.type==='beast'?'Morhad pada na złote płyty. Krew jego ofiar jeszcze długo z niego wypływa.':'Zrost pada. Jego twarze wciąż szepczą.');if(e.type==='beast'){for(let i=0;i<6;i++)pool(e.x+rnd(-30,30),e.y+rnd(-14,14),36,12)}shake(.6,.7);for(let i=0;i<14;i++)dropPick('w',e.x+rnd(-24,24),e.y+rnd(-14,14),3);for(let i=0;i<20;i++)dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16))}
   else if(!big){if(e.xp>0)dropPick('w',e.x,e.y,e.xp);if(Math.random()<ET[e.type].coin)dropPick('c',e.x+rnd(-4,4),e.y+rnd(-3,3))}
+  if(e.dgBoss)dungeonCleared(e);
 }
 function powderBlast(p){const x=p.x*16,y=p.y*16;if(p.obj)p.obj.mesh.visible=false;shake(.45,.4);play('quake',0);play('fire',0);S.flash=Math.max(S.flash,.35);
   if(DEC.scorch)decalAt(DEC.scorch[(Math.random()*4)|0],x,y);addVfx(A.fx.nova,.35,x,y,.08,70/8,'ground');
@@ -1459,6 +1562,7 @@ function updEnemy(e,dt){
   if(e.pois>0){e.pois-=dt;e.poisT=(e.poisT||0)-dt;if(e.poisT<=0){e.poisT=.5;if(Math.random()<.7)S.parts.push({k:'m',x:e.x+rnd(-4,4),y:e.y,z:rnd(6,16),vx:0,vy:0,vz:rnd(4,10),c:'#8ac04a',life:.6});damageEnemy(e,e.poisD*.5,0,0,0);if(e.dead)return}}
   if(e.burn>0){e.burn-=dt;e.burnT=(e.burnT||0)-dt;if(Math.random()<dt*12)S.parts.push({k:'e',x:e.x+rnd(-4,4),y:e.y,z:rnd(4,14),vx:0,vy:0,vz:rnd(10,20),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:.4});if(e.burnT<=0){e.burnT=.5;damageEnemy(e,e.burnD*.5,0,0,0);if(e.dead)return}}
   if(e.chill>0)e.chill-=dt;
+  if(e.sleep){if(e.hp<e.max||Math.hypot(pl.x-e.x,pl.y-e.y)<125)wakeRoom(e);else return}
   if(e.frozen>0){e.frozen-=dt;return}
   if(e.emerge>0){e.emerge-=dt;return}
   const fly=e.type==='bat'||e.type==='zmora'||(e.type==='strzyga'&&!e.phase);
@@ -1585,7 +1689,7 @@ function updEproj(dt){for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.
   if(gone&&f.bolt){for(let k=0;k<5;k++)S.parts.push({k:'d',x:f.x,y:f.y,z:8,vx:rnd(-30,30),vy:rnd(-15,15),vz:rnd(5,20),c:'#9d9584',life:.3});S.eproj.splice(i,1);continue}
   if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);S.eproj.splice(i,1)}}}
 function spawnTick(dt){
-  if(pl.dead||S.phase!=='play'||S.opening||S.stage==='break')return;S.spawnT-=dt;if(S.spawnT>0)return;S.spawnT=.5;
+  if(pl.dead||S.phase!=='play'||S.opening||S.stage==='break'||S.dg)return;S.spawnT-=dt;if(S.spawnT>0)return;S.spawnT=.5;
   const target=(SLASHER?Math.min(SL.cap,4+S.t*SL.ramp):Math.min(ENEMY_CAP,6+S.t*ENEMY_RAMP))*(S.lvl>=LATE_LVL?LATE_MUL:1);// will-o'-wisps sit far away on the marsh and must not take up places in the cap
   let n=Math.min(5,Math.floor(target-S.enemies.filter(e=>e.type!=='wisp').length));
   while(n-->0){const p=ringSpot()||ringSpot(170,260);if(!p)continue;const r=Math.random(),t=S.t;
@@ -1811,10 +1915,11 @@ function update(dt){
   if(!S||S.phase!=='play'||S.choosing||S.shop||S.paused)return;
   if(S.hitstop>0){S.hitstop-=dt;if(rollPress)S.bufRoll=1;return}
   if(S.dialog){if(talkPress||rollPress)advanceDialog();return}
-  if(S.stage!=='break')S.t+=dt;
-  stageTick(dt);
+  if(S.stage!=='break'&&!S.dg)S.t+=dt;
+  stageTick(dt);if(S.dg)dungeonTick(dt);
   const nm=nearMerchant();if(talkPress&&nm){openShop();return}
   const nn=nearNpc();if(talkPress&&nn){openDialog(nn);return}
+  const nx=!nn&&!nm?nearExit():null;if(talkPress&&nx){useExit(nx);return}
   updPlayer(dt);events();spawnTick(dt);
   if(SLASHER){slashUpdate(dt);for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn())}
   else if(!pl.dead)updSkills(dt);
@@ -1861,14 +1966,14 @@ const SHOP=[
 const price=it=>Math.round(it.cost*Math.pow(1.5,S.bought[it.id]||0));
 function dissolveAll(msg){for(const e of S.enemies){scene.remove(e.mesh);for(let i=0;i<8;i++)S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(0,14),vx:rnd(-7,7),vy:0,vz:rnd(12,30),c:P.bone2,life:2})}S.enemies=[];if(msg)say(msg)}
 function stageTick(dt){
-  if(S.stage==='p1'&&S.t>=BREAK_AT){S.stage='break';dissolveAll('Północ. Martwi cofają się w ciemność, a Marga rozkłada kram.');
+  if(S.stage==='p1'&&S.t>=BREAK_AT&&!S.dg){S.stage='break';dissolveAll('Północ. Martwi cofają się w ciemność, a Marga rozkłada kram.');
     let spot=null;for(let i=0;i<30&&!spot;i++){const a=Math.random()*Math.PI*2,x=pl.x+Math.cos(a)*44,y=pl.y+Math.sin(a)*30;if(!boxSolid(x,y,6,3))spot=[x,y]}
     spot=spot||[pl.x+20,pl.y];S.merchant={x:spot[0],y:spot[1],state:'in',t:1,wait:60};play('bless',0);
     for(let i=0;i<26;i++)S.parts.push({k:'a',x:spot[0]+rnd(-8,8),y:spot[1],z:rnd(0,20),vx:rnd(-8,8),vy:0,vz:rnd(8,20),c:'#3d4a3a',life:rnd(1,2)})}
   const m=S.merchant;
   if(m){if(m.state==='in'){m.t-=dt*1.5;if(m.t<=0)m.state='here'}
     else if(m.state==='here'){m.wait-=dt;if(m.wait<=0){say('Marga traci cierpliwość i zwija kram.');leaveMerchant()}}
-    else if(m.state==='out'){m.t-=dt*1.5;if(m.t<=0){S.merchant=null;S.stage='collector';S.collT=2.5}}}
+    else if(m.state==='out'){m.t-=dt*1.5;if(m.t<=0){S.merchant=null;if(!m.dg){S.stage='collector';S.collT=2.5}}}}
   if(S.stage==='collector'&&S.collT>0&&CH===4&&A.leszy){S.collT-=dt;if(S.collT<=0){const p=ringSpot(120,170)||ringSpot(80,220)||[pl.x+100,pl.y],hp=ET.leszy.hp*(1+S.t/360);
     S.leszy=spawnEnemy('leszy',p[0],p[1],{rise:1.4,hp,max:hp});play('bossGrowl',0);play('howl',0);shake(.2,1);say('Las milknie. Spomiędzy drzew wychodzi Leszy, Pan Kniei.')}}
   else if(S.stage==='collector'&&S.collT>0){S.collT-=dt;if(S.collT<=0){const p=ringSpot(120,170)||ringSpot(80,220)||[pl.x+100,pl.y];const hp=900*(1+S.t/360);
@@ -1888,7 +1993,55 @@ function buy(i){const it=SHOP[i];if(!it||!S.shop)return;const pr=price(it);if(S.
   if(it.id==='brew')pl.hp=pl.max;else if(it.id==='heart'){pl.max+=25;heal(25)}else if(it.id==='whet')S.whet++;else if(it.id==='amulet'){if(SLASHER){pl.staMax+=20;pl.sta=pl.staMax}else{pl.maxDodge++;pl.dodge=pl.maxDodge}}
   else if(it.id==='scroll'){S.lvl++;S.need=xpNeed(S.lvl);S.pendLv++}else if(it.id==='magnet')S.magnet+=.4;
   renderShop()}
-function closeShop(){if(!S||!S.shop)return;S.shop=false;$('shop').hidden=true;$('touch').hidden=!coarse;leaveMerchant();say('Marga: „Uważaj. Poborca zakonu zwęszył twoje złoto.”');if(S.pendLv>0)openLevelUp()}
+function closeShop(){if(!S||!S.shop)return;S.shop=false;$('shop').hidden=true;$('touch').hidden=!coarse;const mdg=S.merchant&&S.merchant.dg;leaveMerchant();say(mdg?'Marga: „Schody prowadzą na górę. Noc na ciebie poczeka.”':'Marga: „Uważaj. Poborca zakonu zwęszył twoje złoto.”');if(S.pendLv>0)openLevelUp()}
+/* ============ THE CRYPT: a random dungeon under the Brzeźnica graveyard (once per night, before midnight) ============ */
+const DG_T1=['possessed','madman','ghoul','hound','dwarf','bat','wolf','strzygon'],DG_T2=['bandit','monk','xbow','zmora','drowner'],DG_BOSS=['boss','beast','leszy','strzyga'];
+const DG_BOSS_MSG={boss:'Ze stosu kości w głębi sali wstaje Zrost, zszyty z ciał pogrzebanych w krypcie.',beast:'Z mroku krypty wypada Morhad, Bestia Tysiąca Rzezi. Ktoś go tu zamknął.',
+  leszy:'Korzenie rozsadzają posadzkę. Leszy, Pan Kniei, przyszedł po tych, co tu leżą.',strzyga:'Wieko sarkofagu pęka. Wstaje Strzyga Matka, Królowa Kurhanów.'};
+function makeDungeon(){if(WORLDS[5]){scene.remove(WORLDS[5].group);delete WORLDS[5]}initWorld(5);useWorld(5);ROOT=W.group;buildDungeon(IMGS);ROOT=scene;buildMini()}
+// everything lying around belongs to the level we leave; coins on the ground are picked up on the way
+function stashEntities(){for(const p of S.picks)if(p.k==='c')S.coins+=p.v||1;
+  for(const m of [...S.enemies.map(e=>e.mesh),...S.picks.flatMap(p=>[p.mesh,p.glow]),...S.vfx.map(f=>f.mesh),...S.corpses.map(c=>c.mesh),...S.zones.map(z=>z.mesh),...(S.eproj||[]).map(f=>f.mesh)])if(m)scene.remove(m);
+  S.enemies=[];S.picks=[];S.vfx=[];S.corpses=[];S.zones=[];S.eproj=[];S.quakes=[];S.delayed=[];S.leszy=null;S.collector=null;S.merchant=null;
+  for(const g of S.golems){g.x=pl.x+rnd(-10,10);g.y=pl.y+rnd(-6,6)}
+  Object.assign(pl,{roll:0,swingT:0,inv:1,atk:null,block:false,charging:false,atkHeld:false});camTarget.set(pl.x/16,0,pl.y/16)}
+function enterDungeon(){const fog=canvas(MW,MH);fog.getContext('2d').drawImage(MINI.fog,0,0);const dec=canvas(WW,WH);dec.getContext('2d').drawImage(decalC,0,0);
+  S.dgBack={x:W.crypt.x,y:W.crypt.y+12,shr:S.shr,fog,dec};
+  makeDungeon();pl.x=START.x;pl.y=START.y;stashEntities();
+  S.shr=W.shrines.map(()=>60);S.dg={done:false,boss:null,margaT:0};
+  dg.clearRect(0,0,WW,WH);decalDirty=true;resetFog();MINI.t=0;lastHud='';
+  populateDungeon();play('rumble',0);shake(.15,.6);
+  say('Schodzisz do krypty pod cmentarzem. Na górze noc stoi w miejscu. W najgłębszej sali coś na ciebie czeka.')}
+function exitDungeon(){const b=S.dgBack,done=S.dg&&S.dg.done;useWorld(1);pl.x=b.x;pl.y=b.y;stashEntities();S.shr=b.shr;
+  const fg=MINI.fog.getContext('2d');fg.globalCompositeOperation='source-over';fg.clearRect(0,0,MW,MH);fg.drawImage(b.fog,0,0);
+  dg.clearRect(0,0,WW,WH);dg.drawImage(b.dec,0,0);decalDirty=true;
+  S.dg=null;S.dgBack=null;S.dgDone=true;S.spawnT=1.5;lastHud='';play('rumble',0);
+  say(done?'Wychodzisz z krypty z pełną sakwą. Wejście zapada się za tobą.':'Uciekasz z krypty. Wejście zapada się za tobą.')}
+// low dead from every chapter sleep in the crypts and wake together when you come close or hurt one of them
+function populateDungeon(){const T1=DG_T1.filter(k=>A[k]&&ET[k]),T2=DG_T2.filter(k=>A[k]&&ET[k]);
+  W.rooms.forEach((R,i)=>{if(R.k==='start'||R.k==='boss')return;const n=3+((Math.random()*3)|0)+(S.lvl>=8?1:0)+(R.k==='pre'?1:0);
+    for(let j=0;j<n;j++){let p=null;for(let t=0;t<30&&!p;t++){const x=(R.x+1+Math.random()*(R.w-2))*TS,y=(R.y+1+Math.random()*(R.h-2))*TS;if(!boxSolid(x,y,6,4))p=[x,y]}if(!p)continue;
+      const pool=Math.random()<.62||!T2.length?T1:T2,t=pool[(Math.random()*pool.length)|0];
+      for(let k=0;k<(t==='bat'||t==='wolf'||t==='hound'?2:1);k++)spawnEnemy(t,p[0]+(k?rnd(-10,10):0),p[1]+(k?rnd(-6,6):0),{rise:0,sleep:1,room:i})}})}
+function wakeRoom(e){for(const q of S.enemies)if(q.room===e.room)q.sleep=0}
+function dungeonTick(dt){const d=S.dg;
+  if(!d.boss&&!d.done){const B=W.rooms.find(R=>R.k==='boss'),tx=pl.x/TS,ty=pl.y/TS;
+    if(tx>B.x+.8&&tx<B.x+B.w-.8&&ty>B.y+.8&&ty<B.y+B.h-.8){const types=DG_BOSS.filter(k=>A[k]),t=types[(Math.random()*types.length)|0],hp=ET[t].hp*.55*(1+S.t/360);
+      let p=null;for(let i=0;i<40&&!p;i++){const x=(B.x+B.w*(.3+Math.random()*.4))*TS,y=(B.y+B.h*(.3+Math.random()*.4))*TS;if(!boxSolid(x,y,10,4)&&Math.hypot(x-pl.x,y-pl.y)>70)p=[x,y]}
+      p=p||[(B.x+B.w/2)*TS,(B.y+B.h/2)*TS];d.boss=spawnEnemy(t,p[0],p[1],{rise:1.6,hp,max:hp,dgBoss:true});play('rise',0);play('bossGrowl',0);shake(.3,1);say(DG_BOSS_MSG[t])}}
+  if(d.margaT>0&&(d.margaT-=dt)<=0){let spot=null;for(let i=0;i<30&&!spot;i++){const a=Math.random()*Math.PI*2,x=pl.x+Math.cos(a)*44,y=pl.y+Math.sin(a)*30;if(!boxSolid(x,y,6,3))spot=[x,y]}
+    spot=spot||[pl.x+20,pl.y];S.merchant={x:spot[0],y:spot[1],state:'in',t:1,wait:90,dg:true};play('bless',0);
+    for(let i=0;i<26;i++)S.parts.push({k:'a',x:spot[0]+rnd(-8,8),y:spot[1],z:rnd(0,20),vx:rnd(-8,8),vy:0,vz:rnd(8,20),c:'#3d4a3a',life:rnd(1,2)});say('Z cienia między sarkofagami wychodzi Marga i rozkłada kram.')}}
+function dungeonCleared(e){const d=S.dg;if(!d||d.done)return;d.done=true;d.boss=null;d.margaT=2.2;S.coins+=150;play('coin',0);play('bless',0);lastHud='';
+  for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,sp=rnd(30,90);S.parts.push({k:'e',x:e.x,y:e.y,z:rnd(4,16),vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*.6,vz:rnd(20,50),c:Math.random()<.6?'#e0b84a':'#fff0b0',life:rnd(.8,1.6)})}
+  say('Krypta milknie. Na twoje konto wpada 150 monet. Schody w głębi sali prowadzą na górę.')}
+// stairs: down into the crypt from the graveyard (before midnight, once), back up from the entrance room or, after the boss, from the boss hall
+function nearExit(){if(!S||pl.dead)return null;
+  if(CH===1&&W.crypt&&Math.hypot(pl.x-W.crypt.x,pl.y-W.crypt.y)<30)return{x:W.crypt.x,y:W.crypt.y-6,kind:S.dgDone||S.stage!=='p1'?'sealed':'enter'};
+  if(CH===5&&S.dg)for(const p of PROPS){if(!p.exit)continue;const x=p.x*16,y=(p.y+.5)*16;if(Math.hypot(pl.x-x,pl.y-y)<30&&(p.exit==='start'||S.dg.done))return{x,y:y-6,kind:'leave'}}
+  return null}
+function useExit(n){if(n.kind==='enter')enterDungeon();else if(n.kind==='leave')exitDungeon();
+  else say(S.dgDone?'Wejście do krypty zawaliło się.':'O północy krypta zamyka się na głucho. Spróbuj następnej nocy.')}
 /* ============ RENDER ============ */
 const camTarget=new THREE.Vector3();let idleA=0;
 // slasher hero v2 (S1-S4 sheets): every state has its own drawn-sword animation
@@ -2031,8 +2184,9 @@ function syncScene(dt){
   decalT-=dt;if(decalDirty&&decalT<=0){decalTex.needsUpdate=true;decalDirty=false;decalT=.15}
   // talk prompt
   const pr=$('prompt'),free=S&&S.phase==='play'&&!S.dialog&&!S.choosing&&!S.shop,nmc=free?nearMerchant():null,near=free?(nmc||nearNpc()):null;
-  if(near){V.set(near.x/16,2.1,near.y/16).project(cam);pr.hidden=false;pr.textContent=nmc?(coarse?'Handluj':'E · Handluj'):(coarse?'Rozmawiaj':'E · Rozmawiaj');pr.style.left=((V.x+1)/2*100)+'%';pr.style.top=((1-V.y)/2*100)+'%'}else pr.hidden=true;
-  $('bTalk').hidden=!near;$('bTalk').textContent=nmc?'Handluj':'Rozmawiaj';
+  const nex=free&&!near?nearExit():null,lbl=nex?{enter:'Zejdź do krypty',leave:'Wyjdź na górę',sealed:'Krypta zamknięta'}[nex.kind]:nmc?'Handluj':'Rozmawiaj',tgt=near||nex;
+  if(tgt){V.set(tgt.x/16,2.1,tgt.y/16).project(cam);pr.hidden=false;pr.textContent=coarse||(nex&&nex.kind==='sealed')?lbl:'E · '+lbl;pr.style.left=((V.x+1)/2*100)+'%';pr.style.top=((1-V.y)/2*100)+'%'}else pr.hidden=true;
+  $('bTalk').hidden=!tgt;$('bTalk').textContent=lbl;
   // Marga at her stall during the break
   const mc=S&&S.merchant;margaMesh.visible=!!mc;if(mc){setFrame(margaMesh,at(A.marga,clock,3));margaMesh.position.set(mc.x/16,0,mc.y/16);const k=mc.state==='in'?1-mc.t:mc.state==='out'?mc.t:1;margaMesh.scale.set(1,SQ*Math.max(.05,k),1);blob(mc.x/16,mc.y/16,1);W.merchantLight.x=mc.x/16;W.merchantLight.z=mc.y/16+.3}
   if(S&&S.collector&&!S.collector.dead&&Math.random()<dt*10){const c=S.collector,a=Math.random()*Math.PI*2;S.parts.push({k:'e',x:c.x+Math.cos(a)*14,y:c.y+Math.sin(a)*8,z:rnd(6,26),vx:-Math.sin(a)*10,vy:Math.cos(a)*6,vz:rnd(2,8),c:Math.random()<.6?'#e0b84a':'#fff0b0',life:rnd(.6,1.2)})}
@@ -2068,9 +2222,9 @@ let lastHud='',chipsDirty=true;
 let lastBuffs=null;
 function hud(){if(!S)return;drawMini(1/60);const left=Math.max(0,(S.stage==='p1'?BREAK_AT:NIGHT)-S.t),m=Math.floor(left/60),s=Math.floor(left%60);
   const bl=S.enemies.filter(e=>(BIG.has(e.type)||e.type==='jerzak'||e.type==='collector'||e.type==='boginka')&&e.rise<=0),boss=bl.find(e=>BIG.has(e.type))||bl.find(e=>e.type==='collector')||bl[0];
-  const key=`${pl.hp|0}|${pl.max}|${S.xp}|${S.need}|${S.lvl}|${m}:${s}|${S.kills}|${S.coins}|${boss?boss.hp|0:-1}|${S.stage}|${boss&&boss.stolen||0}|${S.merchant?S.merchant.wait|0:0}`;
+  const key=`${pl.hp|0}|${pl.max}|${S.xp}|${S.need}|${S.lvl}|${m}:${s}|${S.kills}|${S.coins}|${boss?boss.hp|0:-1}|${S.stage}|${boss&&boss.stolen||0}|${S.merchant?S.merchant.wait|0:0}|${S.dg?(S.dg.done?2:1):0}`;
   if(key!==lastHud){lastHud=key;$('hp').style.width=$('hpg').style.width=(Math.max(0,pl.hp)/pl.max*100)+'%';$('hpbar').classList.toggle('low',pl.hp<pl.max*.3);$('xp').style.width=Math.min(100,S.xp/S.need*100)+'%';$('lvlTag').innerHTML=`<i class="ic ic-wisp"></i>Poziom ${S.lvl}`;
-    const mmss=`${m}:${String(s).padStart(2,'0')}`,tic=S.stage==='p1'||S.stage==='break'?'hourglass':S.stage==='p2'?'sun':'bossskull';$('time').innerHTML=`<i class="ic ic-${tic}"></i>`+(S.stage==='p1'?`Do północy ${mmss}`:S.stage==='break'?`Przerwa · kram Margi${S.merchant&&S.merchant.state==='here'?' '+Math.ceil(S.merchant.wait)+' s':''}`:S.stage==='collector'?(CH===4&&A.leszy?'Leszy, Pan Kniei!':'Poborca Zakonu!'):S.stage==='final'?(CH===3?'Pokonaj Morhada':CH===4&&A.strzyga?'Pokonaj Strzygę':'Pokonaj Zrosta'):`${CH===2?'Do otwarcia wrót':'Do świtu'} ${mmss}`);$('kills').innerHTML=`<i class="ic ic-skull"></i>Zabici: ${S.kills}`;$('coins').textContent=S.coins;
+    const mmss=`${m}:${String(s).padStart(2,'0')}`,tic=S.stage==='p1'||S.stage==='break'?'hourglass':S.stage==='p2'?'sun':'bossskull';$('time').innerHTML=`<i class="ic ic-${S.dg?'bossskull':tic}"></i>`+(S.dg?(S.dg.done?'Krypta oczyszczona':'Krypta pod cmentarzem'):S.stage==='p1'?`Do północy ${mmss}`:S.stage==='break'?`Przerwa · kram Margi${S.merchant&&S.merchant.state==='here'?' '+Math.ceil(S.merchant.wait)+' s':''}`:S.stage==='collector'?(CH===4&&A.leszy?'Leszy, Pan Kniei!':'Poborca Zakonu!'):S.stage==='final'?(CH===3?'Pokonaj Morhada':CH===4&&A.strzyga?'Pokonaj Strzygę':'Pokonaj Zrosta'):`${CH===2?'Do otwarcia wrót':'Do świtu'} ${mmss}`);$('kills').innerHTML=`<i class="ic ic-skull"></i>Zabici: ${S.kills}`;$('coins').textContent=S.coins;
     $('boss').hidden=!boss;if(boss){$('bossName').innerHTML='<i class="ic ic-bossskull"></i>'+(boss.type==='jerzak'?'Jerzak, Kosmate Jądro Otchłani':boss.type==='collector'?`Poborca Zakonu · zabrał ${boss.stolen} monet`:boss.type==='beast'?'Morhad, Bestia Tysiąca Rzezi':boss.type==='leszy'?'Leszy, Pan Kniei':boss.type==='strzyga'?(boss.phase===2?'Strzyga Matka · druga dusza':'Strzyga Matka, Królowa Kurhanów'):boss.type==='boginka'?'Boginka z Topieliska':'Zrost');$('bossHp').style.width=Math.max(0,boss.hp/boss.max*100)+'%'}}
   const st=$('stam'),nseg=SLASHER?1:pl.maxDodge;if(st.childElementCount!==nseg){st.innerHTML=('<div class="seg fb st"><span class="trk"><i></i></span><b class=\"l\"></b><b class=\"m\"></b><b class=\"r\"></b></div>').repeat(nseg)}
   if(SLASHER)st.style.width=Math.min(100,pl.staMax/1.8)+'%';else st.style.width='';
@@ -2105,17 +2259,18 @@ function goFull(){const d=document.documentElement,inApp=navigator.standalone||m
   if(inApp||document.fullscreenElement||document.webkitFullscreenElement)return;const fs=d.requestFullscreen||d.webkitRequestFullscreen;if(!fs)return;
   try{const p=fs.call(d);if(p&&p.catch)p.catch(()=>{})}catch(e){}}
 function start(ch){if(!A)return;$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=!SLASHER;$('bSign').hidden=true;mouseL=mouseR=tAtk=tBlock=false;if(coarse)goFull();useWorld(ch);initAudio();if(AC&&AC.state==='suspended')AC.resume();newGame();lastHud='';for(const id of ['title','end','lvl','dialog'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16)}
-function endGame(won){S.phase='end';$('touch').hidden=true;$('boss').hidden=true;$('prompt').hidden=true;const surv=S.t,m=Math.floor(surv/60),s=Math.floor(surv%60);
-  $('endKicker').textContent=won?`Rozdział ${['I','II','III','IV'][CH-1]} ukończony`:(CH===1?'Noc cię pochłonęła':CH===2?'Dolne Miasto cię pochłonęło':CH===3?'Złotogród cię pochłonął':'Czarnobór cię pochłonął');
-  $('endTitle').innerHTML=won?(CH===1?'Ś<em>wit</em>':CH===2?'Wro<em>ta</em>':CH===3?'Kopu<em>ły</em>':'Brza<em>sk</em>'):'Pole<em>głeś</em>';
-  $('endText').textContent=won?(CH===1?'Słońce wstaje nad zgliszczami Brzeźnicy. Pod spaloną kaplicą widzisz schody prowadzące w dół, do Dolnego Miasta.':CH===2?'Wrota na powierzchnię rozwierają się z jękiem. Za tobą, w głębi pod lawą, coś ogromnego otwiera oczy.':CH===4?'Mgła opada w dolinach. Na Łysej Górze dogasają ogniska, a w kurhanach znów jest cicho. Na razie.':'Bestia leży martwa u stóp katedry. Dzwony biją dalej, choć nikt ich nie porusza. Złoto kopuł nie grzeje.')
-    :(CH===1?'Twoje ciało zostaje w błocie między spalonymi chatami. Do rana coś się nim pożywi.':CH===2?'Twoje kości zostaną tu na zawsze, między kośćmi krasnoludów, którzy kopali za głęboko.':CH===4?'Las zamyka się nad twoim ciałem. Wilki znajdą cię przed świtem.':'Twoja krew wsiąka między złote płyty. Do rana szaleńcy wyliżą je do czysta.');
-  $('nextBtn').hidden=!(won&&CH<4);$('nextBtn').innerHTML=CH===1?'<small>Rozdział II</small>Zejdź do Dolnego Miasta':CH===2?'<small>Rozdział III</small>Wyjdź na powierzchnię':'<small>Rozdział IV</small>Wyrusz w Czarnobór';
+function endGame(won){const inDg=!!S.dg,C=inDg?1:CH;S.phase='end';$('touch').hidden=true;$('boss').hidden=true;$('prompt').hidden=true;const surv=S.t,m=Math.floor(surv/60),s=Math.floor(surv%60);
+  $('endKicker').textContent=won?`Rozdział ${['I','II','III','IV'][C-1]} ukończony`:(C===1?'Noc cię pochłonęła':C===2?'Dolne Miasto cię pochłonęło':C===3?'Złotogród cię pochłonął':'Czarnobór cię pochłonął');
+  $('endTitle').innerHTML=won?(C===1?'Ś<em>wit</em>':C===2?'Wro<em>ta</em>':C===3?'Kopu<em>ły</em>':'Brza<em>sk</em>'):'Pole<em>głeś</em>';
+  $('endText').textContent=won?(C===1?'Słońce wstaje nad zgliszczami Brzeźnicy. Pod spaloną kaplicą widzisz schody prowadzące w dół, do Dolnego Miasta.':C===2?'Wrota na powierzchnię rozwierają się z jękiem. Za tobą, w głębi pod lawą, coś ogromnego otwiera oczy.':C===4?'Mgła opada w dolinach. Na Łysej Górze dogasają ogniska, a w kurhanach znów jest cicho. Na razie.':'Bestia leży martwa u stóp katedry. Dzwony biją dalej, choć nikt ich nie porusza. Złoto kopuł nie grzeje.')
+    :(C===1?'Twoje ciało zostaje w błocie między spalonymi chatami. Do rana coś się nim pożywi.':C===2?'Twoje kości zostaną tu na zawsze, między kośćmi krasnoludów, którzy kopali za głęboko.':C===4?'Las zamyka się nad twoim ciałem. Wilki znajdą cię przed świtem.':'Twoja krew wsiąka między złote płyty. Do rana szaleńcy wyliżą je do czysta.');
+  $('nextBtn').hidden=!(won&&C<4);$('nextBtn').innerHTML=C===1?'<small>Rozdział II</small>Zejdź do Dolnego Miasta':C===2?'<small>Rozdział III</small>Wyjdź na powierzchnię':'<small>Rozdział IV</small>Wyrusz w Czarnobór';
+  if(inDg){$('endKicker').textContent='Krypta cię pochłonęła';$('endText').textContent='Twoje kości zostaną w krypcie pod cmentarzem Brzeźnicy, między sarkofagami, których nikt już nie otworzy.'}
   $('endStats').textContent=`Przetrwałeś ${m}:${String(s).padStart(2,'0')} · Poziom ${S.lvl} · Zabici: ${S.kills} · Monety: ${S.coins}`;$('end').hidden=false;setTimeout(()=>($('nextBtn').hidden?$('againBtn'):$('nextBtn')).focus(),50)}
 function togglePause(on){if(!S||S.phase!=='play'||S.choosing||S.shop||S.dialog)return;S.paused=on===undefined?!S.paused:on;$('pause').hidden=!S.paused;$('touch').hidden=S.paused||!coarse;
   for(const k in keys)keys[k]=false;mouseL=mouseR=tAtk=tBlock=false;if(AC){if(S.paused&&AC.state==='running')AC.suspend();else if(!S.paused&&AC.state==='suspended')AC.resume()}if(S.paused)setTimeout(()=>$('resumeBtn').focus(),30)}
 function toMenu(){if(S)S.paused=false;$('pause').hidden=true;if(AC&&AC.state==='suspended')AC.resume();clearScene();S=null;for(const id of ['end','hud','boss','prompt','dialog','lvl','shop'])$(id).hidden=true;$('touch').hidden=true;useWorld(1);dg.clearRect(0,0,WW,WH);decalDirty=true;$('title').hidden=false;setTimeout(()=>$('start1').focus(),50)}
-$('start1').addEventListener('click',()=>start(1));$('start2').addEventListener('click',()=>start(2));$('againBtn').addEventListener('click',()=>start(CH));$('nextBtn').addEventListener('click',()=>start(Math.min(4,CH+1)));$('start3').addEventListener('click',()=>start(3));$('start4').addEventListener('click',()=>start(4));$('menuBtn').addEventListener('click',toMenu);$('resumeBtn').addEventListener('click',()=>togglePause(false));$('pauseMenuBtn').addEventListener('click',toMenu);$('shopClose').addEventListener('click',closeShop);
+$('start1').addEventListener('click',()=>start(1));$('start2').addEventListener('click',()=>start(2));$('againBtn').addEventListener('click',()=>start(CH===5?1:CH));$('nextBtn').addEventListener('click',()=>start(Math.min(4,CH+1)));$('start3').addEventListener('click',()=>start(3));$('start4').addEventListener('click',()=>start(4));$('menuBtn').addEventListener('click',toMenu);$('resumeBtn').addEventListener('click',()=>togglePause(false));$('pauseMenuBtn').addEventListener('click',toMenu);$('shopClose').addEventListener('click',closeShop);
 $('dialog').addEventListener('click',()=>{if(S&&S.dialog)advanceDialog()});
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
   if(S&&S.paused){if(k==='escape'||k==='p')togglePause(false);return}
@@ -2159,7 +2314,7 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;clock+=dt;up
 // load sprite sheets, then start the loop
 const names=Object.keys(SPRITE_DATA),imgs={};
 Promise.all(names.map(n=>new Promise((res,rej)=>{const im=new Image();im.onload=()=>{imgs[n]=im;res()};im.onerror=rej;im.src=SPRITE_DATA[n]}))).then(()=>{
-  A=buildAnims(imgs);decals(imgs);
+  A=buildAnims(imgs);IMGS=imgs;decals(imgs);
   // a dead NPC no longer glows
   for(const k of ['elder','wit','izolda','ottokar'])if(A[k]&&A[k][3])A[k][3].n.emissive.setHex(0x000000);
   const TINT={madman:0xe0a890,hound:0xb89078,rotknight:0xa8b880,monk:0xffa060,izolda:0xc4b4ec,ottokar:0xf0d090,aurel:0xa8c8f0};
