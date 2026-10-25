@@ -125,14 +125,22 @@ button:focus-visible{outline:2px solid var(--bone);outline-offset:3px}
 .card .cl.new{color:var(--gold)}
 .card .cd{font-size:.9em;line-height:1.25;color:var(--bone-dim)}
 #err{position:absolute;inset:0;display:grid;place-items:center;padding:2em;text-align:center;background:#070608;color:var(--bone)}
+#title .credit{position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));margin:0;pointer-events:none;font-size:.72em;letter-spacing:.14em;text-transform:uppercase;color:rgba(216,207,184,.45);text-align:center}
 #touch{position:fixed;inset:0;z-index:5}
-#stick{position:absolute;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;border:2px solid rgba(216,207,184,.25);background:rgba(0,0,0,.25);pointer-events:none}
-#knob{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:rgba(216,207,184,.35)}
-#btns{position:absolute;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:12px}
-#btns button{font-family:var(--pixel);font-size:14px;color:var(--bone);border:2px solid rgba(216,207,184,.3);border-radius:50%;width:72px;height:72px;background:rgba(40,8,10,.55)}
+#stick{position:absolute;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;border:2px solid rgba(216,207,184,.35);background:radial-gradient(circle,rgba(255,255,255,.04),rgba(255,255,255,.1));box-shadow:inset 0 0 14px rgba(0,0,0,.35);pointer-events:none}
+#knob{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.5),rgba(216,207,184,.28));box-shadow:0 0 10px rgba(0,0,0,.4)}
+#btns{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));width:250px;height:250px;pointer-events:none}
+#btns button{position:absolute;pointer-events:auto;display:flex;align-items:center;justify-content:center;font-family:var(--pixel);font-size:12px;letter-spacing:.04em;color:rgba(236,228,206,.92);text-shadow:0 1px 3px #000;-webkit-tap-highlight-color:transparent;border-radius:50%;padding:0;
+  border:2px solid var(--bc,rgba(216,207,184,.4));background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.16),rgba(255,255,255,.03) 55%,rgba(0,0,0,.28));box-shadow:0 0 14px var(--bg,rgba(0,0,0,.35)),inset 0 0 12px rgba(0,0,0,.35);opacity:.62;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:transform .06s,opacity .06s,background .06s}
+#btns button:active{transform:scale(.92);opacity:.95;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.28),rgba(255,255,255,.08) 70%)}
+#btns #bRoll{left:81px;top:146px;width:88px;height:88px;--bc:rgba(120,200,150,.55);--bg:rgba(60,160,100,.25);font-size:14px}
+#btns.sl #bRoll{left:167px;top:92px;width:66px;height:66px;font-size:12px}
+#btns #bBlock{left:17px;top:92px;width:66px;height:66px;--bc:rgba(120,160,230,.55);--bg:rgba(70,110,200,.25)}
+#btns #bSign{left:196px;top:30px;width:46px;height:46px;font-size:10px;--bc:rgba(230,200,110,.55);--bg:rgba(200,160,60,.25)}
+#btns #bHeavy{left:88px;top:14px;width:74px;height:74px;font-size:11px;line-height:1.15;--bc:rgba(240,150,70,.6);--bg:rgba(220,110,30,.3)}
+#btns #bAtk{left:67px;top:132px;width:112px;height:112px;font-size:16px;line-height:1.15;--bc:rgba(235,90,90,.65);--bg:rgba(200,40,40,.35)}
+#btns[hidden],#btns button[hidden]{display:none}
 #bPause{position:absolute;left:50%;top:calc(6px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--pixel);font-size:13px;color:var(--bone);background:rgba(20,16,24,.6);border:1px solid rgba(216,207,184,.3);border-radius:6px;width:44px;height:30px}
-#btns #bAtk{width:84px;height:84px;background:rgba(80,10,12,.6)}
-#btns #bTalk{width:auto;height:36px;border-radius:18px;padding:0 14px;font-size:12px}
 @media (prefers-reduced-motion:reduce){#msg{transition:none}}
 </style>
 
@@ -170,16 +178,16 @@ button:focus-visible{outline:2px solid var(--bone);outline-offset:3px}
         <div class="cards" id="cards"></div>
       </div>
       <div class="overlay" id="title">
-        <div class="kicker">Roguelike w ciemności · Demo HD-2D</div>
         <h1>Piętno <em>Nocy</em></h1>
         <p class="lede">Jesteś Naznaczeńcem. Nosisz znak Paktu, który po zmroku przyzywa najstraszniejsze koszmary i budzi zmarłych. Walcz z siłami ciemności i zdobywaj doświadczenie, aby przebić się przez hordy potworów i wreszcie zaznać spokoju…</p>
         <div class="keys" id="keysDesk"><span>Ruch</span><b>WASD / strzałki</b><span>Unik (zużywa staminę)</span><b>Spacja / Shift</b><span>Rozmowa</span><b>E</b><span>Ulepszenia</span><b>1 · 2 · 3</b></div>
         <div class="keys" id="keysSlash" hidden><span>Ruch</span><b>WASD / strzałki</b><span>Cios (przytrzymaj: ciężki)</span><b>J / lewy przycisk myszy</b><span>Blok, w ostatniej chwili: parowanie</span><b>L / prawy przycisk myszy</b><span>Unik (stamina)</span><b>Spacja / Shift</b><span>Znak (gdy go zdobędziesz)</span><b>Q</b><span>Rozmowa · Pauza</span><b>E · Esc / P</b></div>
-        <div class="keys" id="keysTouch" hidden><span>Ruch</span><b>przeciągnij lewą stroną ekranu</b><span>Unik i rozmowa</span><b>przyciski po prawej</b></div>
+        <div class="keys" id="keysTouch" hidden><span>Ruch</span><b>przeciągnij lewą stroną ekranu</b><span>Unik, ataki, blok</span><b>przyciski po prawej</b><span>Rozmowa i handel</span><b>dotknij postaci</b></div>
         <div class="btnrow"><button class="go" id="start1" disabled>Wczytywanie…</button><button class="go alt" id="start2" disabled>Wczytywanie…</button><button class="go alt" id="start3" disabled>Wczytywanie…</button><button class="go alt" id="start4" disabled>Wczytywanie…</button></div>
         <label class="tgl" for="modeTgl"><input type="checkbox" id="modeTgl"><span class="sl" aria-hidden="true"></span><span>Tryb walki: slasher (prototyp, w stylu soulslike)</span></label>
         <label class="tgl" for="touchTgl"><input type="checkbox" id="touchTgl"><span class="sl" aria-hidden="true"></span><span>Sterowanie dotykowe (telefon, tablet)</span></label>
         <div class="warn" id="warn">Brutalna przemoc i groza. Wymaga WebGL.</div>
+        <div class="credit">Created by Y3ebau</div>
       </div>
       <div class="overlay" id="pause" hidden>
         <div class="kicker">Piętno Nocy</div>
@@ -197,7 +205,7 @@ button:focus-visible{outline:2px solid var(--bone);outline-offset:3px}
     </div>
   </div>
 </div>
-<div id="touch" hidden><div id="stick" hidden><div id="knob"></div></div><button id="bPause" type="button" aria-label="Pauza">II</button><div id="btns"><button id="bTalk" type="button" hidden>Rozmawiaj</button><button id="bSign" type="button" hidden>Znak</button><button id="bBlock" type="button" hidden>Blok</button><button id="bAtk" type="button" hidden>Cios</button><button id="bRoll" type="button">Unik</button></div></div>
+<div id="touch" hidden><div id="stick" hidden><div id="knob"></div></div><button id="bPause" type="button" aria-label="Pauza">II</button><div id="btns"><button id="bSign" type="button" hidden>Znak</button><button id="bHeavy" type="button" hidden>Silny<br>Atak</button><button id="bBlock" type="button" hidden>Blok</button><button id="bAtk" type="button" hidden>Szybki<br>Atak</button><button id="bRoll" type="button">Unik</button></div></div>
 
 <script src="three.min.js"></script>
 <script>
@@ -1400,8 +1408,8 @@ function addVfx(anim,dur,x,y,h,size,mode,rot=0,flip=1){const m=spriteMesh(geoC);
 // Chosen on the title screen. The hero swings by hand (light combo, heavy blow), blocks and parries, every action costs stamina;
 // enemies wind up before they strike instead of hurting on touch, there are fewer of them, bosses have less health.
 let SLASHER=false;try{SLASHER=localStorage.getItem('pn_mode')==='s'}catch(e){}
-let signPress=false,mouseL=false,mouseR=false,mouseX=0,mouseY=0,mouseT=-99,tAtk=false,tBlock=false;
-const SL={regen:40,delay:.55,roll:22,parry:.22,blockMul:1.3,guardBreak:.9,riposte:2.5,cap:26,ramp:.12,bossHp:.4,enemyWind:.45,enemyRec:.6,enemyHit:1.6,
+let heavyPress=false,signPress=false,mouseL=false,mouseR=false,mouseX=0,mouseY=0,mouseT=-99,tAtk=false,tBlock=false;
+const SL={regen:40,delay:.45,roll:22,parry:.22,blockMul:1.3,guardBreak:.9,riposte:2.5,cap:26,ramp:.12,bossHp:.4,enemyWind:.45,enemyRec:.6,enemyHit:1.4,coinDrop:.5,coinStrong:3,coinSurvive:12,projDiv:800,dmgDiv:640,shotGap:1.2,aim:.45,
   light:{cost:16,dmg:[16,18,27],wind:.12,act:.1,rec:.27,range:30,arc:1.05,stun:[.3,.3,.5],lunge:[30,30,55]},
   heavy:{cost:32,dmg:48,charge:.42,wind:.16,act:.12,rec:.45,range:37,arc:1.5,stun:.9,lunge:70}};
 // level-up cards in slasher mode raise the hero's attributes instead of giving skills
@@ -1438,11 +1446,12 @@ function slashUpdate(dt){
   if(pl.block){pl.blockT+=dt;const a=aimDir();if(a){pl.fx=a[0];pl.fy=a[1]}
     if(Math.random()<dt*20){const sp=(Math.random()-.5)*1.6,c=Math.cos(Math.atan2(pl.fy,pl.fx)+sp),s2=Math.sin(Math.atan2(pl.fy,pl.fx)+sp);S.parts.push({k:'i',x:pl.x+c*12,y:pl.y+s2*8,z:rnd(4,16),vx:0,vy:0,vz:rnd(2,6),c:pl.blockT<SL.parry?'#ffe9a0':'#9fb4d0',life:.25})}}
   // attack button: a tap is a light blow (chains into a combo of three), holding it charges a heavy blow
-  const held=keys.j||mouseL||tAtk;
+  if(heavyPress){heavyPress=false;if(!pl.atk&&!pl.block&&!(pl.broken>0))startAttack('h')}
+  const held=keys.j||mouseL||tAtk,cc=!(coarse&&!keys.j&&!mouseL);
   if(held&&!pl.atkHeld){pl.atkHeld=true;pl.charge=0}
-  if(pl.atkHeld){if(held){pl.charge+=dt;pl.charging=pl.charge>.18&&!pl.atk&&!pl.block;
+  if(pl.atkHeld){if(held){pl.charge+=dt;pl.charging=cc&&pl.charge>.18&&!pl.atk&&!pl.block;
       if(pl.charging&&Math.random()<dt*30)S.parts.push({k:'e',x:pl.x+rnd(-8,8),y:pl.y+rnd(-3,3),z:rnd(6,20),vx:0,vy:0,vz:rnd(6,14),c:pl.charge>=SL.heavy.charge?'#ffb347':'#d8cfb8',life:.3});
-      if(pl.charge>=SL.heavy.charge&&!pl.atk&&!pl.block){pl.atkHeld=false;pl.charging=false;startAttack('h')}}
+      if(cc&&pl.charge>=SL.heavy.charge&&!pl.atk&&!pl.block){pl.atkHeld=false;pl.charging=false;startAttack('h')}}
     else{pl.atkHeld=false;pl.charging=false;if(pl.atk){if(pl.atk.kind==='l'&&pl.atk.stage!=='wind')pl.queue=true}else if(!pl.block)startAttack('l',pl.comboT>0?pl.nextCombo:0)}}
   if(pl.comboT>0)pl.comboT-=dt;
   const a=pl.atk;if(!a)return;const P=a.kind==='h'?SL.heavy:SL.light;a.t-=dt;
@@ -1493,7 +1502,7 @@ function castAard(){const L=S.sk.aard||0;if(!L||pl.dead||pl.roll>0||pl.broken>0|
   pl.swingT=pl.swingDur=.25;if(Math.abs(a[0])>Math.abs(a[1])){pl.swingDir=2;pl.swingS=a[0]>0?1:-1}else{pl.swingDir=a[1]>0?0:1;pl.swingS=1}}
 // enemy side: wind up, strike, then stand open for a moment
 function slashEnemy(e,dx,dy,d,dt){
-  if(e.sw>0){e.sw-=dt;if(e.sw<=0){e.recov=SL.enemyRec*(e.type==='bat'?.5:1);e.atkA=.3;if(d<e.r+17&&!pl.dead){S.attacker=e;hurtPlayer(e.dmg*ENEMY_DMG*SL.enemyHit*(1+S.t/480),dx/d,dy/d);S.attacker=null}}return true}
+  if(e.sw>0){e.sw-=dt;if(e.sw<=0){e.recov=SL.enemyRec*(e.type==='bat'?.5:1);e.atkA=.3;if(d<e.r+17&&!pl.dead){S.attacker=e;hurtPlayer(e.dmg*ENEMY_DMG*SL.enemyHit*(1+S.t/SL.dmgDiv),dx/d,dy/d);S.attacker=null}}return true}
   if(e.recov>0){e.recov-=dt;return true}
   e.acd=(e.acd===undefined?rnd(.2,.9):e.acd)-dt;
   if(d<e.r+12&&e.acd<=0){e.sw=SL.enemyWind*(e.type==='bat'?.6:1);e.acd=rnd(1.3,2.2);S.parts.push({k:'e',x:e.x,y:e.y,z:26,vx:0,vy:0,vz:4,c:'#ff2a2a',life:.35});return true}
@@ -1539,7 +1548,9 @@ function killEnemy(e,nx,ny){e.dead=true;S.kills++;if(S.trial)S.trial.k++;
   e.mesh.castShadow=false;if(e.type==='bat'){e.mesh.geometry=geo32;e.mesh.position.y=0}const ck=jz?1.5:e.type==='beast'?(A.beast.sheet?1.2:1.35):e.type==='collector'?1.25:e.type==='leszy'?1.25:e.type==='strzyga'?1.2:e.type==='bies'?1.15:1;S.corpses.push({mesh:e.mesh,anim:A[e.type].death,t:0,s:e.s*ck,k:ck,big,gone:ghost?1:0});
   if(S.corpses.length>160){const c=S.corpses.shift();scene.remove(c.mesh)}
   if(big&&e.type!=='leszy'){if(S.stage==='final')S.won=true;say(e.type==='strzyga'?'Strzyga Matka rozpada się w stado kruków i popiół. Drugie serce przestaje bić.':e.type==='beast'?'Morhad pada na złote płyty. Krew jego ofiar jeszcze długo z niego wypływa.':'Zrost pada. Jego twarze wciąż szepczą.');if(e.type==='beast'){for(let i=0;i<6;i++)pool(e.x+rnd(-30,30),e.y+rnd(-14,14),36,12)}shake(.6,.7);for(let i=0;i<14;i++)dropPick('w',e.x+rnd(-24,24),e.y+rnd(-14,14),3);for(let i=0;i<20;i++)dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16))}
-  else if(!big){if(e.xp>0)dropPick('w',e.x,e.y,e.xp);if(Math.random()<ET[e.type].coin)dropPick('c',e.x+rnd(-4,4),e.y+rnd(-3,3))}
+  else if(!big){if(e.xp>0)dropPick('w',e.x,e.y,e.xp);
+    if(SLASHER){const strong=ET[e.type].hp>=45;if(strong||Math.random()<SL.coinDrop){dropPick('c',e.x+rnd(-4,4),e.y+rnd(-3,3));if(strong)S.picks[S.picks.length-1].v=SL.coinStrong}}
+    else if(Math.random()<ET[e.type].coin)dropPick('c',e.x+rnd(-4,4),e.y+rnd(-3,3))}
   if(e.dgBoss)dungeonCleared(e);
 }
 function powderBlast(p){const x=p.x*16,y=p.y*16;if(p.obj)p.obj.mesh.visible=false;shake(.45,.4);play('quake',0);play('fire',0);S.flash=Math.max(S.flash,.35);
@@ -1548,7 +1559,7 @@ function powderBlast(p){const x=p.x*16,y=p.y*16;if(p.obj)p.obj.mesh.visible=fals
   for(const e of [...S.enemies])if(!e.dead&&Math.hypot(e.x-x,e.y-y)<48)damageEnemy(e,BIG.has(e.type)?60:90,(e.x-x)/48,(e.y-y)/48,2);
   const d=Math.hypot(pl.x-x,pl.y-y);if(d<34)hurtPlayer(12,(pl.x-x)/(d||1),(pl.y-y)/(d||1));
   for(const q of PROPS)if(q!==p&&q.k==='black_powder'&&!S.boom.has(q)&&Math.hypot(q.x-p.x,q.y-p.y)<4){S.boom.add(q);S.delayed.push({t:.25,fn:()=>powderBlast(q)})}}
-function hurtPlayer(dmg,nx,ny){if(pl.inv>0||pl.dead)return;
+function hurtPlayer(dmg,nx,ny){if(pl.inv>0||pl.dead)return;if(!SLASHER&&S.cheatMul)dmg*=S.cheatMul;
   if(SLASHER&&pl.block&&-(pl.fx*nx+pl.fy*ny)>.3){const sp=c=>{for(let i=0;i<14;i++)S.parts.push({k:'e',x:pl.x+pl.fx*10,y:pl.y+pl.fy*7,z:rnd(8,16),vx:rnd(-50,50),vy:rnd(-25,25),vz:rnd(5,30),c,life:rnd(.2,.4)})};
     if(pl.blockT<SL.parry&&S.attacker&&!S.attacker.dead){const e=S.attacker;e.stun=1.4;e.sw=0;e.recov=0;pl.riposte=1.6;pl.parryT=.45;S.hitstop=.12;play('katana',0);shake(.15,.15);sp('#ffe9a0');if(!S.ev.has('par')){S.ev.add('par');say('Parowanie! Następny cios zada potrójne obrażenia.')}return}
     pl.sta-=dmg*SL.blockMul;pl.staDelay=SL.delay;pl.gHitT=.25;sp('#c8d2dc');play('hit',0);
@@ -1582,7 +1593,10 @@ function updEnemy(e,dt){
   if(e.type==='beast'&&beastAI(e,dx,dy,d,dt))return;
   if(CZAI[e.type]&&CZAI[e.type](e,dx,dy,d,dt,hw))return;
   if(e.type==='monk'){e.cast=(e.cast===undefined?rnd(1,2.5):e.cast)-dt;
-    if(d<140&&e.cast<=0){e.cast=rnd(2.6,3.4);e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*74,vy:dy/d*74,life:2.6,ph:Math.random(),mesh:A.fireball?(()=>{const m=new THREE.Mesh(geoC,A.fireball[0].n);scene.add(m);return m})():null});play('fire',.2)}
+    const mFire=()=>{e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*74,vy:dy/d*74,life:2.6,ph:Math.random(),mesh:A.fireball?(()=>{const m=new THREE.Mesh(geoC,A.fireball[0].n);scene.add(m);return m})():null});play('fire',.2)};
+    if(SLASHER){if(e.aim>0){e.aim-=dt;if(e.aim<=0&&d>1)mFire()}
+      else if(d<140&&e.cast<=0&&(S.shotCd||0)<=0){e.aim=SL.aim;e.cast=rnd(4,5);S.shotCd=SL.shotGap+SL.aim;telegraph(e)}}
+    else if(d<140&&e.cast<=0){e.cast=rnd(2.6,3.4);mFire()}
     if(d<64){moveBox(e,-dx/d*e.spd*dt,-dy/d*e.spd*dt,hw,3);e.walk+=dt;return}if(d<110){e.walk+=dt*.3;return}}
   if(SLASHER&&!BIG.has(e.type)&&e.type!=='collector'&&e.type!=='jerzak'&&e.type!=='wisp'&&e.dmg>0&&e.leap<=0){if(slashEnemy(e,dx,dy,d,dt)){e.walk+=dt*.2;return}}
   else if(d<e.r+6&&e.dmg>0&&e.type!=='collector'&&!(SLASHER&&!BIG.has(e.type))){hurtPlayer(e.dmg*ENEMY_DMG*(1+S.t/480),dx/d,dy/d);if(e.atkA<=0)e.atkA=.35}
@@ -1592,7 +1606,7 @@ function updEnemy(e,dt){
     e.slamT-=dt;if(e.slamT<=0&&d<80){e.slamT=3.4;e.atkT=.8;play('bossGrowl',0);return}
   }
   let sp=e.spd*(e.chill>0?e.chillMul||.6:1);if(e.type==='madman'){sp*=.4+1.1*Math.abs(Math.sin(e.walk*4.3+e.ph));e.side=Math.sin(clock*2+e.ph)>0?1:-1}if(e.type==='dwarf'||e.type==='possessed')sp*=.65+.6*Math.abs(Math.sin(e.walk*3));
-  if(e.type==='ghoul'||e.type==='hound'||e.type==='wolf'||e.type==='strzygon'){e.lcd-=dt;if(e.leap>0){e.leap-=dt;moveBox(e,e.lx*dt,e.ly*dt,4,3);e.walk+=dt*2;if(SLASHER&&!e.lhit&&d<e.r+9){e.lhit=1;S.attacker=e;hurtPlayer(e.dmg*ENEMY_DMG*SL.enemyHit*(1+S.t/480),dx/d,dy/d);S.attacker=null}return}if(d<52&&d>22&&e.lcd<=0){e.leap=.3;e.lhit=0;e.atkA=.3;e.lx=dx/d*105;e.ly=dy/d*105;e.lcd=3.2+Math.random()*1.5;return}}
+  if(e.type==='ghoul'||e.type==='hound'||e.type==='wolf'||e.type==='strzygon'){e.lcd-=dt;if(e.leap>0){e.leap-=dt;moveBox(e,e.lx*dt,e.ly*dt,4,3);e.walk+=dt*2;if(SLASHER&&!e.lhit&&d<e.r+9){e.lhit=1;S.attacker=e;hurtPlayer(e.dmg*ENEMY_DMG*SL.enemyHit*(1+S.t/SL.dmgDiv),dx/d,dy/d);S.attacker=null}return}if(d<52&&d>22&&e.lcd<=0){e.leap=.3;e.lhit=0;e.atkA=.3;e.lx=dx/d*105;e.ly=dy/d*105;e.lcd=3.2+Math.random()*1.5;return}}
   let mx=dx/d,my=dy/d;
   if(fly){const w=Math.sin(clock*5+e.ph)*1.2,c=Math.cos(w),s=Math.sin(w);[mx,my]=[mx*c-my*s,mx*s+my*c]}
   for(const o of S.enemies){if(o===e||o.dead)continue;const ox=e.x-o.x,oy=e.y-o.y;if(Math.abs(ox)>24||Math.abs(oy)>24)continue;const od=Math.hypot(ox,oy),min=e.r+o.r+1;if(od<min&&od>0){mx+=ox/od*.9;my+=oy/od*.9}}
@@ -1627,12 +1641,18 @@ function beastAI(e,dx,dy,d,dt){
 const CZAI={
   // crossbowman keeps his distance and shoots bolts
   xbow(e,dx,dy,d,dt,hw){e.cast=(e.cast===undefined?rnd(1,2.5):e.cast)-dt;
-    if(d<170&&e.cast<=0){e.cast=rnd(2.6,3.3);e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*150,vy:dy/d*150,life:1.6,bolt:1});play('swing',.2)}
+    if(SLASHER){if(e.aim>0){e.aim-=dt;if(e.aim<=0&&d>1){e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*110,vy:dy/d*110,life:2.2,bolt:1});play('swing',.2)}}
+      else if(d<170&&e.cast<=0&&(S.shotCd||0)<=0){e.aim=SL.aim;e.cast=rnd(4,5);S.shotCd=SL.shotGap+SL.aim;telegraph(e)}}
+    else if(d<170&&e.cast<=0){e.cast=rnd(2.6,3.3);e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*150,vy:dy/d*150,life:1.6,bolt:1});play('swing',.2)}
     if(d<70){moveBox(e,-dx/d*e.spd*dt,-dy/d*e.spd*dt,hw,3);e.walk+=dt;return true}if(d<125){e.walk+=dt*.3;return true}return false},
   // drowned corpse grabs and holds the hero for a moment
-  drowner(e,dx,dy,d,dt){e.gcd=(e.gcd||0)-dt;if(d<e.r+8&&e.gcd<=0&&pl.inv<=0){e.gcd=2.6;e.atkA=.45;S.snare=.8;hurtPlayer(9*ENEMY_DMG*(1+S.t/480),dx/d,dy/d);for(let i=0;i<10;i++)S.parts.push({k:'d',x:pl.x+rnd(-6,6),y:pl.y,z:rnd(0,6),vx:rnd(-20,20),vy:0,vz:rnd(10,24),c:'#2e3e3a',life:.5})}return false},
+  drowner(e,dx,dy,d,dt){e.gcd=(e.gcd||0)-dt;
+    if(SLASHER){if(e.tw>0){e.tw-=dt;if(e.tw>0)return false;if(d>=e.r+14||pl.inv>0)return false}else if(d<e.r+8&&e.gcd<=0&&pl.inv<=0){e.tw=.3;e.gcd=2.6;telegraph(e);return false}else return false}
+    if(SLASHER||d<e.r+8&&e.gcd<=0&&pl.inv<=0){e.gcd=2.6;e.atkA=.45;S.snare=.8;hurtPlayer(9*ENEMY_DMG*(1+S.t/(SLASHER?SL.dmgDiv:480)),dx/d,dy/d);for(let i=0;i<10;i++)S.parts.push({k:'d',x:pl.x+rnd(-6,6),y:pl.y,z:rnd(0,6),vx:rnd(-20,20),vy:0,vz:rnd(10,24),c:'#2e3e3a',life:.5})}return false},
   // nightmare drains a stamina charge on touch
-  zmora(e,dx,dy,d,dt){e.dcd=(e.dcd||0)-dt;if(d<e.r+8&&e.dcd<=0){e.dcd=2.2;e.atkA=.4;if(SLASHER){pl.sta=Math.max(0,pl.sta-35);pl.staDelay=1;S.stamFlash=.5}else if(pl.dodge>=1){pl.dodge=Math.max(0,pl.dodge-1);S.stamFlash=.5;if(!S.ev.has('zm')){S.ev.add('zm');say('Zmora wysysa z ciebie siły. Tracisz ładunek uniku.')}}}return false},
+  zmora(e,dx,dy,d,dt){e.dcd=(e.dcd||0)-dt;
+    if(SLASHER){if(e.tw>0){e.tw-=dt;if(e.tw>0)return false;if(d>=e.r+14)return false}else if(d<e.r+8&&e.dcd<=0){e.tw=.3;e.dcd=2.2;telegraph(e);return false}else return false}
+    if(SLASHER||d<e.r+8&&e.dcd<=0){e.dcd=2.2;e.atkA=.4;if(SLASHER){pl.sta=Math.max(0,pl.sta-35);pl.staDelay=1;S.stamFlash=.5}else if(pl.dodge>=1){pl.dodge=Math.max(0,pl.dodge-1);S.stamFlash=.5;if(!S.ev.has('zm')){S.ev.add('zm');say('Zmora wysysa z ciebie siły. Tracisz ładunek uniku.')}}}return false},
   // false will-o'-wisp waits; when you come close it flares and bursts
   wisp(e,dx,dy,d,dt){e.walk+=dt;if(e.boom>0){e.boom-=dt;if(e.boom<=0){if(d<38)hurtPlayer(14*(1+S.t/600),dx/d,dy/d);shake(.2,.25);play('fire',0);for(let i=0;i<26;i++){const a=i/26*Math.PI*2;S.parts.push({k:'e',x:e.x,y:e.y,z:8,vx:Math.cos(a)*90,vy:Math.sin(a)*50,vz:rnd(5,25),c:Math.random()<.5?'#7fffd0':'#d8ffe8',life:rnd(.3,.6)})}e.xp=0;e.hp=0;killEnemy(e,0,1)}return true}
     if(d<30){e.boom=.55;play('pick',0)}return true},
@@ -1681,11 +1701,14 @@ function strzygaAI(e,dx,dy,d,dt){
   if(e.lT<=0&&d<240){e.mode='up';e.mt=.8;e.tx=pl.x;e.ty=pl.y;e.lT=rnd(4.5,6);play('bossGrowl',0);return true}
   if(e.wT<=0){e.mode='raise';e.mt=1;e.wT=rnd(11,14);play('growl',0);return true}
   return false}
-function updEproj(dt){for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
+function telegraph(e){S.parts.push({k:'e',x:e.x,y:e.y,z:26,vx:0,vy:0,vz:4,c:'#ff2a2a',life:.45});e.atkA=.2}
+function updEproj(dt){S.shotCd=Math.max(0,(S.shotCd||0)-dt);for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
   if(f.bolt)S.parts.push({k:'d',x:f.x,y:f.y,z:9,vx:0,vy:0,vz:0,c:'#d8cfb8',life:.12});
   else for(let k=0;k<(f.mesh?1:3);k++)S.parts.push({k:'e',x:f.x+rnd(-2,2),y:f.y+rnd(-1,1),z:9+rnd(-2,2),vx:rnd(-4,4),vy:0,vz:rnd(2,8),c:k?'#ff6a1a':'#ffb347',life:rnd(.15,.35)});
   let gone=f.life<=0||solidAt(f.x,f.y);
-  if(!gone&&!pl.dead&&Math.hypot(pl.x-f.x,pl.y-f.y)<8){const sp=Math.hypot(f.vx,f.vy)||1;hurtPlayer((f.bolt?9:10)*ENEMY_DMG*(1+S.t/480),f.vx/sp,f.vy/sp);gone=true}
+  if(!gone&&!pl.dead&&Math.hypot(pl.x-f.x,pl.y-f.y)<8){const sp=Math.hypot(f.vx,f.vy)||1,nx=f.vx/sp,ny=f.vy/sp;
+    if(SLASHER&&pl.block&&pl.inv<=0&&-(pl.fx*nx+pl.fy*ny)>.3&&pl.blockT<SL.parry+.1){pl.riposte=1.6;pl.parryT=.45;S.hitstop=.12;play('katana',0);shake(.15,.15);for(let k=0;k<14;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:10,vx:rnd(-50,50),vy:rnd(-25,25),vz:rnd(5,30),c:'#ffe9a0',life:rnd(.2,.4)});if(!S.ev.has('par2')){S.ev.add('par2');say('Odbiłeś pocisk! Następny cios zada potrójne obrażenia.')}}
+    else hurtPlayer((f.bolt?(SLASHER?6:9):(SLASHER?7:10))*ENEMY_DMG*(1+S.t/(SLASHER?SL.projDiv:480)),nx,ny);gone=true}
   if(gone&&f.bolt){for(let k=0;k<5;k++)S.parts.push({k:'d',x:f.x,y:f.y,z:8,vx:rnd(-30,30),vy:rnd(-15,15),vz:rnd(5,20),c:'#9d9584',life:.3});S.eproj.splice(i,1);continue}
   if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);S.eproj.splice(i,1)}}}
 function spawnTick(dt){
@@ -1706,7 +1729,7 @@ function spawnTick(dt){
 }
 function events(){
   const ev=(k,c,fn)=>{if(c&&!S.ev.has(k)){S.ev.add(k);fn()}};
-  if(SLASHER)ev('slh',S.t>2.5,()=>say(coarse?'Slasher: Cios (przytrzymaj: ciężki), Blok (w ostatniej chwili: parowanie), Unik. Wszystko kosztuje staminę.':'Slasher: J lub lewy przycisk to cios (przytrzymaj: ciężki), L lub prawy to blok. Zablokuj w ostatniej chwili, by sparować.'));
+  if(SLASHER)ev('slh',S.t>2.5,()=>say(coarse?'Slasher: Szybki Atak, Silny Atak, Blok (w ostatniej chwili: parowanie), Unik. Wszystko kosztuje staminę.':'Slasher: J lub lewy przycisk to cios (przytrzymaj: ciężki), L lub prawy to blok. Zablokuj w ostatniej chwili, by sparować.'));
   if(CH<4&&W.altar){
     ev('alt',S.t>34,()=>say(W.altar.hint));
     ev('wave',S.t>DZIADY_AT&&!S.won,()=>{play('rise',0);play('bossGrowl',0);shake(.2,1);say(W.wave.msg);for(const [t,n] of W.wave.list)for(let i=0;i<n;i++){const p=ringSpot(150,240)||ringSpot(100,300);if(p)spawnEnemy(t,p[0],p[1],{rise:1})}});
@@ -1911,11 +1934,26 @@ function updParts(dt){
     else{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vx*=.97;if(p.k==='d')p.vz-=60*dt;if(p.z<0&&p.k!=='e')p.z=0;if(p.life<=0)ps.splice(i,1)}}
   if(ps.length>MAXP-50)ps.splice(0,ps.length-(MAXP-50));
 }
+const CHEESE_T=30,CHEESE_R=36,CHEESE_NEAR=44;
+function cheeseTick(dt){
+  if(SLASHER||S.dg||pl.dead||S.stage==='break'||S.opening){S.ch=null;return}
+  const live=S.enemies.filter(e=>!e.dead&&e.type!=='wisp'&&e.rise<=0);
+  if(!S.ch||Math.hypot(pl.x-S.ch.x,pl.y-S.ch.y)>CHEESE_R||!live.length||pl.hurtT>0||live.some(e=>Math.hypot(e.x-pl.x,e.y-pl.y)<CHEESE_NEAR)||pl.roll>0){S.ch={x:pl.x,y:pl.y,t:0};return}
+  S.ch.t+=dt;if(S.ch.t<CHEESE_T)return;
+  const n=S.cheat=(S.cheat||0)+1;
+  if(n===1)S.coins-=Math.floor(S.coins*.1);
+  else if(n===2){S.coins-=Math.floor(S.coins*.5);S.cheatMul=2}
+  else{pl.hp=1;S.cheatMul=4}
+  let tx=MW>>1,ty=MH>>1,best=null;
+  for(let r=0;r<40&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;let ok=true;for(let a=-1;a<=1&&ok;a++)for(let b=-1;b<=1;b++)if(SOLID.has(tileAt(tx+dx+a,ty+dy+b))){ok=false;break}if(ok){best=[tx+dx,ty+dy];break}}
+  if(best){pl.x=best[0]*TS+8;pl.y=best[1]*TS+8}
+  pl.inv=Math.max(pl.inv,1.5);S.flash=Math.max(S.flash||0,.6);shake(.4,.5);play('quake',0);S.ch=null;
+  say(n===1?'Bogowie mroku gardzą oszustami. Tracisz 10% monet.':n===2?'Bogowie mroku gardzą oszustami! Tracisz połowę monet, a wrogowie biją dwa razy mocniej.':'Bogowie mroku gardzą oszustami!!! Zostaje ci 1 życie, a wrogowie biją czterokrotnie mocniej.')}
 function update(dt){
   if(!S||S.phase!=='play'||S.choosing||S.shop||S.paused)return;
   if(S.hitstop>0){S.hitstop-=dt;if(rollPress)S.bufRoll=1;return}
   if(S.dialog){if(talkPress||rollPress)advanceDialog();return}
-  if(S.stage!=='break'&&!S.dg)S.t+=dt;
+  if(S.stage!=='break'&&!S.dg){S.t+=dt;if(SLASHER&&!pl.dead){S.surv=(S.surv||0)+dt;if(S.surv>=SL.coinSurvive){S.surv-=SL.coinSurvive;S.coins++;play('coin',.02)}}}
   stageTick(dt);if(S.dg)dungeonTick(dt);
   const nm=nearMerchant();if(talkPress&&nm){openShop();return}
   const nn=nearNpc();if(talkPress&&nn){openDialog(nn);return}
@@ -1926,6 +1964,7 @@ function update(dt){
   updZones(dt);
   for(const e of S.enemies)if(!e.dead)updEnemy(e,dt);
   S.enemies=S.enemies.filter(e=>!e.dead);
+  cheeseTick(dt);
   updEproj(dt);updPicks(dt);
   for(const c of S.corpses)c.t+=dt;
   if(S.corpses.some(c=>c.gone&&c.t>c.gone))S.corpses=S.corpses.filter(c=>{if(c.gone&&c.t>c.gone){scene.remove(c.mesh);return false}return true});
@@ -2185,8 +2224,7 @@ function syncScene(dt){
   // talk prompt
   const pr=$('prompt'),free=S&&S.phase==='play'&&!S.dialog&&!S.choosing&&!S.shop,nmc=free?nearMerchant():null,near=free?(nmc||nearNpc()):null;
   const nex=free&&!near?nearExit():null,lbl=nex?{enter:'Zejdź do krypty',leave:'Wyjdź na górę',sealed:'Krypta zamknięta'}[nex.kind]:nmc?'Handluj':'Rozmawiaj',tgt=near||nex;
-  if(tgt){V.set(tgt.x/16,2.1,tgt.y/16).project(cam);pr.hidden=false;pr.textContent=coarse||(nex&&nex.kind==='sealed')?lbl:'E · '+lbl;pr.style.left=((V.x+1)/2*100)+'%';pr.style.top=((1-V.y)/2*100)+'%'}else pr.hidden=true;
-  $('bTalk').hidden=!tgt;$('bTalk').textContent=lbl;
+  if(tgt){V.set(tgt.x/16,2.1,tgt.y/16).project(cam);pr.hidden=false;pr.textContent=(nex&&nex.kind==='sealed')?lbl:coarse?'Dotknij: '+lbl:'E · '+lbl;pr.style.left=((V.x+1)/2*100)+'%';pr.style.top=((1-V.y)/2*100)+'%'}else pr.hidden=true;
   // Marga at her stall during the break
   const mc=S&&S.merchant;margaMesh.visible=!!mc;if(mc){setFrame(margaMesh,at(A.marga,clock,3));margaMesh.position.set(mc.x/16,0,mc.y/16);const k=mc.state==='in'?1-mc.t:mc.state==='out'?mc.t:1;margaMesh.scale.set(1,SQ*Math.max(.05,k),1);blob(mc.x/16,mc.y/16,1);W.merchantLight.x=mc.x/16;W.merchantLight.z=mc.y/16+.3}
   if(S&&S.collector&&!S.collector.dead&&Math.random()<dt*10){const c=S.collector,a=Math.random()*Math.PI*2;S.parts.push({k:'e',x:c.x+Math.cos(a)*14,y:c.y+Math.sin(a)*8,z:rnd(6,26),vx:-Math.sin(a)*10,vy:Math.cos(a)*6,vz:rnd(2,8),c:Math.random()<.6?'#e0b84a':'#fff0b0',life:rnd(.6,1.2)})}
@@ -2258,7 +2296,7 @@ applyTouchMode();
 function goFull(){const d=document.documentElement,inApp=navigator.standalone||matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
   if(inApp||document.fullscreenElement||document.webkitFullscreenElement)return;const fs=d.requestFullscreen||d.webkitRequestFullscreen;if(!fs)return;
   try{const p=fs.call(d);if(p&&p.catch)p.catch(()=>{})}catch(e){}}
-function start(ch){if(!A)return;$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=!SLASHER;$('bSign').hidden=true;mouseL=mouseR=tAtk=tBlock=false;if(coarse)goFull();useWorld(ch);initAudio();if(AC&&AC.state==='suspended')AC.resume();newGame();lastHud='';for(const id of ['title','end','lvl','dialog'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16)}
+function start(ch){if(!A)return;$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=$('bHeavy').hidden=!SLASHER;$('btns').classList.toggle('sl',SLASHER);$('bSign').hidden=true;mouseL=mouseR=tAtk=tBlock=false;if(coarse)goFull();useWorld(ch);initAudio();if(AC&&AC.state==='suspended')AC.resume();newGame();lastHud='';for(const id of ['title','end','lvl','dialog'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16)}
 function endGame(won){const inDg=!!S.dg,C=inDg?1:CH;S.phase='end';$('touch').hidden=true;$('boss').hidden=true;$('prompt').hidden=true;const surv=S.t,m=Math.floor(surv/60),s=Math.floor(surv%60);
   $('endKicker').textContent=won?`Rozdział ${['I','II','III','IV'][C-1]} ukończony`:(C===1?'Noc cię pochłonęła':C===2?'Dolne Miasto cię pochłonęło':C===3?'Złotogród cię pochłonął':'Czarnobór cię pochłonął');
   $('endTitle').innerHTML=won?(C===1?'Ś<em>wit</em>':C===2?'Wro<em>ta</em>':C===3?'Kopu<em>ły</em>':'Brza<em>sk</em>'):'Pole<em>głeś</em>';
@@ -2282,11 +2320,14 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowd
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseL=mouseR=false;if(S&&S.phase==='play'&&!S.paused)togglePause(true)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S&&S.phase==='play'&&!S.paused)togglePause(true)});
 const touch=$('touch'),stick=$('stick'),knob=$('knob');let sid=null,sx0=0,sy0=0;
-touch.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;if(S&&S.dialog){advanceDialog();return}if(e.clientX>innerWidth*.6)return;sid=e.pointerId;sx0=e.clientX;sy0=e.clientY;stick.hidden=false;stick.style.left=sx0+'px';stick.style.top=sy0+'px';knob.style.transform='';try{touch.setPointerCapture(e.pointerId)}catch(err){}});
+let tapD=null;
+touch.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;tapD={x:e.clientX,y:e.clientY,t:performance.now()};if(S&&S.dialog){advanceDialog();return}if(e.clientX>innerWidth*.6)return;sid=e.pointerId;sx0=e.clientX;sy0=e.clientY;stick.hidden=false;stick.style.left=sx0+'px';stick.style.top=sy0+'px';knob.style.transform='';try{touch.setPointerCapture(e.pointerId)}catch(err){}});
 touch.addEventListener('pointermove',e=>{if(e.pointerId!==sid)return;let dx=e.clientX-sx0,dy=e.clientY-sy0;const d=Math.hypot(dx,dy),m=40;if(d>m){dx=dx/d*m;dy=dy/d*m}tj.x=dx/m;tj.y=dy/m;if(Math.hypot(tj.x,tj.y)<.2){tj.x=0;tj.y=0}knob.style.transform=`translate(${dx}px,${dy}px)`});
+touch.addEventListener('pointerup',e=>{const d=tapD;tapD=null;if(!d||!S||S.phase!=='play'||S.dialog||S.choosing||S.shop||pl.dead)return;if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>16||performance.now()-d.t>450)return;
+  const tg=nearMerchant()||nearNpc()||nearExit();if(!tg)return;V.set(tg.x/16,1,tg.y/16).project(cam);const r=$('screen').getBoundingClientRect(),sx=r.left+(V.x+1)/2*r.width,sy=r.top+(1-V.y)/2*r.height;if(Math.hypot(e.clientX-sx,e.clientY-sy)<80)talkPress=true});
 const endS=e=>{if(e.pointerId!==sid)return;sid=null;tj.x=0;tj.y=0;stick.hidden=true};touch.addEventListener('pointerup',endS);touch.addEventListener('pointercancel',endS);
 const tb=(id,fn)=>$(id).addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(S&&S.dialog){advanceDialog();return}fn()});
-tb('bRoll',()=>rollPress=true);tb('bTalk',()=>talkPress=true);tb('bPause',()=>togglePause(true));tb('bSign',()=>signPress=true);
+tb('bRoll',()=>rollPress=true);tb('bHeavy',()=>heavyPress=true);tb('bPause',()=>togglePause(true));tb('bSign',()=>signPress=true);
 // slasher buttons are held: attack (hold for a heavy blow) and block
 for(const [id,set] of [['bAtk',v=>tAtk=v],['bBlock',v=>tBlock=v]]){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(S&&S.dialog){advanceDialog();return}set(true);try{b.setPointerCapture(e.pointerId)}catch(err){}});
   for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>set(false))}
