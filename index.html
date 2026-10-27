@@ -2223,10 +2223,10 @@ let SLASHER=true,STORYMODE=true;try{SLASHER=localStorage.getItem('pn_mode')!=='a
 const chWon=c=>!!((SETT.save['s'+c]&&SETT.save['s'+c].win)||(SETT.save['a'+c]&&SETT.save['a'+c].win));
 const chLocked=c=>STORYMODE&&c>1&&!chWon(c-1);
 let heavyPress=false,signPress=false,mouseL=false,mouseR=false,mouseX=0,mouseY=0,mouseT=-99,tAtk=false,tBlock=false;
-const SL={regen:36,delay:.4,roll:20,parry:.2,blockMul:1.2,guardBreak:.8,riposte:2.5,cap:28,ramp:.12,bossHp:.45,enemyWind:.5,enemyRec:.65,enemyHit:1.3,coinDrop:.45,coinStrong:2,coinSurvive:15,projDiv:900,dmgDiv:800,shotGap:1.3,aim:.55,
-  wave:{l:{dmg:.6,speed:230,life:.62,r:13,size:1.25},h:{dmg:.7,speed:250,life:.75,r:19,size:1.8},stun:.8},
-  light:{cost:14,dmg:[17,19,28],wind:.12,act:.1,rec:.27,range:30,arc:1.05,stun:[.3,.3,.5],lunge:[30,30,55]},
-  heavy:{cost:30,dmg:48,charge:.42,wind:.52,act:.12,rec:.3,range:37,arc:1.5,stun:.9,lunge:70}};
+const SL={regen:30,delay:.55,roll:20,parry:.2,blockMul:1.2,guardBreak:.8,riposte:2.5,cap:28,ramp:.12,bossHp:.45,enemyWind:.5,enemyRec:.5,enemyHit:1.6,staggerGap:.9,coinDrop:.45,coinStrong:2,coinSurvive:15,projDiv:900,dmgDiv:800,shotGap:1.3,aim:.55,
+  wave:{l:{dmg:.6,speed:230,life:.62,r:13,size:1.25},h:{dmg:.7,speed:250,life:.75,r:19,size:1.8},stun:.4},
+  light:{cost:16,dmg:[17,19,28],wind:.12,act:.1,rec:.27,range:30,arc:1.05,stun:[.18,.18,.3],lunge:[30,30,55]},
+  heavy:{cost:32,dmg:48,charge:.42,wind:.52,act:.12,rec:.3,range:37,arc:1.5,stun:.7,lunge:70}};
 // level-up cards in slasher mode raise the hero's attributes instead of giving skills
 const SLASH_UP=['_vit','_end','_str','_dex'];
 // direction from the hero to the mouse pointer (screen y is foreshortened by the camera tilt)
@@ -2266,13 +2266,16 @@ function startAttack(kind,combo=0,charged=false){const P=kind==='h'?SL.heavy:SL.
   pl.sta=Math.max(0,pl.sta-cost);S.actions.attack++;const wind=P.wind-(kind==='h'&&charged?P.charge:0);pl.staDelay=SL.delay;pl.atk={kind,combo,stage:'wind',t:wind,dx:a[0],dy:a[1],hit:false};pl.queue=false;
   const dur=wind+P.act+P.rec;pl.swingT=pl.swingDur=dur;if(Math.abs(a[0])>Math.abs(a[1])){pl.swingDir=2;pl.swingS=a[0]>0?1:-1}else{pl.swingDir=a[1]>0?0:1;pl.swingS=1}
   play(kind==='h'?'golem':'swing',.03)}
+// Repeated ordinary hits cannot keep cancelling the same enemy's attack forever.
+// Parry and Aard keep their guaranteed interrupt; a heavy blow can stop a light-hit recovery.
+function slashStagger(e,seconds,heavy=false){if(e.staggerCd>0&&!heavy)return false;e.stun=Math.max(e.stun||0,seconds);e.sw=0;e.staggerCd=seconds+SL.staggerGap;return true}
 function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc,crit=pl.riposte>0;ftCrit=crit;ftHeavy=a.kind==='h';ftMelee=true;
   let dmg=(a.kind==='h'?P.dmg:P.dmg[a.combo])*(1+.07*(S.lvl-1))*(S.str||1)*might()*encDmg(encLevel()[1]);if(crit)dmg*=riMul();if(a.kind==='l'&&a.combo===2)dmg*=1+.18*sk('rytm');if(pl.dance>0){dmg*=1+.25*sk('taniec');pl.dance=0}
   const ang=Math.atan2(a.dy,a.dx);let hits=0;
   for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>R+e.r||!sight(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>arc)continue;
     const big=BIG.has(e.type)||e.type==='collector',weak=e.stun>0||e.recov>0||crit;if(damageEnemy(e,dmg*(weak?1+.12*sk('dobicie'):1),dx/(d||1),dy/(d||1),a.kind==='h'?1.6:a.combo===2?1.2:.7)){hits++;applyEnchants(e,a,crit);if(weak&&brOn('off'))pl.sta=Math.min(pl.staMax,pl.sta+Math.min(6,Math.max(0,12-(a.refund||0))));if(weak&&brOn('off'))a.refund=(a.refund||0)+6}else continue;
     // stagger: normal enemies are interrupted, big ones only when their poise breaks
-    if(!e.dead){const st=a.kind==='h'?P.stun:P.stun[a.combo];if(big){breakPoise(e,a.kind==='h'?45:a.combo===2?20:12)}else{e.stun=Math.max(e.stun||0,st);e.sw=0}}}
+    if(!e.dead){const st=a.kind==='h'?P.stun:P.stun[a.combo];if(big){breakPoise(e,a.kind==='h'?45:a.combo===2?20:12)}else{slashStagger(e,st,a.kind==='h'||crit)}}}
   ftCrit=false;ftHeavy=false;ftMelee=false;
   const c=Math.cos(ang),s=Math.sin(ang);addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,R/16*(a.kind==='h'?.9:.7),'bill',-screenAng(c,s));
   {const en=ENCH.filter(k=>S.sk[k]);if(en.length)for(let i=0;i<16;i++){const t=ang+rnd(-arc,arc),rr=rnd(10,R),k=en[i%en.length];S.parts.push({k:'e',x:pl.x+Math.cos(t)*rr,y:pl.y+Math.sin(t)*rr,z:rnd(8,18),vx:0,vy:0,vz:rnd(4,12),c:Math.random()<.6?ENC[k].col:ENC[k].col2,life:rnd(.2,.45)})}}
@@ -2286,7 +2289,7 @@ function launchWave(a,ang,base,quiet){const W0=a.kind==='h'?SL.wave.h:SL.wave.l,
 function waveTick(dt){if(!S.waves||!S.waves.length)return;for(let i=S.waves.length-1;i>=0;i--){const w=S.waves[i];w.t-=dt;w.x+=w.vx*dt;w.y+=w.vy*dt;if(w.f){w.f.x=w.x;w.f.y=w.y}
     if(w.t<=0||boxSolid(w.x,w.y,2,2)){S.waves.splice(i,1);continue}
     for(const e of [...S.enemies]){if(e.dead||e.rise>0||w.hit.has(e))continue;if(Math.hypot(e.x-w.x,e.y-w.y)>w.r+e.r)continue;w.hit.add(e);const d=Math.hypot(w.vx,w.vy)||1;
-      if(damageEnemy(e,w.dmg,w.vx/d,w.vy/d,.9)){if(brOn('wav'))applyEnchants(e,{kind:'l'},true);if(!e.dead){const big=BIG.has(e.type)||e.type==='collector';if(big){breakPoise(e,25)}else{e.stun=Math.max(e.stun||0,SL.wave.stun);e.sw=0}}}
+      if(damageEnemy(e,w.dmg,w.vx/d,w.vy/d,.9)){if(brOn('wav'))applyEnchants(e,{kind:'l'},true);if(!e.dead){const big=BIG.has(e.type)||e.type==='collector';if(big){breakPoise(e,25)}else{slashStagger(e,SL.wave.stun)}}}
       for(let k=0;k<6;k++)S.parts.push({k:'e',x:e.x,y:e.y,z:rnd(6,18),vx:rnd(-40,40),vy:rnd(-20,20),vz:rnd(4,12),c:'#ffe9a0',life:rnd(.2,.4)})}}}
 
 function slashUpdate(dt){
@@ -2363,7 +2366,7 @@ function slashEnemy(e,dx,dy,d,dt){
     if(d<e.r+17&&!pl.dead){S.attacker=e;S.redHit=red;hurtPlayer(enemyDamage(e.dmg*SL.enemyHit,SL.dmgDiv),dx/d,dy/d);S.attacker=null;S.redHit=false}
     if(red&&avoid&&!pl.dead){e.stun=Math.max(e.stun||0,.9);e.recov=0;e.sw=0;ftx('Odsłonięty',e.x,e.y,ftEntH(e)+.5,'i')}}return true}
   if(e.recov>0){e.recov-=dt;return true}
-  e.acd=(e.acd===undefined?rnd(.2,.9):e.acd)-dt;
+  if(e.acd===undefined)e.acd=rnd(.2,.9);
   if(d<e.r+12&&e.acd<=0){// white strike can be blocked and parried; red strike (heavy enemies, elite, after 2 min) only dodged
     const heavy=!BIG.has(e.type)&&ET[e.type]&&ET[e.type].hp>=90;e.hc=(e.hc||0)+1;e.red=S.t>120&&(e.mini?e.hc%2===0:heavy&&e.hc%3===0);
     e.sw=SL.enemyWind*(e.type==='bat'?.6:1)+(e.red?.22:0);e.acd=rnd(1.3,2.2);S.parts.push({k:'e',x:e.x,y:e.y,z:26,vx:0,vy:0,vz:4,c:e.red?warningColor():'#f2ecd8',life:.35});
@@ -2453,6 +2456,7 @@ function updEnemy(e,dt){
   keepEnemyDistance(e,ox,oy);
 }
 function stepEnemyAI(e,dt){
+  if(SLASHER){if(e.staggerCd>0)e.staggerCd=Math.max(0,e.staggerCd-dt);if(e.acd!==undefined)e.acd-=dt}
   e.flash-=dt;e.atkA-=dt;if(e.rise>0){e.rise-=dt;return}
   if(e.bleed>0){e.bleed-=dt;e.bleedT-=dt;if(e.bleedT<=0){e.bleedT=.4;damageEnemy(e,e.bleedDmg||5,0,0,0);if(e.dead)return}}
   if(e.pois>0){e.pois-=dt;e.poisT=(e.poisT||0)-dt;if(e.poisT<=0){e.poisT=.5;if(Math.random()<.7)S.parts.push({k:'m',x:e.x+rnd(-4,4),y:e.y,z:rnd(6,16),vx:0,vy:0,vz:rnd(4,10),c:'#8ac04a',life:.6});damageEnemy(e,e.poisD*.5,0,0,0);if(e.dead)return}}
@@ -3469,7 +3473,7 @@ const PERKS=[
  {id:'lekka',lv:4,n:'Lekka stopa',pl:'ruch szybszy o 12%',mi:'wrogowie zadają +15% obrażeń',bx:.10,fx:k=>{k.spd*=1.12;k.hurt*=1.15}},
  {id:'chciwosc',lv:5,n:'Chciwość',pl:'+25% monet z ziemi',mi:'otrzymujesz +15% obrażeń',bx:.12,fx:k=>{k.coin*=1.25;k.hurt*=1.15}},
  {id:'uczen',lv:6,n:'Uczeń nocy',pl:'+30% doświadczenia w nocy',mi:'wrogowie mają +20% życia',bx:.12,fx:k=>{k.xp*=1.3;k.ehp*=1.2}},
- {id:'bezlitosc',lv:7,n:'Bez litości',pl:'+20% obrażeń',mi:'awans leczy 20% zamiast 35%',bx:.15,fx:k=>{k.dmg*=1.2;k.lvHeal=.2}},
+ {id:'bezlitosc',lv:7,n:'Bez litości',pl:'+20% obrażeń',mi:'awans leczy 20% zamiast 35%',bx:.15,fx:k=>{k.dmg*=1.2;k.lvHeal=SLASHER?.05:.2}},
  {id:'pomruk',lv:8,n:'Pomruk',pl:'+25% do doświadczenia postaci',mi:'wrogów +40%, ich obrażenia +20%',bx:.25,fx:k=>{k.en*=1.4;k.hurt*=1.2}}];
 const CHALS=[
  {id:'rzeznik',n:'Rzeźnik',d:'Zabij 120 wrogów w jedną noc.',bx:.5,coins:40,v:()=>S.kills>=120,pr:()=>S.kills+'/120'},
@@ -3478,7 +3482,8 @@ const CHALS=[
  {id:'nietykalny',n:'Nietykalny',d:'Przetrwaj noc, dostając najwyżej 5 trafień.',bx:.6,coins:0,end:true,v:()=>(S.hitsT||0)<=5,pr:()=>'trafienia '+(S.hitsT||0)+'/5'},
  {id:'riposta',n:'Mistrz riposty',d:'Udane parowanie 15 razy.',bx:.5,coins:40,sl:true,v:()=>(S.parries||0)>=15,pr:()=>(S.parries||0)+'/15'},
  {id:'poziom',n:'Szybki awans',d:'Osiągnij 10. poziom w nocy.',bx:.4,coins:30,sl:false,v:()=>S.lvl>=10,pr:()=>'poz. '+S.lvl+'/10'}];
-const PK0=()=>({en:1,ehp:1,spd:1,dmg:1,hurt:1,coin:1,xp:1,lvHeal:.35});
+const PK0=()=>({en:1,ehp:1,spd:1,dmg:1,hurt:1,coin:1,xp:1,lvHeal:SLASHER?.1:.35});
+const perkMinus=p=>SLASHER&&p.id==='bezlitosc'?'awans leczy 5% zamiast 10%':p.mi;
 const PREP={perks:[],ch:null},PNEED=l=>150+75*(l-1),PMAX=10,PMODE=()=>SLASHER?'s':'a';
 function cleanProg(raw){const o={};for(const m of ['s','a']){const q=isRecord(raw)&&isRecord(raw[m])?raw[m]:{};const lv=Math.floor(clampNumber(q.lv,1,PMAX,1));o[m]={lv,xp:lv>=PMAX?0:Math.floor(clampNumber(q.xp,0,PNEED(lv)-1,0)),sel:[...new Set(Array.isArray(q.sel)?q.sel:[])].filter(id=>PERKS.some(p=>p.id===id&&p.lv<=lv)).slice(0,3),ch:CHALS.some(c=>c.id===q.ch)?q.ch:null}}return o}
 function loadProg(){try{return cleanProg(JSON.parse(localStorage.getItem('pn_prog')||'{}'))}catch(e){return cleanProg({})}}
@@ -3491,7 +3496,7 @@ function prepBonus(){let b=0;for(const id of PREP.perks)b+=PERKS.find(p=>p.id===
 function renderPrep(){const q=prog();$('prepK').textContent=(SLASHER?'Slasher':'Horda')+' · '+CHN[PREP.ch-1];$('prepLv').textContent=charLine();$('prepBar').style.width=(q.lv>=PMAX?100:100*q.xp/PNEED(q.lv))+'%';
   $('prepPH').textContent=`Perki (${PREP.perks.length}/3) · bonus do doświadczenia: +${Math.round(prepBonus().perk*100)}%`;
   const P=$('prepPerks');P.innerHTML='';for(const d of PERKS){const lock=d.lv>q.lv,on=PREP.perks.includes(d.id),b=document.createElement('button');b.type='button';b.className='opt'+(on?' on':'');b.disabled=lock;
-    b.innerHTML=lock?`<b>${d.n}</b><small>Odblokowanie: poziom postaci ${d.lv}</small>`:`<b>${on?'✓ ':''}${d.n}</b><span class="pl">${d.pl}</span><span class="mi">${d.mi}</span>`;
+    b.innerHTML=lock?`<b>${d.n}</b><small>Odblokowanie: poziom postaci ${d.lv}</small>`:`<b>${on?'✓ ':''}${d.n}</b><span class="pl">${d.pl}</span><span class="mi">${perkMinus(d)}</span>`;
     b.addEventListener('click',()=>{const i=PREP.perks.indexOf(d.id);if(i>=0)PREP.perks.splice(i,1);else if(PREP.perks.length<3)PREP.perks.push(d.id);else{play('empty',0);return}q.sel=PREP.perks.slice();saveProg();renderPrep();const nb=[...$('prepPerks').children][PERKS.indexOf(d)];nb&&nb.focus()});P.appendChild(b)}
   const C=$('prepCh');C.innerHTML='';for(const c of CHALS){if(c.sl!==undefined&&c.sl!==SLASHER)continue;const on=PREP.chal===c.id,b=document.createElement('button');b.type='button';b.className='opt'+(on?' on':'');
     b.innerHTML=`<b>${on?'✓ ':''}${c.n}</b><span>${c.d}</span><span class="pl">nagroda: +${Math.round(c.bx*100)}% doświadczenia postaci${c.coins?' i '+c.coins+' monet od razu':''}</span>`;
@@ -3590,7 +3595,7 @@ function manPage(id){
     return h}
   if(id==='prog'){return mBox('Poziom postaci','To <b>stały postęp</b>, niezależny od pojedynczej nocy. Po każdej nocy (nawet przegranej) dostajesz doświadczenie postaci. Potrzebne jest <b>'+PNEED(1)+' dla pierwszego poziomu</b>, a każdy kolejny o '+(PNEED(2)-PNEED(1))+' więcej. Maksymalny poziom to <b>'+PMAX+'</b>. Pasek widzisz na ekranie głównym i w „Nim zapadnie noc”.')
    +mBox('Perki: wybierasz do 3',mP('Przed każdą nocą ekran <b>„Nim zapadnie noc”</b> pozwala wybrać do <b>trzech perków</b>. Każdy daje <b>zaletę i wadę</b>, a dodatkowo zwiększa doświadczenie postaci zdobyte w tej nocy. Nowe perki odblokowujesz poziomami postaci. Co wybrałeś, zapamiętuje się na kolejne noce.')
-    +'<div class="mtab">'+PERKS.map(p=>`<div class="mrow"><div class="mn"><b>${p.n}</b><small>poziom ${p.lv}</small></div><span><span class="pl">${p.pl}</span> · <span class="mi">${p.mi}</span> · bonus doświadczenia +${Math.round(p.bx*100)}%</span></div>`).join('')+'</div>')
+    +'<div class="mtab">'+PERKS.map(p=>`<div class="mrow"><div class="mn"><b>${p.n}</b><small>poziom ${p.lv}</small></div><span><span class="pl">${p.pl}</span> · <span class="mi">${perkMinus(p)}</span> · bonus doświadczenia +${Math.round(p.bx*100)}%</span></div>`).join('')+'</div>')
    +mBox('Wyzwania nocy: wybierasz jedno',mP('Do tego jedno <b>wyzwanie</b>: cel, który spełniasz w trakcie nocy. Za wykonanie dostajesz <b>premię do doświadczenia postaci</b>, a czasem monety na start kolejnej próby. Wyzwanie „Mistrz riposty” jest tylko w trybie Slasher, a „Szybki awans” tylko w Trybie Hordy.')
     +'<div class="mtab">'+CHALS.map(c=>`<div class="mrow"><div class="mn"><b>${c.n}</b><small>${c.sl===true?'Slasher':c.sl===false?'Tryb Hordy':'oba tryby'}</small></div><span>${c.d} <span class="pl">Nagroda: +${Math.round(c.bx*100)}% doświadczenia postaci${c.coins?' i '+c.coins+' monet':''}</span></span></div>`).join('')+'</div>')
    +mBox('Rekordy',mP('Dla każdego rozdziału i trybu gra zapamiętuje najlepszy wynik: czas ukończenia albo najdłuższy czas przeżycia, poziom i liczbę zabitych. Zobaczysz to w <b>Opcje → Dane zapisu</b>.'));}
@@ -3737,7 +3742,7 @@ return [{t:1,text:tc?(SETT.touchLeft?'Prawy':'Lewy')+' kciuk: przeciągnij, aby 
 {t:4,text:SLASHER?(tc?'Szybki atak: dotknij przycisku '+(SETT.touchLeft?'po lewej':'po prawej'):pd?'X: lekki cios · B: ciężki cios':'J: lekki cios · K: ciężki cios · L: blok'):'Miecz atakuje sam. Podejdź na chwilę, a potem odsuń się.',done:()=>!SLASHER||S.actions.attack>0},
 {t:12,text:SLASHER?'Blok tuż przed trafieniem paruje. Jasne podświetlenie zapowiada cios; czerwone wymaga uniku.':'Zbieraj ogniki: dają poziomy i nowe umiejętności.',done:()=>SLASHER?S.actions.block>0:S.actions.collect>0},
 {t:20,text:tc?'Unik: przycisk przy ataku. Potrzebujesz pełnego kosztu staminy.':pd?'A: unik. Przesuwa cię i daje krótką nietykalność.':'Spacja lub Shift: unik. Unikaj czerwonego podświetlenia i łańcucha.',done:()=>S.actions.dodge>0},
-{t:30,text:'Zbieraj ogniki i monety. Awans leczy 35% życia. O północy kupisz ulepszenia u Margi.',done:()=>S.actions.collect>0},
+{t:30,text:'Zbieraj ogniki i monety. Awans leczy '+Math.round(S.pk.lvHeal*100)+'% życia. O północy kupisz ulepszenia u Margi.',done:()=>S.actions.collect>0},
 {t:45,text:'Cel: przetrwaj noc i pokonaj finałowego bossa. Sklep i bossowie wydłużają podejście.',done:()=>true}];}
 function tutTick(dt){const h=$('tut');if(tutorialDone()||S.dg||CH!==1||STORYINTRO_ACTIVE()){$('tutSkip').hidden=true;h.classList.remove('on');return}if(TUT.sid!==S){TUT.sid=S;TUT.i=0;TUT.shown=0;TUT.x0=[pl.x,pl.y]}const steps=tutList();if(TUT.i>=steps.length){finishTutorial();return}const q=steps[TUT.i];if(S.t<q.t)return;h.textContent=q.text;h.classList.add('on');$('tutSkip').hidden=false;TUT.shown+=dt;if(TUT.shown>=5&&q.done()){TUT.i++;TUT.shown=0;h.classList.remove('on')}}
 
