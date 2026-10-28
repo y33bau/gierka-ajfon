@@ -6,6 +6,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Grenze+Gotisch:wght@500;700&family=Grenze:wght@400;500;600&family=Pixelify+Sans:wght@400;600&family=Jacquard+24&display=swap">
 <style>
+#orient{height:100%}@supports (height:100dvh){#orient{height:100dvh}}
+#rot{display:none!important}
 /* Layout: one 16:9 WebGL screen centred in a black void; HUD, level-up cards, dialog and title cards layered over it */
 :root{
   --void:#070608;
@@ -24,9 +26,8 @@
 }
 html,body{height:100%}
 body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none}
-#app{height:100%;box-sizing:border-box;display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+#app{height:100%;box-sizing:border-box;display:grid;place-items:center;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 @supports (height:100dvh){html,body,#app{height:100dvh}}
-@media (max-height:500px){#app{padding-block:2px}}
 #stage{position:relative;width:100%;height:100%;display:grid;place-items:center;min-width:0}
 #screen{position:relative;overflow:hidden;background:#000;box-shadow:0 0 0 1px #000,0 0 80px rgba(163,22,26,.10)}
 #gl{display:block;width:100%;height:100%}
@@ -42,7 +43,7 @@ body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:h
 .stam{display:flex;gap:0;margin-top:-.25em}
 .buffs{display:flex;flex-direction:column;gap:.1em;margin-top:.35em;font-size:.95em;color:#f0d58a;text-shadow:0 1px 2px #000,0 0 6px #000;font-variant-numeric:tabular-nums lining-nums}
 .buffs .tr{color:#ff9a6a}
-.stam .seg{flex:1}
+.stam .seg{flex:1} #screen #msg{top:4.3em;left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:min(62%,36em);box-sizing:border-box;padding:.3em 1.4em;font-family:var(--text);font-weight:600;font-size:1.12em;line-height:1.25;color:#e6dcc0;text-align:center;text-wrap:balance;text-shadow:0 2px 0 #000,0 0 8px #000;background:linear-gradient(90deg,transparent,rgba(8,4,6,.7) 14%,rgba(8,4,6,.7) 86%,transparent);transition:opacity .35s;z-index:6;pointer-events:none} #screen #msg.boss{color:#f0b9a4} #screen.port #msg{top:13.9em;max-width:92%;font-size:1.05em} @media (prefers-reduced-motion:reduce){#screen #msg{transition:none}} #stage{min-height:0;min-width:0;overflow:hidden} #screen #pause>.btnrow{align-self:stretch;width:auto;max-width:none;background:#0a0509;box-shadow:0 -8px 14px #0a0509} #screen #pause{padding-bottom:0} #screen.port #shop .cards{grid-template-columns:repeat(2,minmax(0,1fr))} .hb.gd i{box-sizing:border-box;width:40px;height:5px;border:1px solid #080706;box-shadow:0 0 0 1px #292319;background:#15120c} .hb.gd u{background:#c9b27a} .mana{margin-top:-.15em} .mana .fb.st{--h:1.25em} .mana .fb.st>.trk>i{filter:hue-rotate(190deg) saturate(3.5) brightness(1.15)} #activeSkillHud .no-mana .ic{filter:grayscale(.6) brightness(.45) sepia(.4) hue-rotate(180deg)}
 .right{text-align:right;line-height:1.3;text-shadow:0 1px 0 #000,0 0 6px #000}
 .time{font-size:1.35em;font-weight:600;font-variant-numeric:tabular-nums lining-nums;letter-spacing:.02em}
 .small{color:var(--bone-dim);font-size:1em;font-variant-numeric:tabular-nums lining-nums}
@@ -789,6 +790,7 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 
 </style>
 
+<div id="orient">
 <div id="app">
   <div id="stage">
     <div id="screen">
@@ -797,7 +799,7 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
       <div id="hud" hidden><div id="chal" hidden></div>
         <div id="xpbar" class="fb xp"><span class="trk"><i id="xp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div>
         <div class="hud-row">
-          <div class="left"><span class="lvl-tag" id="lvlTag">Poziom 1</span><div class="fb hp" id="hpbar"><span class="trk"><b class="g" id="hpg"></b><i id="hp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div><div class="stam" id="stam" aria-label="Stamina uników"></div><div class="buffs" id="buffs"></div></div>
+          <div class="left"><span class="lvl-tag" id="lvlTag">Poziom 1</span><div class="fb hp" id="hpbar"><span class="trk"><b class="g" id="hpg"></b><i id="hp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div><div class="stam" id="stam" aria-label="Stamina uników"></div><div class="stam mana" id="mana" aria-label="Mana"></div><div class="buffs" id="buffs"></div></div>
           <div class="right"><div class="time" id="time">Do otwarcia wrót 3:00</div><div class="small" id="kills">Zabici: 0</div><div class="small coin" id="coins">0</div></div>
         </div>
         <canvas id="mini" width="128" height="112" aria-label="Minimapa"></canvas><div id="miniF"><b></b><b></b><b></b><b></b></div>
@@ -805,7 +807,7 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
       </div>
       <div id="boss" hidden><div class="name" id="bossName">Zrost</div><div class="fb boss"><span class="trk"><i id="bossHp"></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div></div>
       <div id="prompt" hidden>E · Rozmawiaj</div>
-      <div id="msg"></div><div id="notice" hidden role="dialog" aria-modal="true" aria-labelledby="noticeKicker" aria-describedby="noticeText"><div class="noticebox chainbox"><i class="chain-edge top" aria-hidden="true"></i><i class="chain-edge bottom" aria-hidden="true"></i><i class="chain-side left" aria-hidden="true"></i><i class="chain-side right" aria-hidden="true"></i><div id="noticeKicker" class="kicker">Wydarzenie</div><p id="noticeText"></p><button id="noticeNext" class="go alt" type="button">Dalej · Enter / Spacja</button></div></div>
+      <div id="msg" role="status" aria-live="polite"></div><div id="notice" hidden role="dialog" aria-modal="true" aria-labelledby="noticeKicker" aria-describedby="noticeText"><div class="noticebox chainbox"><i class="chain-edge top" aria-hidden="true"></i><i class="chain-edge bottom" aria-hidden="true"></i><i class="chain-side left" aria-hidden="true"></i><i class="chain-side right" aria-hidden="true"></i><div id="noticeKicker" class="kicker">Wydarzenie</div><p id="noticeText"></p><button id="noticeNext" class="go alt" type="button">Dalej · Enter / Spacja</button></div></div>
       <div id="tut" class="chainbox" aria-live="polite"><i class="chain-edge top" aria-hidden="true"></i><i class="chain-edge bottom" aria-hidden="true"></i><i class="chain-side left" aria-hidden="true"></i><i class="chain-side right" aria-hidden="true"></i><span id="tutText"></span></div>
       <div id="ft"></div>
       <div id="hbs"></div>
@@ -894,6 +896,7 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 
         </div>
         <div class="pane" id="pane-dat" hidden>
+<button class="go alt" id="copyErrors" type="button">Kopiuj raport błędów</button>
           <div class="stats" id="datInfo"></div>
           <div class="btnrow"><button class="go alt" id="expSave" type="button">Zapisz postęp do pliku</button><button class="go alt" id="impSave" type="button">Wczytaj postęp z pliku</button></div>
           <input type="file" id="impFile" accept=".json,application/json" hidden>
@@ -935,8 +938,8 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
     </div>
   </div>
 </div>
-<div id="rot" role="alert"><div class="rotc"><div class="rotph" aria-hidden="true"></div><p>Obróć telefon w poziom</p><small>Gra działa tylko na szerokim ekranie</small></div></div>
 <div id="touch" hidden><div id="stick" hidden><div id="knob"></div></div><button id="bPause" type="button" aria-label="Pauza">II</button><div id="btns"><button id="bHeavy" type="button" hidden>Silny<br>Atak</button><button id="bBlock" type="button" hidden>Blok</button><button id="bAtk" type="button" hidden>Szybki<br>Atak</button><button id="bRoll" type="button">Unik</button></div></div>
+</div>
 
 <script src="three.min.js"></script>
 <script>
@@ -2422,7 +2425,7 @@ const SK={
   fireblade:{name:'Ognisty Miecz',kind:'Zaklęcie ostrza',max:10,ic:'inferno'},
   iceblade:{name:'Lodowe Ostrze',kind:'Zaklęcie ostrza',max:10,ic:'frost'},
   bloodblade:{name:'Spływająca Krwią Katana',kind:'Zaklęcie ostrza',max:10,ic:'blood'},
-  aard:{name:'Odrzut Mocy',kind:'Znak',max:5,ic:'area',lv:['Aktywuj z wyposażonego slotu: fala mocy przed tobą odrzuca i ogłusza wrogów, zbija pociski. 20 staminy, odnowienie 8 s.','Dalej, mocniej, odnowienie 7 s.','Dalej, mocniej, odnowienie 6 s.','Dalej, mocniej, odnowienie 5 s.','Fala we wszystkie strony, odnowienie 4,5 s.']},
+  aard:{name:'Odrzut Mocy',kind:'Znak',max:5,ic:'area',lv:['Aktywuj z wyposażonego slotu: fala mocy przed tobą odrzuca i ogłusza wrogów, zbija pociski. 24 many, odnowienie 8 s.','Dalej, mocniej, odnowienie 7 s.','Dalej, mocniej, odnowienie 6 s.','Dalej, mocniej, odnowienie 5 s.','Fala we wszystkie strony, odnowienie 4,5 s.']},
   _vit:{name:'Witalność',kind:'Cecha',sub:'Cecha postaci',d:'+15 do maksymalnego życia.',ic:'heart'},
   _end:{name:'Wytrzymałość',kind:'Cecha',sub:'Cecha postaci',d:'+15 do maksymalnej staminy.',ic:'boot'},
   _str:{name:'Siła',kind:'Cecha',sub:'Cecha postaci',d:'+10% obrażeń zadawanych mieczem.',ic:'might'},
@@ -2472,13 +2475,13 @@ const STONE_N=6,DZIADY_AT=540;
 const XP_BASE=5,XP_GROW=1.05,xpNeed=l=>Math.ceil(XP_BASE*l*Math.pow(XP_GROW,l-1));
 let STORY=true;// fabuła jest zawsze włączona (przełącznik usunięty)
 let S=null,pl=null;const keys={};let rollPress=false,talkPress=false;const tj={x:0,y:0};
-function clearScene(){if(!S)return;clearSwordTransient();if(swordGlow)swordGlow.visible=false;const all=[...S.enemies.map(e=>e.mesh),...S.picks.flatMap(p=>[p.mesh,p.glow]),...S.vfx.map(f=>f.mesh),...S.corpses.map(c=>c.mesh),...S.golems.map(g=>g.mesh),...S.zones.map(z=>z.mesh),...(S.eproj||[]).map(f=>f.mesh),...(S.deathPurses||[]).map(p=>p.mesh)];for(const m of all)if(m)scene.remove(m);for(const c of S.corpses)if(c.own)c.mesh.material.dispose()}
+function clearScene(){if(!S)return;for(const f of S.vfx)if(f.ownMat)for(const a of f.anim)a.n.dispose();clearSwordTransient();if(swordGlow)swordGlow.visible=false;const all=[...S.enemies.map(e=>e.mesh),...S.picks.flatMap(p=>[p.mesh,p.glow]),...S.vfx.map(f=>f.mesh),...S.corpses.map(c=>c.mesh),...S.golems.map(g=>g.mesh),...S.zones.map(z=>z.mesh),...(S.eproj||[]).map(f=>f.mesh),...(S.deathPurses||[]).map(p=>p.mesh)];for(const m of all)if(m)scene.remove(m);for(const c of S.corpses)if(c.own)c.mesh.material.dispose()}
 function newGame(){
   clearScene();dg.clearRect(0,0,WW,WH);decalDirty=true;resetFog();MINI.t=0;
   S={t:0,kills:0,coins:0,lvl:1,xp:0,need:xpNeed(1),pendLv:0,choosing:false,phase:'play',enemies:[],parts:[],picks:[],vfx:[],corpses:[],quakes:[],golems:[],zones:[],delayed:[],
     waves:[],sk:{sword:1},cd:{sword:.6},spawnT:1,hurt:0,shakeT:0,shakeM:0,endT:0,stage:'p1',merchant:null,collector:null,bought:{},whet:0,magnet:0,ev:new Set(),shr:SHRINES.map(()=>60),eproj:[],stones:[0,0,0,0,0],boom:new Set(),trapCd:new Map(),dialog:null,dlg:0,npc:Object.fromEntries(W.npcs.map(n=>[n.id,{state:'alive',t:0}])),flash:0,nextBolt:9};
   pl={x:START.x,y:START.y,fx:1,fy:0,dir:2,s:1,hp:100,max:100,inv:0,roll:0,rollT:0,rvx:0,rvy:0,walk:0,moving:false,dead:false,deadT:0,rollCd:0,swingT:0,swingDir:2,swingS:1,hurtT:0};
-  S.activeSlots=[null,null,null];S.activeWind=null;S.combatLock=0;S.bloodPrimed=0;S.bloodCd=0;S.swordShots=[];S.mainEnchant=null;S.elementMain=null;S.elementSupport=null;S.shotCd=0;S.enemyShotCd=0;S.swordGuardian=null;S.shotWind=null;S.swordTrails=[];S.sk={};S.cd={};S.str=1;S.dex=1;Object.assign(pl,{sta:100,staMax:100,staDelay:0,atk:null,block:false,blockT:0,broken:0,riposte:0,atkHeld:false,charge:0,charging:false,comboT:0,nextCombo:0,queue:false})
+  S.activeSlots=[null,null,null];S.activeWind=null;S.combatLock=0;S.bloodPrimed=0;S.bloodCd=0;S.swordShots=[];S.mainEnchant=null;S.elementMain=null;S.elementSupport=null;S.shotCd=0;S.manaHitCd=0;S.manaFlash=0;S.enemyShotCd=0;S.swordGuardian=null;S.shotWind=null;S.swordTrails=[];S.sk={};S.cd={};S.str=1;S.dex=1;Object.assign(pl,{mana:SL.mana.max,manaMax:SL.mana.max,manaDelay:0,sta:100,staMax:100,staDelay:0,atk:null,block:false,blockT:0,broken:0,riposte:0,atkHeld:false,charge:0,charging:false,comboT:0,nextCombo:0,queue:false})
   S.pk=PK0();S.hitsT=0;S.parries=0;S.cEarn=0;S.coinFrac=0;S.dealt=0;S.chal=null;S.perkIds=[];S.actions={attack:0,dodge:0,block:0,parry:0,collect:0};S.firstNight=CH===1&&!tutorialDone();S.noticeQueue=[];S.rebirth=null;S.rebirthUsed=false;S.deaths=0;S.deathPurses=[];S.finalDeathLoss=false;
   heroMesh.visible=true;chipsDirty=true;
 }
@@ -2523,21 +2526,34 @@ function ftTick(dt){FLT.tm+=dt;const r=$('screen').getBoundingClientRect();
 const ENAME={guard:'Strażnik',scribe:'Skryba',executioner:'Kat',debtor:'Dłużnik',wraith:'Upiór rachunków',bookgolem:'Golem ksiąg',condemned:'Skazaniec',courtraven:'Kruk sądowy',paperrat:'Szczur papierowy',madman:'Szaleniec',hound:'Ogar',rotknight:'Zgniły rycerz',monk:'Mnich',possessed:'Opętany',knight:'Rycerz',dwarf:'Krasnolud',ghoul:'Ghul',warden:'Strażnik',wolf:'Wilk',bandit:'Bandyta',xbow:'Kusznik',drowner:'Utopiec',strzygon:'Strzygoń',wight:'Upiór',zmora:'Zmora',bies:'Bies'};
 const HB=new Map();
 function hbClear(){for(const el of HB.values())el.remove();HB.clear()}
+const GUARD_TOPS=new WeakMap();
+function guardianBarAnchor(g){const m=g.mesh,image=m.material.map.image;let top=GUARD_TOPS.get(image);if(top===undefined){top=0;if(image.getContext){const d=image.getContext('2d').getImageData(0,0,image.width,image.height).data;findTop:for(let y=0;y<image.height;y++)for(let x=0;x<image.width;x++)if(d[(y*image.width+x)*4+3]>=128){top=y/image.height;break findTop}}GUARD_TOPS.set(image,top)}if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();const b=m.geometry.boundingBox;m.updateWorldMatrix(true,false);V.set(0,b.max.y-top*(b.max.y-b.min.y),0);m.localToWorld(V);return V.project(cam)}
 function hbTick(){const box=$('hbs');if(!box)return;
 
-  for(const [e,el] of HB)if(e.dead||!S||!S.enemies.includes(e)){el.remove();HB.delete(e)}
+  for(const [e,el] of HB)if(e==='guard'?!S||!S.swordGuardian:(e.dead||!S||!S.enemies.includes(e))){el.remove();HB.delete(e)}
   if(!S)return;
   for(const e of S.enemies){if(e.dead||e.rise>0||BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'||e.type==='boginka'||e.type==='wisp'||e.type==='bat')continue;
     const elite=e.mini||(e.max>=90&&e.hp<e.max)||((e.type==='debtor'||e.type==='wraith')&&Math.hypot(e.x-pl.x,e.y-pl.y)<130);if(!elite)continue;
     let el=HB.get(e);if(!el){el=document.createElement('div');el.className='hb'+(e.mini?' m':'');el.innerHTML='<b></b><i><u></u></i>';el.firstChild.textContent=(e.mini?'Elita: ':'')+(ENAME[e.type]||'Wróg');box.appendChild(el);HB.set(e,el)}
     V.set(e.x/16,ftEntH(e)+.45,e.y/16).project(cam);
-    el.style.left=((V.x+1)/2*100)+'%';el.style.top=((1-V.y)/2*100)+'%';el.lastChild.firstChild.style.width=Math.max(0,e.hp/e.max*100)+'%'}}
+    el.style.left=((V.x+1)/2*100)+'%';el.style.top=((1-V.y)/2*100)+'%';el.lastChild.firstChild.style.width=Math.max(0,e.hp/e.max*100)+'%'}
+  {const g=S.swordGuardian;if(g&&!g.gone){let el=HB.get('guard');if(!el){el=document.createElement('div');el.className='hb gd';el.innerHTML='<i><u></u></i>';el.setAttribute('role','progressbar');el.setAttribute('aria-label','Życie golema');el.setAttribute('aria-valuemin','0');box.appendChild(el);HB.set('guard',el)}guardianBarAnchor(g);el.style.left=((V.x+1)/2*100)+'%';el.style.top='calc('+((1-V.y)/2*100)+'% - 7px)';el.setAttribute('aria-valuemax',Math.ceil(g.max));el.setAttribute('aria-valuenow',Math.max(0,Math.ceil(g.hp)));el.lastChild.firstChild.style.width=Math.max(0,Math.min(100,g.hp/g.max*100))+'%'}}}
 let msgT=0;
 let HINTS_ENABLED=true;try{HINTS_ENABLED=localStorage.getItem('pn_hints')!=='0'}catch(e){}
 function setHints(on){HINTS_ENABLED=!!on;$('hintsTgl').checked=HINTS_ENABLED;try{localStorage.setItem('pn_hints',on?'1':'0')}catch(e){}if(!on){$('tut').classList.remove('on');$('tutSkip').hidden=true}TUT.sid=null}
-function pumpNotice(){if(!S||S.phase!=='play'||S.notice||S.intro||S.dialog||S.choosing||S.shop||S.paused)return;const next=(S.noticeQueue||[]).shift();if(!next){if(S.witRewardPending&&S.pendLv>0){S.witRewardPending=false;openLevelUp()}return}S.notice=next;resetInput();$('noticeText').textContent=next.text;$('noticeKicker').textContent=next.kind==='boss'?'Noc przemawia':'Wydarzenie';$('notice').hidden=false;$('touch').hidden=true;$('prompt').hidden=true;setTimeout(()=>{if(S&&S.notice===next)$('noticeNext').focus()},20)}
+// the old pausing event box is gone; this only hands out a pending Wit reward once its message has been shown
+function pumpNotice(){if(!S||S.phase!=='play'||S.notice||S.intro||S.dialog||S.choosing||S.shop||S.paused)return;if(S.witRewardPending&&S.pendLv>0&&!S.banner&&!(S.noticeQueue||[]).length){S.witRewardPending=false;openLevelUp()}}
 function dismissNotice(){if(!S||!S.notice)return;S.notice=null;$('notice').hidden=true;resetInput();for(const k in keys)keys[k]=false;pumpNotice();if(!S.notice)$('touch').hidden=!coarse||!!(S.dialog||S.choosing||S.shop||S.intro||S.paused)}
-function say(t,kind='event'){if(!t)return;if(S&&S.phase==='play'){const q=S.noticeQueue||(S.noticeQueue=[]);if(S.notice?.text!==t&&!q.some(n=>n.text===t))q.push({text:t,kind});pumpNotice();return}const m=$('msg');m.textContent=t;m.classList.add('on');clearTimeout(msgT);msgT=setTimeout(()=>m.classList.remove('on'),3400)}
+function say(t,kind='event'){if(!t)return;if(S&&S.phase==='play'){const q=S.noticeQueue||(S.noticeQueue=[]);if(S.banner?.text!==t&&!q.some(n=>n.text===t))q.push({text:t,kind});return}const m=$('msg');m.classList.remove('boss');m.textContent=t;m.classList.add('on');clearTimeout(msgT);msgT=setTimeout(()=>m.classList.remove('on'),messageDuration(t)*1000)}
+// Event messages: a banner at the top of the screen that never pauses the game. Each stays MSG.show seconds of play
+// time at minimum, extended by text length up to MSG.max; the next waits until fade-out ends (MSG.gap).
+// The banner waits (and hides) while the game is paused, in a dialog, on level-up cards, in the shop or the intro.
+const MSG={show:3,gap:.45,threshold:60,perChar:.025,max:7};
+function messageDuration(text){return Math.min(MSG.max,MSG.show+Math.max(0,[...String(text)].length-MSG.threshold)*MSG.perChar)}
+function bannerTick(dt){const m=$('msg');if(!S||S.phase!=='play'){S&&(S.banner=null);return}
+  const hold=!!(S.paused||S.choosing||S.shop||S.dialog||S.intro||S.witChoice||pl.dead);
+  if(S.banner){if(hold){m.classList.remove('on');return}S.banner.t-=dt;if(S.banner.t>0){m.classList.add('on');return}m.classList.remove('on');if(S.banner.t<=-MSG.gap)S.banner=null;return}
+  if(hold)return;const next=(S.noticeQueue||[]).shift();if(!next)return;S.banner={text:next.text,kind:next.kind,t:messageDuration(next.text)};m.textContent=next.text;m.classList.toggle('boss',next.kind==='boss');m.classList.add('on')}
 function nearPowerFire(){if(!S||pl.dead||S.rebirthUsed||S.rebirth)return null;let result=null,best=32;for(let i=0;i<SHRINES.length;i++){const f=SHRINES[i],d=Math.hypot(pl.x-f.x,pl.y-f.y);if(d<best){best=d;result={...f,index:i,kind:'powerFire'}}}return result}
 function activatePowerFire(f){if(!f||!S||S.rebirth||S.rebirthUsed)return false;S.rebirth={ch:CH,x:pl.x,y:pl.y,index:f.index};play('bless',0);say('Ognisko mocy zapamiętuje twoje piętno. Tej nocy powrócisz raz. Odrodzenie kosztuje połowę doświadczenia postaci otrzymanego za noc. Monety zostaną w miejscu śmierci.');return true}
 function preparePowerFires(w){if(!A.powerFire)A.powerFire=[[64,64],[96,64],[0,96],[32,96]].map(([x,y])=>procFrame(IMGS.br_props,x,y,32,32,'prop'));
@@ -2546,7 +2562,7 @@ function makeDeathPurse(x,y,amount){if(!(amount>0))return;const mesh=new THREE.M
 function updatePowerVisuals(){if(!S)return;for(const f of W.fireMarkers||[]){const armed=S.rebirth&&S.rebirth.ch===CH&&S.rebirth.index===f.index;f.mesh.material.color.setHex(S.rebirthUsed||S.rebirth&&!armed?0x766b65:armed?0x8cead4:0xffad55);f.mesh.material.opacity=(S.rebirthUsed||S.rebirth&&!armed)?.18:armed?.85:.48+.18*Math.sin(clock*2)}for(const p of S.deathPurses||[]){p.mesh.visible=p.ch===CH;p.mesh.position.set(p.x/16,.2+Math.sin(clock*3)*.035,p.y/16)}}
 function recoverPurses(){for(let i=(S.deathPurses||[]).length-1;i>=0;i--){const p=S.deathPurses[i];if(p.ch!==CH)continue;const distance=Math.hypot(pl.x-p.x,pl.y-p.y);if(!p.ready){if(distance>24)p.ready=true;continue}if(distance>16)continue;S.coins+=p.amount;scene.remove(p.mesh);S.deathPurses.splice(i,1);play('coin',0);say('Odzyskujesz sakwę z miejsca śmierci: '+p.amount+' monet.')}}
 function tryRebirth(){if(!S.rebirth||S.rebirthUsed)return false;clearSwordTransient();S.swordTrails=[];const f=S.rebirth;makeDeathPurse(pl.x,pl.y,S.coins);S.coins=0;S.rebirthUsed=true;S.deaths=1;let x=f.ch===CH?f.x:START.x,y=f.ch===CH?f.y:START.y;
-  if(boxSolid(x,y,4,3)){x=START.x;y=START.y}Object.assign(pl,{x,y,hp:Math.max(1,Math.round(pl.max*.7)),dead:false,deadT:0,inv:3,roll:0,rollCd:0,atk:null,block:false,charging:false,atkHeld:false,queue:false,swingT:0,broken:0,hurtT:0,sta:pl.staMax});S.endT=0;S.hurt=0;S.hitstop=0;S.snare=0;S.slowT=0;camTarget.set(x/16,0,y/16);resetInput();play('bless',0);say('Ognisko przywraca cię do życia. Doświadczenie postaci za tę noc: −50%. Sakwa czeka tam, gdzie upadłeś. Kolejna śmierć zakończy noc bez jej nagród.');return true}
+  if(boxSolid(x,y,4,3)){x=START.x;y=START.y}Object.assign(pl,{x,y,hp:Math.max(1,Math.round(pl.max*.7)),dead:false,deadT:0,inv:3,roll:0,rollCd:0,atk:null,block:false,charging:false,atkHeld:false,queue:false,swingT:0,broken:0,hurtT:0,sta:pl.staMax,mana:pl.manaMax,manaDelay:0});S.endT=0;S.hurt=0;S.hitstop=0;S.snare=0;S.slowT=0;camTarget.set(x/16,0,y/16);resetInput();play('bless',0);say('Ognisko przywraca cię do życia. Doświadczenie postaci za tę noc: −50%. Sakwa czeka tam, gdzie upadłeś. Kolejna śmierć zakończy noc bez jej nagród.');return true}
 function loseSecondLife(){clearSwordTransient();if(!S.rebirthUsed)return;S.finalDeathLoss=true;S.deaths=2;S.coins=0;S.xp=0;for(const p of S.deathPurses||[])scene.remove(p.mesh);S.deathPurses=[];for(let i=S.picks.length-1;i>=0;i--)if(S.picks[i].k==='c'){scene.remove(S.picks[i].mesh);scene.remove(S.picks[i].glow);S.picks.splice(i,1)}}
 function offerWitChoice(){S.witChoice=true;$('witChoices').hidden=false;document.querySelector('#dialog .next').hidden=true;$('dlgTxt').textContent='„To nie była moja decyzja. Ale rozkaz to rozkaz... Tak sobie wtedy mówiłem. Błagam, zabij mnie. Nie chcę już z tym żyć”. Co postanawiasz?';resetInput();$('witLeave').focus()}
 function chooseWit(mercy){if(!S||!S.witChoice||S.dialog?.id!=='wit')return;const n=S.dialog,st=S.npc.wit;S.witChoice=false;S.dialog=null;$('witChoices').hidden=true;$('dialog').hidden=true;document.querySelector('#dialog .next').hidden=false;S.ev.add('w');resetInput();
@@ -2569,10 +2585,13 @@ let STORYMODE=true;try{STORYMODE=localStorage.getItem('pn_story')!=='0'}catch(e)
 const chWon=c=>!!((SETT.save['s'+c]&&SETT.save['s'+c].win)||(SETT.save['a'+c]&&SETT.save['a'+c].win));
 const chLocked=c=>STORYMODE&&c>1&&!chWon(c-1);
 let heavyPress=false,signPress=false,mouseL=false,mouseR=false,mouseX=0,mouseY=0,mouseT=-99,tAtk=false,tBlock=false;
-const SL={regen:30,delay:.55,roll:20,parry:.2,blockMul:1.2,guardBreak:.8,riposte:2.5,cap:28,ramp:.12,bossHp:.45,enemyWind:.5,enemyRec:.5,enemyHit:1.6,staggerGap:.9,coinDrop:.45,coinStrong:2,coinSurvive:15,projDiv:900,dmgDiv:800,shotGap:1.3,aim:.55,
+const SL={regen:28,delay:.55,roll:24,blockRegen:.25,stepCost:8,
+  mana:{max:60,regen:1.2,delay:.75,onHit:1,onParry:0,onKill:0,hitGap:.5},
+  shot:{iceDmg:16,fireDmg:14,perL:2,targets:[3,4,6]},
+  guard:{dur:10,hp:[.8,1,1.2],taunt:[96,112,128],bossTaunt:5,spd:42,r:7,leash:140,inv:.3},parry:.2,blockMul:1.2,guardBreak:.8,riposte:2.5,cap:28,ramp:.12,bossHp:.45,enemyWind:.5,enemyRec:.5,enemyHit:1.6,staggerGap:.9,coinDrop:.45,coinStrong:2,coinSurvive:15,projDiv:900,dmgDiv:800,shotGap:1.3,aim:.55,
   wave:{l:{dmg:.6,speed:230,life:.62,r:13,size:1.25},h:{dmg:.7,speed:250,life:.75,r:19,size:1.8},stun:.4},
-  light:{cost:16,dmg:[17,19,28],wind:.12,act:.1,rec:.27,range:30,arc:1.05,stun:[.18,.18,.3],lunge:[30,30,55]},
-  heavy:{cost:32,dmg:48,charge:.42,wind:.52,act:.12,rec:.3,range:37,arc:1.5,stun:.7,lunge:70}};
+  light:{cost:14,dmg:[17,19,28],wind:.12,act:.1,rec:.27,range:30,arc:1.05,stun:[.18,.18,.3],lunge:[30,30,55]},
+  heavy:{cost:36,dmg:48,charge:.42,wind:.52,act:.12,rec:.3,range:37,arc:1.5,stun:.7,lunge:70}};
 // level-up cards in slasher mode raise the hero's attributes instead of giving skills
 const SLASH_UP=['_vit','_end','_str','_dex'];
 // direction from the hero to the mouse pointer (screen y is foreshortened by the camera tilt)
@@ -2623,6 +2642,7 @@ function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc
     // stagger: normal enemies are interrupted, big ones only when their poise breaks
     if(!e.dead){const st=a.kind==='h'?P.stun:P.stun[a.combo];if(big){breakPoise(e,a.kind==='h'?45:a.combo===2?20:12)}else{slashStagger(e,st,a.kind==='h'||crit)}}}
   ftCrit=false;ftHeavy=false;ftMelee=false;
+  if(hits>0&&!(S.manaHitCd>0)&&SL.mana.onHit>0){gainMana(SL.mana.onHit);S.manaHitCd=SL.mana.hitGap}
   const c=Math.cos(ang),s=Math.sin(ang);addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,R/16*(a.kind==='h'?.9:.7),'bill',-screenAng(c,s));
   {const en=ENCH.filter(k=>S.sk[k]);if(en.length)for(let i=0;i<16;i++){const t=ang+rnd(-arc,arc),rr=rnd(10,R),k=en[i%en.length];S.parts.push({k:'e',x:pl.x+Math.cos(t)*rr,y:pl.y+Math.sin(t)*rr,z:rnd(8,18),vx:0,vy:0,vz:rnd(4,12),c:Math.random()<.6?ENC[k].col:ENC[k].col2,life:rnd(.2,.45)})}}
   if(crit){pl.riposte=0;launchWave(a,ang,waveDmg);const ec=sk('echo');if(ec>=1){launchWave(a,ang-.28,waveDmg*(ec>=3?1.2:1),1);if(ec>=2)launchWave(a,ang+.28,waveDmg*(ec>=3?1.2:1),1)}if(hits)ftInfo('Cios krytyczny!')}
@@ -2638,9 +2658,10 @@ function waveTick(dt){if(!S.waves||!S.waves.length)return;for(let i=S.waves.leng
       if(damageEnemy(e,w.dmg,w.vx/d,w.vy/d,.9)){if(brOn('wav'))applyEnchants(e,{kind:'l'},true);if(!e.dead){const big=BIG.has(e.type)||e.type==='collector';if(big){breakPoise(e,25)}else{slashStagger(e,SL.wave.stun)}}}
       for(let k=0;k<6;k++)S.parts.push({k:'e',x:e.x,y:e.y,z:rnd(6,18),vx:rnd(-40,40),vy:rnd(-20,20),vz:rnd(4,12),c:'#ffe9a0',life:rnd(.2,.4)})}}}
 
+function manaTick(dt){S.manaHitCd=Math.max(0,(S.manaHitCd||0)-dt);S.manaFlash=Math.max(0,(S.manaFlash||0)-dt);if(!pl.manaMax)return;if(pl.manaDelay>0)pl.manaDelay=Math.max(0,pl.manaDelay-dt);else pl.mana=Math.min(pl.manaMax,pl.mana+SL.mana.regen*dt)}
 function slashUpdate(dt){
-  swordTick(dt);if(pl.atk?.kind==='shot'||pl.atk?.kind==='skill'){if(!S.shotWind&&!S.activeWind){pl.atk.t-=dt;if(pl.atk.t<=0)pl.atk=null}return}
-  if(pl.staDelay>0)pl.staDelay-=dt;else if(!pl.atk&&pl.roll<=0)pl.sta=Math.min(pl.staMax,pl.sta+SL.regen*(S.regenMul||1)*(S.heri>0?1.15:1)*(pl.block?.35:1)*dt);
+  manaTick(dt);swordTick(dt);if(pl.atk?.kind==='shot'||pl.atk?.kind==='skill'){if(!S.shotWind&&!S.activeWind){pl.atk.t-=dt;if(pl.atk.t<=0)pl.atk=null}return}
+  if(pl.staDelay>0)pl.staDelay-=dt;else if(!pl.atk&&pl.roll<=0)pl.sta=Math.min(pl.staMax,pl.sta+SL.regen*(S.regenMul||1)*(S.heri>0?1.15:1)*(pl.block?SL.blockRegen:1)*dt);
   if(pl.parryHealCd>0)pl.parryHealCd-=dt;if(pl.parryCd>0)pl.parryCd-=dt;if(pl.riposte>0)pl.riposte-=dt;if(pl.dance>0)pl.dance-=dt;waveTick(dt);
   if(pl.broken>0){pl.broken-=dt;pl.block=false;pl.atk=null;return}
   if(pl.dead||pl.roll>0){pl.block=false;pl.atkHeld=false;pl.charging=false;return}
@@ -2678,18 +2699,19 @@ function encLvText(k,L){const st={venom:`trucizna ${2+L} obrażeń/s przez 4 s`,
 for(const k of ['venom','fireblade','iceblade','bloodblade'])SK[k].lv=[...Array(10).keys()].map(i=>encLvText(k,i+1));
 // Slasher: intentional sword actions, a main element and one compatible support.
 const ELEMENT_NAME={fire:'Ogień',ice:'Lód',venom:'Trucizna',blood:'Krew',earth:'Ziemia'};
-const ELEMENT_OF={fireblade:'fire',iceblade:'ice',venom:'venom',bloodblade:'blood',embershot:'fire',frostshot:'ice',bloodseal:'blood',earthcut:'earth',stoneguard:'earth'};
-const NEW_SWORD_SK=['frostshot','embershot','breach','shadowstep','retaliation','execution','bloodseal','earthcut','stoneguard'];
+const ELEMENT_OF={fireblade:'fire',iceblade:'ice',venom:'venom',bloodblade:'blood',embershot:'fire',frostshot:'ice',bloodseal:'blood',earthcut:'earth',stoneguard:'earth',venomshot:'venom'};
+const NEW_SWORD_SK=['frostshot','embershot','venomshot','breach','shadowstep','retaliation','execution','bloodseal','earthcut','stoneguard'];
 Object.assign(SK,{
- frostshot:{name:'Odłamek szronu',kind:'Wsparcie · Lód',ic:'frostshot',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: pojedynczy pocisk, ${8+L} obrażeń, spowolnienie ${25+5*L}% przez 1,5 s (boss: 10%). Zasięg ${120+10*L}, koszt 12 staminy, odnowienie 4 s. Bez przebijania i znaków finiszera.`)},
- embershot:{name:'Żar z ostrza',kind:'Wsparcie · Ogień',ic:'embershot',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: pojedynczy żar, ${7+L} obrażeń i 2 obrażenia/s przez ${1+.5*L} s. Zasięg ${100+10*L}, koszt 12 staminy, odnowienie 4 s. Bez eksplozji, przebijania i znaków finiszera.`)},
+ venomshot:{name:'Jadowy kolec',kind:'Wsparcie · Trucizna',ic:'drop',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: kolec przebija ${[3,4,6][L-1]} różnych wrogów, ${12+2*L} obrażeń i zatrucie ${2+L} obrażeń/s przez 3 s (boss: połowa). Koszt 20 many, odnowienie 10 s. Bez kumulacji trucizny; ściany zatrzymują pocisk.`)},
+ frostshot:{name:'Odłamek szronu',kind:'Wsparcie · Lód',ic:'frostshot',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: odłamek przebija do ${[3,4,6][L-1]} różnych wrogów, ${16+2*L} obrażeń każdemu, spowolnienie ${25+5*L}% przez 1,5 s (boss: 10%). Zasięg ${120+10*L}, koszt 18 many, odnowienie 8 s. Ściana go zatrzymuje.`)},
+ embershot:{name:'Żar z ostrza',kind:'Wsparcie · Ogień',ic:'embershot',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: żar przebija do ${[3,4,6][L-1]} różnych wrogów, ${14+2*L} obrażeń każdemu i 2 obrażenia/s przez ${1+.5*L} s. Zasięg ${100+10*L}, koszt 18 many, odnowienie 8 s. Bez eksplozji; ściana go zatrzymuje.`)},
  breach:{name:'Przełamanie',kind:'Technika miecza',ic:'breach',max:3,lv:[1,2,3].map(L=>`Naładowany ciężki cios dodaje ${20+10*L} punktów przełamania postawy bossów. Zwykłego wroga odrzuca i ogłusza na ${(.6+.15*L).toFixed(2).replace('.',',')} s. Wykonaj przytrzymując lekki atak.`)},
- shadowstep:{name:'Krok przez cień',kind:'Technika miecza',ic:'shadowstep',max:3,lv:[1,2,3].map(L=>`Po uniku masz 1,2 s: następny lekki cios doskakuje do wroga przed tobą, maks. ${18+6*L} jednostek. Doskok kosztuje dodatkowe 6 staminy, zatrzymuje się przed ścianą. Bez dodatkowej nietykalności.`)},
+ shadowstep:{name:'Krok przez cień',kind:'Technika miecza',ic:'shadowstep',max:3,lv:[1,2,3].map(L=>`Po uniku masz 1,2 s: następny lekki cios doskakuje do wroga przed tobą, maks. ${18+6*L} jednostek. Doskok kosztuje dodatkowe 8 staminy, zatrzymuje się przed ścianą. Bez dodatkowej nietykalności.`)},
  retaliation:{name:'Żelazny odwet',kind:'Technika miecza',ic:'retaliation',max:3,lv:[1,2,3].map(L=>`Udane parowanie ładuje jeden ciężki kontratak na 2 s: +${10*L}% obrażeń. Premia zużywa się także przy pudle. Nie zwiększa obrażeń fal.`)},
  execution:{name:'Egzekucja',kind:'Technika miecza',ic:'execution',max:3,lv:[1,2,3].map(L=>`Ciężki cios zadaje +${20+10*L}% obrażeń zwykłemu wrogowi mającemu najwyżej 20% życia. Musisz podejść i trafić; bez nietykalności i automatycznego zabicia. Bossowie: +${5*L}% poniżej 10% życia.`)},
- bloodseal:{name:'Piętno krwi',kind:'Wsparcie · Krew',ic:'bloodseal',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu (12 staminy, 8 s odnowienia): przez 5 s następny trafiony cios mieczem oznacza jednego wroga na 5 s. Zabicie go mieczem ładuje na 4 s jeden następny cios: +${10+5*L}% obrażeń. Brak leczenia; oznaczenie nie przenosi się na kolejne cele.`)},
- earthcut:{name:'Rozcięcie ziemi',kind:'Wsparcie · Ziemia',ic:'earthcut',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: uderzenie w ziemię wypuszcza linię kolców do ${48+8*L} jednostek. ${8+4*L} obrażeń na cel, koszt 20 staminy, odnowienie 6 s. Kolce zatrzymują się na ścianach.`)},
- stoneguard:{name:'Kamienny obrońca',kind:'Wsparcie · Ziemia',ic:'stoneguard',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu (20 staminy): przyzywasz na ${2+.5*L} s nieruchomego golema. Osłania cię w promieniu 38 jednostek: przejmuje ${15+5*L}% otrzymywanych obrażeń. Nie atakuje i nie leczy. Odnowienie 14 s.`)}
+ bloodseal:{name:'Piętno krwi',kind:'Wsparcie · Krew',ic:'bloodseal',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu (16 many, 8 s odnowienia): przez 5 s następny trafiony cios mieczem oznacza jednego wroga na 5 s. Zabicie go mieczem ładuje na 4 s jeden następny cios: +${10+5*L}% obrażeń. Brak leczenia; oznaczenie nie przenosi się na kolejne cele.`)},
+ earthcut:{name:'Rozcięcie ziemi',kind:'Wsparcie · Ziemia',ic:'earthcut',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: uderzenie w ziemię wypuszcza linię kolców do ${48+8*L} jednostek. ${8+4*L} obrażeń na cel, koszt 24 many, odnowienie 6 s. Kolce zatrzymują się na ścianach.`)},
+ stoneguard:{name:'Kamienny obrońca',kind:'Wsparcie · Ziemia',ic:'stoneguard',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu (34 many): przyzywasz na 10 s kamiennego golema z ${[80,100,120][L-1]}% twojego maks. życia. Idzie do najbliższego wroga i ściąga na siebie zwykłych przeciwników w promieniu ${[96,112,128][L-1]} jednostek. Bossowie z paskiem życia na dole ekranu idą za nim najwyżej 5 s. Ranią go tylko bezpośrednie ciosy i pociski. Nie zadaje obrażeń, nie leczy, nie blokuje ci przejścia. Odnowienie 30 s.`)}
 });
 SLASH_SK.push(...NEW_SWORD_SK);
 function chosenElements(){return [...new Set(Object.keys(ELEMENT_OF).filter(k=>sk(k)).map(k=>ELEMENT_OF[k]))]}
@@ -2706,41 +2728,76 @@ function supportEnchant(e,a,crit){const k=ENCH.find(k=>sk(k)&&k!==encLevel()[0])
 }
 function swordSparks(x,y,col,n=8){for(let i=0;i<n;i++)S.parts.push({k:'e',x:x+rnd(-3,3),y:y+rnd(-2,2),z:rnd(8,16),vx:rnd(-12,12),vy:rnd(-8,8),vz:rnd(5,20),c:col,life:.2+rnd(0,.15)})}
 // Three equipped active skills. Cooldowns belong to skills, never to slots.
-const ACTIVE_SLASHER=['aard','earthcut','stoneguard','bloodseal','frostshot','embershot'];
-const ACTIVE_CFG={aard:{cost:20,cd:'aardCd',wait:L=>Math.max(4.5,9-L),wind:.18},earthcut:{cost:20,cd:'earthCd',wait:()=>6,wind:.25},stoneguard:{cost:20,cd:'guardCd',wait:()=>14,wind:.3},bloodseal:{cost:12,cd:'bloodCd',wait:()=>8,wind:.18},frostshot:{cost:12,cd:'shotCd',wait:()=>4},embershot:{cost:12,cd:'shotCd',wait:()=>4}};
+const ACTIVE_SLASHER=['aard','earthcut','stoneguard','bloodseal','frostshot','embershot','venomshot'];
+const ACTIVE_CFG={aard:{cost:24,cd:'aardCd',wait:L=>Math.max(4.5,9-L),wind:.18},earthcut:{cost:24,cd:'earthCd',wait:()=>6,wind:.25},stoneguard:{cost:34,cd:'guardCd',wait:()=>30,wind:.3},bloodseal:{cost:16,cd:'bloodCd',wait:()=>8,wind:.18},frostshot:{cost:18,cd:'shotCd',wait:()=>8},embershot:{cost:18,cd:'shotCd',wait:()=>8},venomshot:{cost:20,cd:'shotCd',wait:()=>10}};
+// slot skills are paid with mana (cost = mana); casting never touches stamina or its regen delay
+function canPayMana(k){return pl.mana+1e-8>=ACTIVE_CFG[k].cost}
+function payMana(k){pl.mana=Math.max(0,pl.mana-ACTIVE_CFG[k].cost);pl.manaDelay=SL.mana.delay}
+function manaFlash(t=.3){S.manaFlash=t;play('empty',.2)}
+function gainMana(v){if(v>0&&pl.manaMax)pl.mana=Math.min(pl.manaMax,pl.mana+v)}
 function autoEquipActive(k){if(!ACTIVE_SLASHER.includes(k)||S.activeSlots.includes(k))return;const i=S.activeSlots.indexOf(null);if(i>=0)S.activeSlots[i]=k;renderActiveHud()}
 function loadoutSafe(){return !!(S&&S.paused&&!pl.dead&&!(S.combatLock>0)&&!pl.atk&&pl.roll<=0&&!S.activeWind&&!S.shotWind&&!S.swordShots.length&&!S.swordGuardian&&!S.enemies.some(e=>!e.dead&&e.rise<=0&&Math.hypot(e.x-pl.x,e.y-pl.y)<140+e.r))}
 function equipActive(i,k){if(!loadoutSafe()||!Number.isInteger(i)||i<0||i>2||k!==null&&(!ACTIVE_SLASHER.includes(k)||!sk(k)))return false;const other=k?S.activeSlots.indexOf(k):-1,old=S.activeSlots[i];S.activeSlots[i]=k;if(other>=0&&other!==i)S.activeSlots[other]=old;renderLoadout();renderActiveHud();return true}
-function activateSlot(i){if(!swordCanAct())return false;const k=S.activeSlots[i],c=ACTIVE_CFG[k],L=sk(k);if(!c||!L)return false;if((S[c.cd]||0)>0||pl.sta<c.cost){S.stamFlash=.3;play('empty',.2);return false}S.combatLock=4;
- if(k==='frostshot'||k==='embershot'){requestSwordShot(k);return true}
- const d=aimDir()||[pl.fx,pl.fy];pl.fx=d[0];pl.fy=d[1];pl.sta-=c.cost;pl.staDelay=SL.delay;S[c.cd]=c.wait(L);S.activeWind={k,x:d[0],y:d[1],t:c.wind};pl.atk={kind:'skill',stage:'wind',t:c.wind};pl.atkHeld=false;pl.charging=false;S.actions.skill=(S.actions.skill||0)+1;play('swing',0);return true}
+function activateSlot(i){if(!swordCanAct())return false;const k=S.activeSlots[i],c=ACTIVE_CFG[k],L=sk(k);if(!c||!L)return false;if((S[c.cd]||0)>0){play('empty',.2);return false}if(!canPayMana(k)){manaFlash();return false}S.combatLock=4;
+ if(['frostshot','embershot','venomshot'].includes(k)){requestSwordShot(k);return true}
+ const d=aimDir()||[pl.fx,pl.fy];pl.fx=d[0];pl.fy=d[1];payMana(k);S[c.cd]=c.wait(L);S.activeWind={k,x:d[0],y:d[1],t:c.wind};pl.atk={kind:'skill',stage:'wind',t:c.wind};pl.atkHeld=false;pl.charging=false;S.actions.skill=(S.actions.skill||0)+1;play('swing',0);return true}
 function activeSlotsTick(dt){S.combatLock=Math.max(0,(S.combatLock||0)-dt);S.bloodPrimed=Math.max(0,(S.bloodPrimed||0)-dt);S.bloodCd=Math.max(0,(S.bloodCd||0)-dt);S.aardCd=Math.max(0,(S.aardCd||0)-dt);if(!S.activeWind)return;
  if(pl.dead||pl.roll>0||pl.broken>0){S.activeWind=null;if(pl.atk?.kind==='skill')pl.atk=null;return}S.activeWind.t-=dt;if(S.activeWind.t>0)return;const w=S.activeWind;S.activeWind=null;pl.atk=null;if(w.k==='aard')castAard(true);if(w.k==='earthcut')swordEarth({kind:'h',charged:true,dx:w.x,dy:w.y},true);if(w.k==='stoneguard')summonSwordGuardian(true);if(w.k==='bloodseal'){S.bloodPrimed=5;swordSparks(pl.x,pl.y,'#da5365',12);ftInfo('Piętno gotowe: traf mieczem')}
  pl.atk={kind:'skill',stage:'rec',t:.18};}
-function renderLoadout(){const el=$('skillLoadout');if(!el)return;el.hidden=!S;if(el.hidden)return;const focused=document.activeElement,focusSlot=el.contains(focused)?focused.dataset.slot:undefined,focusEquip=el.contains(focused)?focused.dataset.equip:undefined;const safe=loadoutSafe(),selected=S.loadoutSelected||0,keys=['Q · LT+X','E · LT+Y','F · LT+B'];el.innerHTML='<h2>Aktywne umiejętności</h2><p>Wybierz slot, potem zdobytą umiejętność. Techniki miecza i zaklęcia ostrza działają poza slotami.</p><div class="slot-pick">'+S.activeSlots.map((k,i)=>`<button type="button" class="go slot-tab${selected===i?' chosen':''}" data-slot="${i}" aria-pressed="${selected===i}"><small>${keys[i]}</small>${k?`<i class="ic ic-${SK[k].ic}"></i>${SK[k].name}`:'Wolny slot'}</button>`).join('')+'</div><p class="loadout-state">'+(safe?'Możesz zmienić wyposażenie. Odnowienia pozostają przypisane do umiejętności.':'Zmiana zablokowana podczas walki. Oddal się od wrogów i odczekaj 4 s bez atakowania ani otrzymywania ciosów.')+'</p><div class="slot-inventory">'+ACTIVE_SLASHER.filter(k=>sk(k)).map(k=>`<button type="button" class="go${S.activeSlots[selected]===k?' selected-skill':''}" data-equip="${k}" ${safe?'':'disabled'}><i class="ic ic-${SK[k].ic}"></i><span>${SK[k].name}<small>${ACTIVE_CFG[k].cost} staminy · ${S[ACTIVE_CFG[k].cd]>0?'odnowienie '+Math.ceil(S[ACTIVE_CFG[k].cd])+' s':'gotowa'}${S.activeSlots.includes(k)?' · slot '+(S.activeSlots.indexOf(k)+1):' · w rezerwie'}</small></span></button>`).join('')+`<button type="button" class="go alt" data-equip="" ${safe?'':'disabled'}>Opróżnij slot ${selected+1}</button></div>`;const restore=focusSlot!==undefined?el.querySelector('[data-slot="'+focusSlot+'"]'):focusEquip!==undefined?el.querySelector('[data-equip="'+focusEquip+'"]'):null;if(restore&&!restore.disabled)restore.focus({preventScroll:true});}
-function renderActiveHud(){const el=$('activeSkillHud');if(!el)return;const visible=S&&S.phase==='play'&&!S.paused&&!S.notice&&!S.dialog&&!S.choosing&&!S.shop&&!S.intro&&!pl.dead;el.hidden=!visible;if(!visible)return;el.classList.toggle('lt-held',!!PAD.skillHeld);const labels=PAD.on?['LT+X','LT+Y','LT+B']:['Q','E','F'];const markup=S.activeSlots.map((k,i)=>{const c=ACTIVE_CFG[k],cd=k?Math.max(0,S[c.cd]||0):0;return `<button type="button" data-active="${i}" class="active-slot${k?'':' empty'}${k&&pl.sta<c.cost?' no-stamina':''}${cd>0?' cooling':''}" title="${k?SK[k].name+' · '+c.cost+' staminy':'Wolny slot — wyposaż w pauzie'}" aria-label="${labels[i]}: ${k?SK[k].name:'wolny slot'}" ${k?'':'disabled'}><kbd>${labels[i]}</kbd>${k?`<i class="ic ic-${SK[k].ic}"></i><small>${c.cost} stam.</small>`:'<span>—</span>'}${cd>0?`<b class="slot-cd">${Math.ceil(cd)}</b>`:''}</button>`}).join('');if(el.dataset.markup!==markup){el.innerHTML=markup;el.dataset.markup=markup}}
+function renderLoadout(){const el=$('skillLoadout');if(!el)return;el.hidden=!S;if(el.hidden)return;const focused=document.activeElement,focusSlot=el.contains(focused)?focused.dataset.slot:undefined,focusEquip=el.contains(focused)?focused.dataset.equip:undefined;const safe=loadoutSafe(),selected=S.loadoutSelected||0,keys=['Q · LT+X','E · LT+Y','F · LT+B'];el.innerHTML='<h2>Aktywne umiejętności</h2><p>Wybierz slot, potem zdobytą umiejętność. Techniki miecza i zaklęcia ostrza działają poza slotami.</p><div class="slot-pick">'+S.activeSlots.map((k,i)=>`<button type="button" class="go slot-tab${selected===i?' chosen':''}" data-slot="${i}" aria-pressed="${selected===i}"><small>${keys[i]}</small>${k?`<i class="ic ic-${SK[k].ic}"></i>${SK[k].name}`:'Wolny slot'}</button>`).join('')+'</div><p class="loadout-state">'+(safe?'Możesz zmienić wyposażenie. Odnowienia pozostają przypisane do umiejętności.':'Zmiana zablokowana podczas walki. Oddal się od wrogów i odczekaj 4 s bez atakowania ani otrzymywania ciosów.')+'</p><div class="slot-inventory">'+ACTIVE_SLASHER.filter(k=>sk(k)).map(k=>`<button type="button" class="go${S.activeSlots[selected]===k?' selected-skill':''}" data-equip="${k}" ${safe?'':'disabled'}><i class="ic ic-${SK[k].ic}"></i><span>${SK[k].name}<small>${ACTIVE_CFG[k].cost} many · ${S[ACTIVE_CFG[k].cd]>0?'odnowienie '+Math.ceil(S[ACTIVE_CFG[k].cd])+' s':'gotowa'}${S.activeSlots.includes(k)?' · slot '+(S.activeSlots.indexOf(k)+1):' · w rezerwie'}</small></span></button>`).join('')+`<button type="button" class="go alt" data-equip="" ${safe?'':'disabled'}>Opróżnij slot ${selected+1}</button></div>`;const restore=focusSlot!==undefined?el.querySelector('[data-slot="'+focusSlot+'"]'):focusEquip!==undefined?el.querySelector('[data-equip="'+focusEquip+'"]'):null;if(restore&&!restore.disabled)restore.focus({preventScroll:true});}
+function renderActiveHud(){const el=$('activeSkillHud');if(!el)return;const visible=S&&S.phase==='play'&&!S.paused&&!S.notice&&!S.dialog&&!S.choosing&&!S.shop&&!S.intro&&!pl.dead;el.hidden=!visible;if(!visible)return;el.classList.toggle('lt-held',!!PAD.skillHeld);const labels=PAD.on?['LT+X','LT+Y','LT+B']:['Q','E','F'];const markup=S.activeSlots.map((k,i)=>{const c=ACTIVE_CFG[k],cd=k?Math.max(0,S[c.cd]||0):0;return `<button type="button" data-active="${i}" class="active-slot${k?'':' empty'}${k&&pl.mana<c.cost?' no-mana':''}${cd>0?' cooling':''}" title="${k?SK[k].name+' · '+c.cost+' many':'Wolny slot — wyposaż w pauzie'}" aria-label="${labels[i]}: ${k?SK[k].name:'wolny slot'}" ${k?'':'disabled'}><kbd>${labels[i]}</kbd>${k?`<i class="ic ic-${SK[k].ic}"></i><small>${c.cost} many</small>`:'<span>—</span>'}${cd>0?`<b class="slot-cd">${Math.ceil(cd)}</b>`:''}</button>`}).join('');if(el.dataset.markup!==markup){el.innerHTML=markup;el.dataset.markup=markup}}
 $('skillLoadout').addEventListener('click',e=>{const slot=e.target.closest('[data-slot]'),choice=e.target.closest('[data-equip]');if(slot){S.loadoutSelected=+slot.dataset.slot;renderLoadout()}else if(choice)equipActive(S.loadoutSelected||0,choice.dataset.equip||null)});
 for(const ev of ['pointerdown','mousedown','touchstart'])$('activeSkillHud').addEventListener(ev,e=>e.stopPropagation());
 $('activeSkillHud').addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('[data-active]');if(b){e.preventDefault();activateSlot(+b.dataset.active)}});
 
 function swordCanAct(){return !!(S&&S.phase==='play'&&!S.paused&&!S.notice&&!S.dialog&&!S.choosing&&!S.shop&&!S.intro&&!pl.dead&&pl.roll<=0&&!(pl.broken>0)&&!pl.atk&&!pl.block&&!pl.charging)}
-function requestSwordShot(k=sk('frostshot')?'frostshot':sk('embershot')?'embershot':null){if(!swordCanAct())return;if(!k)return;if((S.shotCd||0)>0||pl.sta<12){play('empty',.2);return}const d=aimDir()||[pl.fx,pl.fy];pl.fx=d[0];pl.fy=d[1];pl.sta-=12;pl.staDelay=SL.delay;S.shotCd=4;S.shotWind={k,L:sk(k),x:d[0],y:d[1],t:.2};pl.atk={kind:'shot',stage:'wind',t:.2};S.actions.shot=(S.actions.shot||0)+1;play('swing',0)}
-function swordShotLaunch(w){const ice=w.k==='frostshot',range=(ice?120:100)+10*w.L;S.swordShots.push({x:pl.x+w.x*8,y:pl.y+w.y*8,vx:w.x*190,vy:w.y*190,t:range/190,L:w.L,ice,ch:CH});const p=S.swordShots[S.swordShots.length-1];addVfx(ice?A.fx.nova:A.fx.slash,p.t,p.x,p.y,.55,.33,'bill',-screenAng(w.x,w.y));p.visual=S.vfx[S.vfx.length-1];swordSparks(pl.x+w.x*10,pl.y+w.y*10,ice?'#9ee9ff':'#ffa44b',8)}
+function requestSwordShot(k=sk('frostshot')?'frostshot':sk('embershot')?'embershot':sk('venomshot')?'venomshot':null){if(!swordCanAct())return;if(!k)return;if((S.shotCd||0)>0){play('empty',.2);return}if(!canPayMana(k)){manaFlash();return}const d=aimDir()||[pl.fx,pl.fy];pl.fx=d[0];pl.fy=d[1];payMana(k);S.shotCd=ACTIVE_CFG[k].wait(sk(k));S.shotWind={k,L:sk(k),x:d[0],y:d[1],t:.2};pl.atk={kind:'shot',stage:'wind',t:.2};S.actions.shot=(S.actions.shot||0)+1;play('swing',0)}
+function swordShotLaunch(w){const ice=w.k==='frostshot',venom=w.k==='venomshot',range=(ice?120:100)+10*w.L;S.swordShots.push({x:pl.x+w.x*8,y:pl.y+w.y*8,vx:w.x*190,vy:w.y*190,t:range/190,L:w.L,ice,venom,ch:CH,hit:new Set(),n:0,max:SL.shot.targets[Math.min(3,Math.max(1,w.L))-1]});const p=S.swordShots[S.swordShots.length-1];addVfx(ice?A.fx.nova:A.fx.slash,p.t,p.x,p.y,.55,.33,'bill',-screenAng(w.x,w.y));p.visual=S.vfx[S.vfx.length-1];if(venom){p.visual.anim=p.visual.anim.map(f=>{const n=f.n.clone();n.color.set('#8ac04a');return {...f,n}});p.visual.ownMat=true;}swordSparks(pl.x+w.x*10,pl.y+w.y*10,ice?'#9ee9ff':'#ffa44b',8)}
 function swordTechniqueHit(e,a){if(e.dead)return;if(a.kind==='h'&&sk('iceblade')>=3&&e.chill>0){e.chill=0;for(const o of S.enemies)if(o!==e&&!o.dead&&Math.hypot(o.x-e.x,o.y-e.y)<28){o.chill=Math.max(o.chill||0,1);o.chillMul=Math.min(o.chillMul||1,BIG.has(o.type)||o.type==='collector'?.9:.8)}swordSparks(e.x,e.y,'#b4efff',10)}const L=sk('breach');if(a.kind==='h'&&a.charged&&L){if(BIG.has(e.type)||e.type==='collector'||e.type==='jerzak')breakPoise(e,20+10*L);else{slashStagger(e,.6+.15*L,true);e.vx+=a.dx*90;e.vy+=a.dy*90}}
  if(S.bloodPrimed>0&&sk('bloodseal')&&!a.marked){S.bloodPrimed=0;S.bloodTarget=e;S.bloodMarkT=5;a.marked=true;swordSparks(e.x,e.y,'#d34860',8)}
 }
 function swordOnKill(e){if(S.bloodTarget!==e)return;S.bloodTarget=null;S.bloodMarkT=0;if(ftMelee){S.bloodCharge=4;ftInfo('Piętno krwi: następny cios wzmocniony')}}
 function swordEarth(a,active=false){const L=sk('earthcut');if(!active||!L)return;const hit=new Set();for(let r=12;r<=48+8*L;r+=6){const x=pl.x+a.dx*r,y=pl.y+a.dy*r;if(boxSolid(x,y,2,2))break;if(r%12===0)addVfx(A.fx.spikes,.35,x,y,0,.65,'bill');for(const e of [...S.enemies])if(!e.dead&&!hit.has(e)&&Math.hypot(e.x-x,e.y-y)<10+e.r){hit.add(e);damageEnemy(e,(8+4*L)*(1+.07*(S.lvl-1)),a.dx,a.dy,.3)}}}
-function swordShadowStep(){if(!sk('shadowstep')||!(S.shadowReady>0)||pl.sta<attackCost('l')+6)return;let target=null,dist=1e9;for(const e of S.enemies){const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(e.dead||e.rise>0||d>80||d<25||(dx*pl.fx+dy*pl.fy)/d<.5||!sight(pl.x,pl.y,e.x,e.y))continue;if(d<dist){target=e;dist=d}}if(!target)return;S.shadowReady=0;pl.sta-=6;const dx=(target.x-pl.x)/dist,dy=(target.y-pl.y)/dist,n=Math.min(18+6*sk('shadowstep'),Math.max(0,dist-contactGap(target)-2));for(let i=0;i<n;i+=2)moveBox(pl,dx*Math.min(2,n-i),dy*Math.min(2,n-i),4,3);swordSparks(pl.x,pl.y,'#b193dc',8)}
-function summonSwordGuardian(active=false){const L=sk('stoneguard');if(!active||!L)return;let x=pl.x-pl.fx*14,y=pl.y-pl.fy*14;if(boxSolid(x,y,6,4)){x=pl.x;y=pl.y}const mesh=new THREE.Mesh(geo32,A.golem.idle[0].n);mesh.position.set(x/16,0,y/16);mesh.scale.set(1,SQ,1);scene.add(mesh);S.swordGuardian={x,y,t:2+.5*L,mesh,ch:CH};S.guardCd=14;swordSparks(x,y,'#d6bf81',12)}
-function clearSwordTransient(){if(!S)return;S.activeWind=null;S.bloodPrimed=0;if(pl?.atk?.kind==='skill')pl.atk=null;if(pl?.atk?.kind==='shot')pl.atk=null;S.swordTrails=[];if(S.swordGuardian)scene.remove(S.swordGuardian.mesh);S.swordGuardian=null;for(const p of S.swordShots||[])if(p.visual)p.visual.t=p.visual.dur;S.swordShots=[];S.shotWind=null;S.bloodTarget=null;S.bloodMarkT=0;S.shadowReady=0;S.bloodCharge=0;S.retaliate=0}
+function swordShadowStep(){if(!sk('shadowstep')||!(S.shadowReady>0)||pl.sta<attackCost('l')+SL.stepCost)return;let target=null,dist=1e9;for(const e of S.enemies){const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(e.dead||e.rise>0||d>80||d<25||(dx*pl.fx+dy*pl.fy)/d<.5||!sight(pl.x,pl.y,e.x,e.y))continue;if(d<dist){target=e;dist=d}}if(!target)return;S.shadowReady=0;pl.sta-=SL.stepCost;const dx=(target.x-pl.x)/dist,dy=(target.y-pl.y)/dist,n=Math.min(18+6*sk('shadowstep'),Math.max(0,dist-contactGap(target)-2));for(let i=0;i<n;i+=2)moveBox(pl,dx*Math.min(2,n-i),dy*Math.min(2,n-i),4,3);swordSparks(pl.x,pl.y,'#b193dc',8)}
+// Stone guardian: a walking golem that draws ordinary enemies to itself for up to 10 s. It has its own life,
+// deals no damage, never heals. Bosses (bottom health bar) follow it for at most SL.guard.bossTaunt seconds per summon.
+function summonSwordGuardian(active=false){const L=Math.min(3,sk('stoneguard'));if(!active||!L)return;removeGuardian();let x=pl.x+pl.fx*14,y=pl.y+pl.fy*14;if(boxSolid(x,y,6,4)){x=pl.x;y=pl.y}const mesh=new THREE.Mesh(geo32,A.golem.idle[0].n);mesh.position.set(x/16,0,y/16);mesh.scale.set(1,SQ,1);scene.add(mesh);
+  const max=Math.max(1,Math.round(pl.max*SL.guard.hp[L-1]));S.guardSeq=(S.guardSeq||0)+1;S.swordGuardian={golem:true,id:S.guardSeq,x,y,t:SL.guard.dur,hp:max,max,L,R:SL.guard.taunt[L-1],mesh,ch:CH,s:pl.fx<0?-1:1,walk:0,moving:false,inv:0,gone:false};swordSparks(x,y,'#d6bf81',12)}
+function removeGuardian(){const g=S&&S.swordGuardian;if(!g)return;g.gone=true;scene.remove(g.mesh);S.swordGuardian=null}
+function bossBar(e){return BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'||e.type==='boginka'}
+function golemTgt(e){return !!(e.tg&&e.tg.golem)}
+// only direct blows and projectiles reach the golem; it shrugs off nothing else
+function golemHurt(g,dmg){if(!g||g.gone||g.inv>0||!(dmg>0))return false;g.hp-=dmg;g.inv=SL.guard.inv;swordSparks(g.x,g.y,'#d6bf81',5);if(g.hp<=0){g.hp=0;swordSparks(g.x,g.y,'#d6bf81',18);shake(.15,.2);removeGuardian()}return true}
+// a direct enemy blow lands on the target chosen when the attack began
+function hitT(e,dmg,nx,ny,att=false){if(golemTgt(e)){golemHurt(e.tg,dmg);return false}return att?hurtFromEnemy(e,dmg,nx,ny):hurtPlayer(dmg,nx,ny)}
+// area blows (slams, roots, bursts) only ever check the hero's own position
+function aoeP(e,R,dmg,cx=e.x,cy=e.y){const dx=pl.x-cx,dy=pl.y-cy,d=Math.hypot(dx,dy)||1;return d<R?hurtPlayer(dmg,dx/d,dy/d):false}
+function enemyBusy(e){return enemyWinding(e)||e.leap>0||e.mode==='charge'||e.mode==='dive'||e.mode==='down'||e.pull>0||e.boom>0}
+// who this enemy is after; kept for the whole wind-up and strike so a ready blow never turns at the last moment
+function enemyTarget(e,dt){if(enemyBusy(e)&&e.tg)return e.tg;const g=S.swordGuardian;let t=pl;
+  if(g&&!g.gone&&g.ch===CH&&e.type!=='wisp'&&Math.hypot(g.x-e.x,g.y-e.y)<=g.R+e.r&&sight(e.x,e.y,g.x,g.y)){
+    if(bossBar(e)){if(e.tauntId!==g.id){e.tauntId=g.id;e.tauntLeft=SL.guard.bossTaunt}if(e.tauntLeft>0){e.tauntLeft-=dt;t=g}}else t=g}
+  e.tg=t;return t}
+function keepGolemDistance(e){const g=S.swordGuardian;if(!g||g.gone||!enemyBody(e))return;const dx=e.x-g.x,dy=e.y-g.y,d=Math.hypot(dx,dy),gap=SL.guard.r+e.r;if(d>=gap||d<.001)return;moveBox(e,dx/d*(gap-d),dy/d*(gap-d),e.hw||e.r-1,3)}
+function golemTick(dt){const g=S.swordGuardian;if(!g)return;g.t-=dt;g.inv=Math.max(0,g.inv-dt);
+  if(g.t<=0||g.hp<=0||g.ch!==CH||pl.dead){removeGuardian();return}
+  let tg=null,best=1e9;for(const e of S.enemies){if(e.dead||e.rise>0||e.sleep||bossBar(e)||e.type==='wisp'||Math.hypot(e.x-pl.x,e.y-pl.y)>SL.guard.leash)continue;const dd=Math.hypot(e.x-g.x,e.y-g.y);if(dd<best&&sight(g.x,g.y,e.x,e.y)){best=dd;tg=e}}
+  const tx=tg?tg.x:pl.x-pl.fx*14,ty=tg?tg.y:pl.y-pl.fy*14,stop=tg?tg.r+SL.guard.r+2:12,dx=tx-g.x,dy=ty-g.y,d=Math.hypot(dx,dy);g.moving=false;
+  if(d>stop){const st=Math.min(d-stop,SL.guard.spd*dt),ox=g.x,oy=g.y;moveBox(g,dx/d*st,dy/d*st,5,3);g.moving=Math.hypot(g.x-ox,g.y-oy)>st*.3;if(g.moving)g.walk+=dt}
+  if(Math.abs(dx)>1)g.s=dx>0?1:-1;
+  g.mesh.position.set(g.x/16,0,g.y/16);g.mesh.scale.set(g.s,SQ,1);setFrame(g.mesh,g.moving?at(A.golem.walk,g.walk,7):at(A.golem.idle,clock,2))}
+function clearSwordTransient(){if(!S)return;S.activeWind=null;S.bloodPrimed=0;if(pl?.atk?.kind==='skill')pl.atk=null;if(pl?.atk?.kind==='shot')pl.atk=null;S.swordTrails=[];removeGuardian();for(const p of S.swordShots||[])if(p.visual)p.visual.t=p.visual.dur;S.swordShots=[];S.shotWind=null;S.bloodTarget=null;S.bloodMarkT=0;S.shadowReady=0;S.bloodCharge=0;S.retaliate=0}
 function swordTick(dt){activeSlotsTick(dt);for(let i=S.swordTrails.length-1;i>=0;i--){const z=S.swordTrails[i];z.t-=dt;if(z.t<=0){S.swordTrails.splice(i,1);continue}if(Math.random()<dt*16)swordSparks(z.x,z.y,'#ff8a38',1);for(const e of S.enemies)if(!e.dead&&!z.hit.has(e)&&Math.hypot(e.x-z.x,e.y-z.y)<12+e.r){z.hit.add(e);e.burn=Math.max(e.burn||0,1);e.burnD=Math.max(e.burnD||0,2)}}for(const k of ['shotCd','earthCd','guardCd','shadowReady','retaliate','bloodCharge','bloodMarkT'])S[k]=Math.max(0,(S[k]||0)-dt);if(!S.bloodMarkT)S.bloodTarget=null;
  if(S.shotWind){if(pl.dead||pl.roll>0||pl.broken>0){S.shotWind=null;if(pl.atk?.kind==='shot')pl.atk=null}else{S.shotWind.t-=dt;if(S.shotWind.t<=0){swordShotLaunch(S.shotWind);S.shotWind=null;pl.atk={kind:'shot',stage:'rec',t:.18}}}}
- if(S.swordGuardian){const g=S.swordGuardian;g.t-=dt;if(g.t<=0||g.ch!==CH||pl.dead){scene.remove(g.mesh);S.swordGuardian=null}else{g.mesh.position.set(g.x/16,0,g.y/16);g.mesh.scale.set(1,SQ,1);setFrame(g.mesh,at(A.golem.idle,clock,2))}}
- for(let i=S.swordShots.length-1;i>=0;i--){const p=S.swordShots[i];p.t-=dt;let gone=p.t<=0||p.ch!==CH;const steps=Math.max(1,Math.ceil(190*dt/3));for(let s=0;s<steps&&!gone;s++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;if(boxSolid(p.x,p.y,2,2)){gone=true;break}for(const e of S.enemies){if(e.dead||e.rise>0||Math.hypot(e.x-p.x,e.y-p.y)>e.r+3)continue;gone=true;const ok=damageEnemy(e,(p.ice?8+p.L:7+p.L)*(1+.07*(S.lvl-1)),p.vx/190,p.vy/190,0);if(ok&&!e.dead){if(p.ice){e.chill=Math.max(e.chill||0,1.5);e.chillMul=Math.min(e.chillMul||1,BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'?.9:1-(.25+.05*p.L))}else{e.burn=Math.max(e.burn||0,1+.5*p.L);e.burnD=Math.max(e.burnD||0,2)}}swordSparks(p.x,p.y,p.ice?'#a2e9ff':'#ff9a43',8);break}}if(p.visual){p.visual.x=p.x;p.visual.y=p.y;if(gone)p.visual.t=p.visual.dur}if(!gone)swordSparks(p.x,p.y,p.ice?'#a2e9ff':'#ff9a43',2);else S.swordShots.splice(i,1)}
+ golemTick(dt);
+ for(let i=S.swordShots.length-1;i>=0;i--){const p=S.swordShots[i];p.t-=dt;let gone=p.t<=0||p.ch!==CH;const steps=Math.max(1,Math.ceil(190*dt/3));for(let s=0;s<steps&&!gone;s++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;if(boxSolid(p.x,p.y,2,2)){gone=true;break}const ux=p.vx/190,uy=p.vy/190,touch=S.enemies.filter(e=>!e.dead&&!(e.rise>0)&&!p.hit.has(e)&&Math.hypot(e.x-p.x,e.y-p.y)<=e.r+3).sort((a,b)=>((a.x-p.x)*ux+(a.y-p.y)*uy)-((b.x-p.x)*ux+(b.y-p.y)*uy));
+   for(const e of touch){p.hit.add(e);const ok=damageEnemy(e,(p.venom?12+2*p.L:((p.ice?SL.shot.iceDmg:SL.shot.fireDmg)+SL.shot.perL*p.L))*(1+.07*(S.lvl-1)),ux,uy,0);if(!ok)continue;p.n++;if(!e.dead){if(p.venom){e.pois=Math.max(e.pois||0,3);e.poisD=Math.max(e.poisD||0,(2+p.L)*(BIG.has(e.type)||e.type==='collector'?.5:1))}else if(p.ice){e.chill=Math.max(e.chill||0,1.5);e.chillMul=Math.min(e.chillMul||1,BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'?.9:1-(.25+.05*p.L))}else{e.burn=Math.max(e.burn||0,1+.5*p.L);e.burnD=Math.max(e.burnD||0,2)}}swordSparks(p.x,p.y,p.venom?'#8ac04a':p.ice?'#a2e9ff':'#ff9a43',8);if(p.n>=p.max){gone=true;break}}}if(p.visual){p.visual.x=p.x;p.visual.y=p.y;if(gone)p.visual.t=p.visual.dur}if(!gone)swordSparks(p.x,p.y,p.venom?'#8ac04a':p.ice?'#a2e9ff':'#ff9a43',2);else S.swordShots.splice(i,1)}
 }
 let swordGlow=null;
-function syncSwordGlow(){if(!swordGlow){const c=canvas(32,128),g=c.getContext('2d'),a=g.createLinearGradient(0,0,32,0);a.addColorStop(0,'transparent');a.addColorStop(.42,'#ffffff55');a.addColorStop(.5,'#fff');a.addColorStop(.58,'#ffffff55');a.addColorStop(1,'transparent');g.fillStyle=a;g.beginPath();g.moveTo(16,2);g.lineTo(28,100);g.lineTo(16,125);g.lineTo(4,100);g.closePath();g.fill();const t=new THREE.CanvasTexture(c);swordGlow=new THREE.Mesh(new THREE.PlaneGeometry(.16,1.05),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,toneMapped:false}));swordGlow.renderOrder=5;scene.add(swordGlow)}const k=S?encLevel()[0]:null;swordGlow.visible=!!(k&&S.phase==='play'&&!pl.dead&&pl.roll<=0);if(!swordGlow.visible)return;const a=pl.atk,ang=a&&a.kind!=='shot'?Math.atan2(pl.fy,pl.fx)+(a.stage==='wind'?-.65:a.stage==='act'?.5:.85):(Math.abs(pl.fx)>.5?(pl.fx>0?.7:Math.PI-.7):pl.fy>0?.9:-.9);swordGlow.position.set((pl.x+(a?Math.cos(ang)*9:pl.fx*6))/16,.65,(pl.y+(a?Math.sin(ang)*8:pl.fy*8+2))/16);swordGlow.quaternion.copy(cam.quaternion);swordGlow.rotateZ(-screenAng(Math.cos(ang),Math.sin(ang))-Math.PI/2);swordGlow.material.color.set(ENC[k].col);swordGlow.material.opacity=SETT.flash?.65:.85;swordGlow.scale.set(a?1.35:.7,a?1.05:.75,1)}
+
+let bladeVisualKey='';
+function updateBladeTexture(k){const secondary=ENCH.find(x=>sk(x)&&x!==k)||'',key=k+':'+secondary;if(key===bladeVisualKey)return;bladeVisualKey=key;const c=canvas(64,192),g=c.getContext('2d'),col=x=>x==='bloodblade'?'#e4a2cf':ENC[x].col,main=col(k);const grad=g.createLinearGradient(8,0,56,0);grad.addColorStop(0,'transparent');grad.addColorStop(.3,main+'50');grad.addColorStop(.5,main);grad.addColorStop(.7,main+'70');grad.addColorStop(1,'transparent');g.fillStyle=grad;g.beginPath();g.moveTo(32,5);g.lineTo(48,154);g.lineTo(32,184);g.lineTo(16,154);g.closePath();g.fill();g.fillStyle=main;g.strokeStyle=main;g.lineWidth=2;for(let i=0;i<7;i++){const y=30+i*20,side=i%2?1:-1,x=32+side*(4+i);g.beginPath();if(k==='iceblade'){g.moveTo(x,y);g.lineTo(x+side*10,y-10);g.lineTo(x+side*6,y+8);g.closePath();g.fill()}else if(k==='fireblade'){g.moveTo(x,y+9);g.quadraticCurveTo(x+side*17,y-3,x+side*7,y-14);g.quadraticCurveTo(x+side*3,y,x,y+9);g.fill()}else if(k==='bloodblade'){g.ellipse(x+side*3,y,2,5,-side*.4,0,Math.PI*2);g.fill()}else{g.arc(x+side*5,y,3+i%2,0,Math.PI*2);g.stroke()}}if(secondary){g.strokeStyle=col(secondary);g.lineWidth=3;g.beginPath();g.moveTo(30,28);g.lineTo(30,164);g.stroke()}const tex=new THREE.CanvasTexture(c);if(swordGlow.material.map)swordGlow.material.map.dispose();swordGlow.material.map=tex;swordGlow.material.needsUpdate=true}
+function syncSwordGlow(){if(!swordGlow){const c=canvas(32,128),g=c.getContext('2d'),a=g.createLinearGradient(0,0,32,0);a.addColorStop(0,'transparent');a.addColorStop(.42,'#ffffffaa');a.addColorStop(.5,'#fff');a.addColorStop(.58,'#ffffff55');a.addColorStop(1,'transparent');g.fillStyle=a;g.beginPath();g.moveTo(16,2);g.lineTo(28,100);g.lineTo(16,125);g.lineTo(4,100);g.closePath();g.fill();const t=new THREE.CanvasTexture(c);swordGlow=new THREE.Mesh(new THREE.PlaneGeometry(.3,1.05),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending,toneMapped:false}));swordGlow.renderOrder=5;scene.add(swordGlow)}const k=S?encLevel()[0]:null;swordGlow.visible=!!(k&&S.phase==='play'&&!pl.dead&&pl.roll<=0);if(!swordGlow.visible)return;const a=pl.atk,ang=a&&a.kind!=='shot'?Math.atan2(pl.fy,pl.fx)+(a.stage==='wind'?-.65:a.stage==='act'?.5:.85):(Math.abs(pl.fx)>.5?(pl.fx>0?.7:Math.PI-.7):pl.fy>0?.9:-.9);swordGlow.position.set((pl.x+(a?Math.cos(ang)*9:pl.fx*6))/16,.65,(pl.y+(a?Math.sin(ang)*8:pl.fy*8+2))/16);swordGlow.quaternion.copy(cam.quaternion);swordGlow.rotateZ(-screenAng(Math.cos(ang),Math.sin(ang))-Math.PI/2);updateBladeTexture(k);swordGlow.material.color.setHex(0xffffff);swordGlow.material.opacity=SETT.flash?.85:.22;swordGlow.scale.set(a?1.35:.7,a?1.05:.75,1)}
 
 function applyEnchants(e,a,crit){if(e.dead)return;const [k,L]=encLevel();if(!k)return;const big=BIG.has(e.type)||e.type==='collector'||e.type==='jerzak',c=ENC[k];
   if(!crit&&Math.random()>=encChance(L)*(a.kind==='h'?1.5:1))return;
@@ -2762,8 +2819,8 @@ function applyEnchants(e,a,crit){if(e.dead)return;const [k,L]=encLevel();if(!k)r
   else{e.xp=Math.max(e.xp,1);e.hp=0;killEnemy(e,0,1)}}
 // Force Push (a sign): a cone of force that throws enemies back, stuns them and knocks projectiles out of the air
 function castAard(prepaid=false){const L=S.sk.aard||0;if(!L||pl.dead||pl.roll>0||pl.broken>0||(pl.atk&&pl.atk.stage!=='rec'))return;
-  if(!prepaid&&S.aardCd>0){play('empty',.2);return}if(!prepaid&&pl.sta<20){S.stamFlash=.45;play('empty',.25);return}
-  if(!prepaid)pl.sta-=20;pl.staDelay=SL.delay;pl.atk=null;pl.block=false;S.aardCd=Math.max(4.5,9-L);
+  if(!prepaid&&S.aardCd>0){play('empty',.2);return}if(!prepaid&&!canPayMana('aard')){manaFlash(.45);return}
+  if(!prepaid)payMana('aard');pl.atk=null;pl.block=false;S.aardCd=Math.max(4.5,9-L);
   const a=aimDir()||autoAim()||[pl.fx,pl.fy];pl.fx=a[0];pl.fy=a[1];const ang=Math.atan2(a[1],a[0]),R=56+8*L,full=L>=5,stun=1+.2*L,dmg=8+8*L;
   for(const e of S.enemies){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy)||1;if(d>R+e.r)continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(!full&&Math.abs(df)>.95)continue;
     const big=BIG.has(e.type)||e.type==='collector';if(!damageEnemy(e,dmg*(1+.07*(S.lvl-1)),dx/d,dy/d,0)||e.dead)continue;
@@ -2774,8 +2831,8 @@ function castAard(prepaid=false){const L=S.sk.aard||0;if(!L||pl.dead||pl.roll>0|
   pl.swingT=pl.swingDur=.25;if(Math.abs(a[0])>Math.abs(a[1])){pl.swingDir=2;pl.swingS=a[0]>0?1:-1}else{pl.swingDir=a[1]>0?0:1;pl.swingS=1}}
 // enemy side: wind up, strike, then stand open for a moment
 function slashEnemy(e,dx,dy,d,dt){
-  if(e.sw>0){e.sw-=dt;if(e.sw<=0){e.recov=SL.enemyRec*(e.type==='bat'?.5:1);e.atkA=.3;const red=!!e.red,avoid=pl.inv>0||d>=e.r+17;e.red=false;
-    if(d<e.r+17&&!pl.dead){S.attacker=e;S.redHit=red;hurtPlayer(enemyDamage(e.dmg*SL.enemyHit,SL.dmgDiv),dx/d,dy/d);S.attacker=null;S.redHit=false}
+  if(e.sw>0){e.sw-=dt;if(e.sw<=0){e.recov=SL.enemyRec*(e.type==='bat'?.5:1);e.atkA=.3;const red=!!e.red,avoid=(!golemTgt(e)&&pl.inv>0)||d>=e.r+17;e.red=false;
+    if(d<e.r+17&&!pl.dead){S.attacker=e;S.redHit=red;hitT(e,enemyDamage(e.dmg*SL.enemyHit,SL.dmgDiv),dx/d,dy/d);S.attacker=null;S.redHit=false}
     if(red&&avoid&&!pl.dead){e.stun=Math.max(e.stun||0,.9);e.recov=0;e.sw=0;ftx('Odsłonięty',e.x,e.y,ftEntH(e)+.5,'i')}}return true}
   if(e.recov>0){e.recov-=dt;return true}
   if(e.acd===undefined)e.acd=rnd(.2,.9);
@@ -2865,7 +2922,7 @@ function hurtPlayer(dmg,nx,ny){if(S.notice||pl.inv>0||pl.dead)return false;dmg*=
     if(S.redHit&&pl.blockT<parryWin()+.1)ftInfo('Nie do sparowania');pl.sta-=dmg*blockMulX()*(S.redHit?2.2:1);pl.staDelay=SL.delay;pl.gHitT=.25;guardFeedback('block',nx,ny);
     if(pl.sta>=0){pl.inv=.18;moveBox(pl,nx*6,ny*4,4,3);return}
     pl.sta=0;pl.broken=SL.guardBreak;pl.block=false;dmg*=.5;play('empty',0);ftInfo('Garda przełamana')}
-  S.combatLock=4;if(S.swordGuardian&&Math.hypot(pl.x-S.swordGuardian.x,pl.y-S.swordGuardian.y)<=38)dmg*=1-(.15+.05*sk('stoneguard'));S.hitsT++;pl.hp-=dmg;padRumble(.8,.5,200);pl.inv=.45;pl.hurtT=.22;S.hurt=.3;shake(.25,.18);blood(pl.x,pl.y,10,nx,ny);play('hurt',.1);
+  S.combatLock=4;S.hitsT++;pl.hp-=dmg;padRumble(.8,.5,200);pl.inv=.45;pl.hurtT=.22;S.hurt=.3;shake(.25,.18);blood(pl.x,pl.y,10,nx,ny);play('hurt',.1);
   if(pl.hp<=0){if(tryRebirth())return true;loseSecondLife();clearSwordTransient();S.swordTrails=[];pl.hp=0;pl.dead=true;pl.deadT=0;blood(pl.x,pl.y,70,nx,ny,3);play('kill',0);S.endT=2.6;pool(pl.x,pl.y,20,8)}return true}
 function updEnemy(e,dt){
   keepEnemyDistance(e);const ox=e.x,oy=e.y,dx=pl.x-e.x,dy=pl.y-e.y,d=Math.hypot(dx,dy);
@@ -2873,7 +2930,7 @@ function updEnemy(e,dt){
   const lock=attackCue(e)!==null&&e.mode!=='up',mode=e.mode;
   stepEnemyAI(e,dt);
   if(lock&&!e.dead&&e.mode===mode){e.x=ox;e.y=oy}
-  keepEnemyDistance(e,ox,oy);
+  keepEnemyDistance(e,ox,oy);keepGolemDistance(e);
 }
 function stepEnemyAI(e,dt){
   if(e.staggerCd>0)e.staggerCd=Math.max(0,e.staggerCd-dt);if(e.acd!==undefined)e.acd-=dt;
@@ -2890,37 +2947,37 @@ function stepEnemyAI(e,dt){
   if(Math.abs(e.vx)+Math.abs(e.vy)>1){if(fly){e.x+=e.vx*dt;e.y+=e.vy*dt}else moveBox(e,e.vx*dt,e.vy*dt,hw,3);const f=Math.pow(.002,dt);e.vx*=f;e.vy*=f}
   // stunned enemies still fly back from a knockback, but do nothing else
   if(e.stun>0){e.ghoulWind=0;e.stun-=dt;e.sw=0;e.chT=0;e.pull=0;e.aim=0;return}
-  const dx=pl.x-e.x,dy=pl.y-e.y,d=Math.hypot(dx,dy)||1;
-  if(d>480&&!BIG.has(e.type)&&e.type!=='wisp'&&e.type!=='boginka'){const p=ringSpot();if(p){e.x=p[0];e.y=p[1]}return}
+  const T=enemyTarget(e,dt),dx=T.x-e.x,dy=T.y-e.y,d=Math.hypot(dx,dy)||1;
+  if(Math.hypot(pl.x-e.x,pl.y-e.y)>480&&!BIG.has(e.type)&&e.type!=='wisp'&&e.type!=='boginka'){const p=ringSpot();if(p){e.x=p[0];e.y=p[1]}return}
   if(Math.abs(dx)>1)e.s=dx>0?1:-1;
   if(pl.dead)return;if(e.ghoulWind>0){e.ghoulWind-=dt;if(e.ghoulWind<=0){e.leap=.3;e.lhit=0;e.atkA=.3;e.lx=e.ghoulDX*82;e.ly=e.ghoulDY*82}return}
   if(e.type==='jerzak'){e.walk+=dt;e.hop=(e.hop||0)+dt;if(e.selfKill>0){e.selfKill-=dt;if(Math.random()<dt*12)shake(.08,.05);if(e.selfKill<=0){e.hp=0;killEnemy(e,0,1)}return}}
   if(e.type==='collector'){e.stealCd=(e.stealCd||0)-dt;e.drain=(e.drain||0)-dt;e.hurtA=(e.hurtA||0)-dt;e.hurtCd=(e.hurtCd||0)-dt;e.tauntA=(e.tauntA||0)-dt;e.tauntCd=(e.tauntCd===undefined?4:e.tauntCd)-dt;
     if(e.tauntCd<=0&&e.stolen>0&&d>90){e.tauntCd=rnd(6,9);e.tauntA=1}
-    if(e.stealWind>0){e.stealWind-=dt;if(e.stealWind<=0&&d<e.r+15){S.attacker=e;const hit=hurtPlayer(enemyDamage(12,0),dx/d,dy/d);S.attacker=null;if(hit){const n=Math.min(S.coins,Math.max(3,Math.floor(S.coins*.15)));S.coins-=n;e.stolen+=n;if(n)ftInfo('−'+n+' monet')}}}
-    else if(d<e.r+10&&e.stealCd<=0&&pl.inv<=0){e.stealWind=.65;e.stealCd=2;telegraph(e)}
-    else if(d<56&&e.drain<=0&&S.coins>0&&pl.inv<=0&&sight(e.x,e.y,pl.x,pl.y)){e.drain=1;e.drainAt=clock;S.coins--;e.stolen++;S.parts.push({k:'g2',x:pl.x,y:pl.y,z:10,tx:e,life:.6,c:'#e0b84a'})}}
+    if(e.stealWind>0){e.stealWind-=dt;if(e.stealWind<=0&&d<e.r+15){S.attacker=e;const hit=hitT(e,enemyDamage(12,0),dx/d,dy/d);S.attacker=null;if(hit){const n=Math.min(S.coins,Math.max(3,Math.floor(S.coins*.15)));S.coins-=n;e.stolen+=n;if(n)ftInfo('−'+n+' monet')}}}
+    else if(d<e.r+10&&e.stealCd<=0&&(golemTgt(e)||pl.inv<=0)){e.stealWind=.65;e.stealCd=2;telegraph(e)}
+    else if(!golemTgt(e)&&d<56&&e.drain<=0&&S.coins>0&&pl.inv<=0&&sight(e.x,e.y,T.x,T.y)){e.drain=1;e.drainAt=clock;S.coins--;e.stolen++;S.parts.push({k:'g2',x:pl.x,y:pl.y,z:10,tx:e,life:.6,c:'#e0b84a'})}}
 
   if(e.type==='collector'&&CH===5&&A.collectorC5){// Arcysędzia Rachmistrz: wyrok młotem, strony nakazu, wezwanie ławników
     e.hamCd=(e.hamCd===undefined?4:e.hamCd)-dt;e.sumCd=(e.sumCd===undefined?15:e.sumCd)-dt;e.fanCd=(e.fanCd===undefined?3:e.fanCd)-dt;
-    if(e.hamT>0){e.hamT-=dt;e.tauntA=.2;if(e.hamT<=0){shake(.5,.4);play('slam',0);addVfx(A.fx.nova,.35,e.x,e.y,.08,60/8,'ground');if(d<56&&pl.inv<=0)hurtPlayer(enemyDamage(20),dx/d,dy/d);e.atkA=.4;
+    if(e.hamT>0){e.hamT-=dt;e.tauntA=.2;if(e.hamT<=0){shake(.5,.4);play('slam',0);addVfx(A.fx.nova,.35,e.x,e.y,.08,60/8,'ground');if(pl.inv<=0)aoeP(e,56,enemyDamage(20));e.atkA=.4;
         for(let i=0;i<20;i++){const a=i/20*Math.PI*2;S.parts.push({k:'d',x:e.x+Math.cos(a)*12,y:e.y+Math.sin(a)*6,z:1,vx:Math.cos(a)*90,vy:Math.sin(a)*45,vz:18,c:'#e0b84a',life:.6})}}return}
     if(d<64&&e.hamCd<=0&&!(e.stealWind>0)){e.hamT=.7;e.hamCd=5.5;telegraph(e);for(let k=0;k<3;k++)telegraph(e);play('bossGrowl',0);return}
     if(e.sumCd<=0&&S.enemies.length<ENEMY_CAP-6){e.sumCd=22;e.tauntA=.8;say('Arcysędzia wzywa ławników: „Wyrok jest już spisany”.');for(let k=0;k<2;k++){const a=Math.random()*6.28,q=spawnEnemy('scribe',e.x+Math.cos(a)*26,e.y+Math.sin(a)*16);q.rise=.8}}
     if(e.fanWind>0){e.fanWind-=dt;if(e.fanWind<=0){for(const o of [-.25,0,.25])S.eproj.push({x:e.x,y:e.y,vx:Math.cos(e.fanAim+o)*95,vy:Math.sin(e.fanAim+o)*95,life:2.4,bolt:1});e.atkA=.35;play('swing',.2)}return}
-    if(e.fanCd<=0&&d>70&&d<210&&sight(e.x,e.y,pl.x,pl.y)){e.fanCd=4.8;e.fanWind=.75;e.fanAim=Math.atan2(dy,dx);telegraph(e);return}}
+    if(e.fanCd<=0&&d>70&&d<210&&sight(e.x,e.y,T.x,T.y)){e.fanCd=4.8;e.fanWind=.75;e.fanAim=Math.atan2(dy,dx);telegraph(e);return}}
   if(e.type==='beast'&&beastAI(e,dx,dy,d,dt))return;
   if(CZAI[e.type]&&CZAI[e.type](e,dx,dy,d,dt,hw))return;
   if(e.type==='monk'){e.cast=(e.cast===undefined?rnd(1,2.5):e.cast)-dt;
     const mFire=()=>{e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*74,vy:dy/d*74,life:2.6,ph:Math.random(),mesh:A.fireball?(()=>{const m=new THREE.Mesh(geoC,A.fireball[0].n);scene.add(m);return m})():null});play('fire',.2)};
-    if(e.aim>0){e.aim-=dt;if(e.aim<=0&&d>1&&sight(e.x,e.y,pl.x,pl.y))mFire()}
-    else if(d<140&&e.cast<=0&&sight(e.x,e.y,pl.x,pl.y)&&(S.enemyShotCd||0)<=0){e.aim=SL.aim;e.cast=rnd(4,5);S.enemyShotCd=SL.shotGap+SL.aim;telegraph(e)}
+    if(e.aim>0){e.aim-=dt;if(e.aim<=0&&d>1&&sight(e.x,e.y,T.x,T.y))mFire()}
+    else if(d<140&&e.cast<=0&&sight(e.x,e.y,T.x,T.y)&&(S.enemyShotCd||0)<=0){e.aim=SL.aim;e.cast=rnd(4,5);S.enemyShotCd=SL.shotGap+SL.aim;telegraph(e)}
     if(d<64){moveBox(e,-dx/d*e.spd*dt,-dy/d*e.spd*dt,hw,3);e.walk+=dt;return}if(d<110){e.walk+=dt*.3;return}}
   if(!BIG.has(e.type)&&e.type!=='collector'&&e.type!=='jerzak'&&e.type!=='wisp'&&e.dmg>0&&e.leap<=0){if(slashEnemy(e,dx,dy,d,dt)){e.walk+=dt*.2;return}}
   else if(d<e.r+6&&e.dmg>0&&e.type!=='collector'&&BIG.has(e.type)){
     if(BIG.has(e.type)){if(!(e.ctw>0)&&!(e.ccd>0)){e.ctw=.4;for(let k=0;k<3;k++)telegraph(e)}}// boss: zapowiedź .4 s, potem przerwa 1,4 s (unik w tym czasie ratuje)
-    else{hurtPlayer(enemyDamage(e.dmg,480),dx/d,dy/d);if(e.atkA<=0)e.atkA=.35}}
-  if(BIG.has(e.type)){if(e.ccd>0)e.ccd-=dt;if(e.ctw>0){e.ctw-=dt;if(e.ctw<=0){e.ccd=1.4;if(d<e.r+10){hurtFromEnemy(e,enemyDamage(e.dmg,480),dx/d,dy/d);e.atkA=.35}}}}
+    else{hitT(e,enemyDamage(e.dmg,480),dx/d,dy/d);if(e.atkA<=0)e.atkA=.35}}
+  if(BIG.has(e.type)){if(e.ccd>0)e.ccd-=dt;if(e.ctw>0){e.ctw-=dt;if(e.ctw<=0){e.ccd=1.4;if(d<e.r+10){hitT(e,enemyDamage(e.dmg,480),dx/d,dy/d,true);e.atkA=.35}}}}
   if(e.type==='boss'&&CH===5&&A.bossC5){// Wierzyciel: faza I (strony), faza II (po połowie życia: monety, wyrok, szybszy)
     for(const k of ['lashF','castF','callF','slamF'])if(e[k]>0)e[k]-=dt;
     if(!e.ph2&&e.hp<e.max*.5){e.ph2=1;e.trans=1.6;e.ctw=0;e.ccd=2;e.atkT=0;e.castWind=0;e.cast=2;e.spd*=1.35;shake(.7,.8);play('bossGrowl',0);addVfx(A.fx.nova,.6,e.x,e.y,.08,80/8,'ground');say('Wierzyciel wstaje z tronu. Łańcuchy pękają, a w jego dłoniach otwiera się nowa księga.');
@@ -2928,16 +2985,16 @@ function stepEnemyAI(e,dt){
     if(e.trans>0){e.trans-=dt;return}
     e.cast=(e.cast===undefined?3:e.cast)-dt;
     if(e.castWind>0){e.castWind-=dt;if(e.castWind<=0){if(!e.ph2){for(const o of [-.32,0,.32])S.eproj.push({x:e.x,y:e.y,vx:Math.cos(e.castAim+o)*90,vy:Math.sin(e.castAim+o)*90,life:2.8,bolt:1});e.castF=.4}else{e.ringOff=(e.ringOff||0)+.31;for(let i=0;i<12;i++){const a=i/12*Math.PI*2+e.ringOff;S.eproj.push({x:e.x,y:e.y,vx:Math.cos(a)*78,vy:Math.sin(a)*78,life:2.6,bolt:1})}e.callF=.4}play('swing',.2)}return}
-    if(e.cast<=0&&d<240&&sight(e.x,e.y,pl.x,pl.y)){e.cast=e.ph2?3.4:4.2;e.castWind=e.ph2?.9:.75;e.castAim=Math.atan2(dy,dx);telegraph(e);return}
+    if(e.cast<=0&&d<240&&sight(e.x,e.y,T.x,T.y)){e.cast=e.ph2?3.4:4.2;e.castWind=e.ph2?.9:.75;e.castAim=Math.atan2(dy,dx);telegraph(e);return}
   }
 
   if(BIG.has(e.type)){
-    if(e.atkT>0){e.atkT-=dt;if(e.atkT<=0){e.atkA=.4;shake(.5,.35);play('slam',0);addVfx(A.fx.nova,.35,e.x,e.y,.08,54/8,'ground');if(d<54)hurtPlayer(enemyDamage(e.type==='beast'?24:20),dx/d,dy/d);
+    if(e.atkT>0){e.atkT-=dt;if(e.atkT<=0){e.atkA=.4;shake(.5,.35);play('slam',0);addVfx(A.fx.nova,.35,e.x,e.y,.08,54/8,'ground');aoeP(e,54,enemyDamage(e.type==='beast'?24:20));
       for(let i=0;i<24;i++){const a=i/24*Math.PI*2;S.parts.push({k:'d',x:e.x+Math.cos(a)*12,y:e.y+Math.sin(a)*6,z:1,vx:Math.cos(a)*90,vy:Math.sin(a)*45,vz:18,c:P.st3,life:.6})}}return}
     e.slamT-=dt;if(e.slamT<=0&&d<80){e.slamT=e.ph2?2.4:3.4;e.slamF=.8;e.atkT=.8;play('bossGrowl',0);return}
   }
   let sp=e.spd*(e.chill>0?e.chillMul||.6:1);if(e.type==='madman'){sp*=.4+1.1*Math.abs(Math.sin(e.walk*4.3+e.ph));e.side=Math.sin(clock*2+e.ph)>0?1:-1}if(e.type==='dwarf'||e.type==='possessed')sp*=.65+.6*Math.abs(Math.sin(e.walk*3));
-  if(e.type==='ghoul'||e.type==='hound'||e.type==='wolf'||e.type==='strzygon'||e.type==='paperrat'){e.lcd-=dt;if(e.leap>0){e.leap-=dt;moveBox(e,e.lx*dt,e.ly*dt,4,3);e.walk+=dt*2;if(!e.lhit&&d<e.r+9){e.lhit=1;S.attacker=e;hurtPlayer(enemyDamage(e.dmg*SL.enemyHit,SL.dmgDiv),dx/d,dy/d);S.attacker=null}return}if(d<52&&d>22&&e.lcd<=0){if(e.type==='ghoul'&&CH===1){e.ghoulWind=.35;e.ghoulDX=dx/d;e.ghoulDY=dy/d;e.lcd=4.5+Math.random()*1.7;telegraph(e);return}e.leap=.3;e.lhit=0;e.atkA=.3;e.lx=dx/d*105;e.ly=dy/d*105;e.lcd=3.2+Math.random()*1.5;return}}
+  if(e.type==='ghoul'||e.type==='hound'||e.type==='wolf'||e.type==='strzygon'||e.type==='paperrat'){e.lcd-=dt;if(e.leap>0){e.leap-=dt;moveBox(e,e.lx*dt,e.ly*dt,4,3);e.walk+=dt*2;if(!e.lhit&&d<e.r+9){e.lhit=1;S.attacker=e;hitT(e,enemyDamage(e.dmg*SL.enemyHit,SL.dmgDiv),dx/d,dy/d);S.attacker=null}return}if(d<52&&d>22&&e.lcd<=0){if(e.type==='ghoul'&&CH===1){e.ghoulWind=.35;e.ghoulDX=dx/d;e.ghoulDY=dy/d;e.lcd=4.5+Math.random()*1.7;telegraph(e);return}e.leap=.3;e.lhit=0;e.atkA=.3;e.lx=dx/d*105;e.ly=dy/d*105;e.lcd=3.2+Math.random()*1.5;return}}
   let mx=dx/d,my=dy/d;
   if(fly){const w=Math.sin(clock*5+e.ph)*1.2,c=Math.cos(w),s=Math.sin(w);[mx,my]=[mx*c-my*s,mx*s+my*c]}
   for(const o of nearbyEnemies(e)){if(o===e||o.dead)continue;const ox=e.x-o.x,oy=e.y-o.y;if(Math.abs(ox)>24||Math.abs(oy)>24)continue;const od=Math.hypot(ox,oy),min=e.r+o.r+1;if(od<min&&od>0){mx+=ox/od*.9;my+=oy/od*.9}}
@@ -2954,7 +3011,7 @@ function beastAI(e,dx,dy,d,dt){
   if(e.mode==='wind'){e.mt-=dt;e.atkA=.15;if(e.mt<=0){e.mode='charge';e.mt=.85;play('roll',0)}return true}
   if(e.mode==='charge'){e.mt-=dt;const ox=e.x,oy=e.y;moveBox(e,e.cx*200*dt,e.cy*200*dt,e.hw,3);e.walk+=dt*3;
     if(Math.random()<dt*14)pool(e.x+rnd(-4,4),e.y+rnd(-2,2),10,4);
-    if(d<e.r+8&&pl.inv<=0){hit(26);moveBox(pl,e.cx*16,e.cy*12,4,3);shake(.4,.3)}
+    if(d<e.r+8&&golemTgt(e))golemHurt(e.tg,enemyDamage(26));else if(d<e.r+8&&pl.inv<=0){hit(26);moveBox(pl,e.cx*16,e.cy*12,4,3);shake(.4,.3)}
     if(Math.hypot(e.x-ox,e.y-oy)<200*dt*.3){e.mt=0;shake(.4,.3);play('slam',0)}
     if(e.mt<=0){e.mode=null;e.cT=rnd(3,4.5)}return true}
   if(e.mode==='up'){e.mt-=dt;e.lh=Math.min(4,(e.lh||0)+dt*9);
@@ -2965,15 +3022,15 @@ function beastAI(e,dx,dy,d,dt){
     for(let i=0;i<30;i++){const a=i/30*Math.PI*2;S.parts.push({k:'d',x:e.x+Math.cos(a)*14,y:e.y+Math.sin(a)*7,z:1,vx:Math.cos(a)*110,vy:Math.sin(a)*55,vz:20,c:Math.random()<.5?P.blood:P.st3,life:.6})}}return true}
   if(e.atkT>0)return false;
   e.cT-=dt;if(e.enraged)e.lT-=dt;
-  if(e.enraged&&e.lT<=0&&d<230){e.mode='up';e.mt=.9;e.tx=pl.x;e.ty=pl.y;play('bossGrowl',0);return true}
+  if(e.enraged&&e.lT<=0&&d<230){e.mode='up';e.mt=.9;e.tx=e.x+dx;e.ty=e.y+dy;play('bossGrowl',0);return true}
   if(e.cT<=0&&d>56&&d<240){e.mode='wind';e.mt=.7;e.cx=dx/d;e.cy=dy/d;play('bossGrowl',0);shake(.15,.6);return true}
   return false}
 // chapter IV behaviours; return true when the enemy is done for this frame
 const CZAI={
   // crossbowman keeps his distance and shoots bolts
   xbow(e,dx,dy,d,dt,hw){e.cast=(e.cast===undefined?rnd(1,2.5):e.cast)-dt;
-    if(e.aim>0){e.aim-=dt;if(e.aim<=0&&d>1&&sight(e.x,e.y,pl.x,pl.y)){e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*110,vy:dy/d*110,life:2.2,bolt:1});play('swing',.2)}}
-    else if(d<170&&e.cast<=0&&sight(e.x,e.y,pl.x,pl.y)&&(S.enemyShotCd||0)<=0){e.aim=SL.aim;e.cast=rnd(4,5);S.enemyShotCd=SL.shotGap+SL.aim;telegraph(e)}
+    if(e.aim>0){e.aim-=dt;if(e.aim<=0&&d>1&&sight(e.x,e.y,e.x+dx,e.y+dy)){e.atkA=.35;S.eproj.push({x:e.x,y:e.y,vx:dx/d*110,vy:dy/d*110,life:2.2,bolt:1});play('swing',.2)}}
+    else if(d<170&&e.cast<=0&&sight(e.x,e.y,e.x+dx,e.y+dy)&&(S.enemyShotCd||0)<=0){e.aim=SL.aim;e.cast=rnd(4,5);S.enemyShotCd=SL.shotGap+SL.aim;telegraph(e)}
     if(d<70){moveBox(e,-dx/d*e.spd*dt,-dy/d*e.spd*dt,hw,3);e.walk+=dt;return true}if(d<125){e.walk+=dt*.3;return true}return false},
   // chapter V: the scribe shoots like the crossbowman, the account wraith drains coins on touch
   scribe(e,dx,dy,d,dt,hw){return CZAI.xbow(e,dx,dy,d,dt,hw)},
@@ -2983,26 +3040,26 @@ const CZAI={
     if(e.pull>0){if(pl.inv>0||pl.roll>0||d>150||!sight(e.x,e.y,pl.x,pl.y)){e.pull=0;e.chCd=5;return true}e.pull-=dt;moveBox(pl,-dx/d*140*dt,-dy/d*140*dt,4,3);
       for(let i=1;i<=8;i++){const t=i/8;S.parts.push({k:'d',x:e.x+(pl.x-e.x)*t,y:e.y+(pl.y-e.y)*t,z:8,vx:0,vy:0,vz:0,c:'#dce7ef',life:.1})}
       if(e.pull<=0||d<e.r+8){e.pull=0;e.chCd=rnd(6,8);if(d<e.r+14)hurtPlayer(enemyDamage(8),dx/d,dy/d)}return true}
-    if(d>46&&d<125&&e.chCd<=0&&pl.inv<=0&&sight(e.x,e.y,pl.x,pl.y)){e.chainAim=[dx/d,dy/d];e.chT=.7;e.chCd=6;telegraph(e);return true}return false},
+    if(!golemTgt(e)&&d>46&&d<125&&e.chCd<=0&&pl.inv<=0&&sight(e.x,e.y,pl.x,pl.y)){e.chainAim=[dx/d,dy/d];e.chT=.7;e.chCd=6;telegraph(e);return true}return false},
   wraith(e,dx,dy,d,dt){e.dcd=(e.dcd||0)-dt;
-    if(e.drainWind>0){e.drainWind-=dt;if(e.drainWind<=0&&d<e.r+14){S.attacker=e;const hit=hurtPlayer(enemyDamage(e.dmg,SL.dmgDiv),dx/d,dy/d);S.attacker=null;if(hit&&S.coins>0){const n=Math.min(S.coins,3+Math.floor(Math.min(S.t,NIGHT)/180));S.coins-=n;e.stolen=(e.stolen||0)+n;ftInfo('−'+n+' monet — odzyskasz je po walce')}}return true}
-    if(d<e.r+9&&e.dcd<=0&&pl.inv<=0){e.drainWind=.6;e.dcd=2.5;telegraph(e);return true}return false},
+    if(e.drainWind>0){e.drainWind-=dt;if(e.drainWind<=0&&d<e.r+14){S.attacker=e;const hit=hitT(e,enemyDamage(e.dmg,SL.dmgDiv),dx/d,dy/d);S.attacker=null;if(hit&&S.coins>0){const n=Math.min(S.coins,3+Math.floor(Math.min(S.t,NIGHT)/180));S.coins-=n;e.stolen=(e.stolen||0)+n;ftInfo('−'+n+' monet — odzyskasz je po walce')}}return true}
+    if(d<e.r+9&&e.dcd<=0&&(golemTgt(e)||pl.inv<=0)){e.drainWind=.6;e.dcd=2.5;telegraph(e);return true}return false},
 
   // drowned corpse grabs and holds the hero for a moment
   drowner(e,dx,dy,d,dt){e.gcd=(e.gcd||0)-dt;
-    {if(e.tw>0){e.tw-=dt;if(e.tw>0)return false;if(d>=e.r+14||pl.inv>0)return false}else if(d<e.r+8&&e.gcd<=0&&pl.inv<=0){e.tw=.3;e.gcd=2.6;telegraph(e);return false}else return false}
-    {e.gcd=2.6;e.atkA=.45;S.snare=.8;hurtPlayer(enemyDamage(9,SL.dmgDiv),dx/d,dy/d);for(let i=0;i<10;i++)S.parts.push({k:'d',x:pl.x+rnd(-6,6),y:pl.y,z:rnd(0,6),vx:rnd(-20,20),vy:0,vz:rnd(10,24),c:'#2e3e3a',life:.5})}return false},
+    {if(e.tw>0){e.tw-=dt;if(e.tw>0)return false;if(d>=e.r+14||(!golemTgt(e)&&pl.inv>0))return false}else if(d<e.r+8&&e.gcd<=0&&(golemTgt(e)||pl.inv<=0)){e.tw=.3;e.gcd=2.6;telegraph(e);return false}else return false}
+    {e.gcd=2.6;e.atkA=.45;if(golemTgt(e)){golemHurt(e.tg,enemyDamage(9,SL.dmgDiv));return false}S.snare=.8;hurtPlayer(enemyDamage(9,SL.dmgDiv),dx/d,dy/d);for(let i=0;i<10;i++)S.parts.push({k:'d',x:pl.x+rnd(-6,6),y:pl.y,z:rnd(0,6),vx:rnd(-20,20),vy:0,vz:rnd(10,24),c:'#2e3e3a',life:.5})}return false},
   // nightmare drains a stamina charge on touch
-  zmora(e,dx,dy,d,dt){e.dcd=(e.dcd||0)-dt;if(pl.inv>0||pl.roll>0)return false;
+  zmora(e,dx,dy,d,dt){e.dcd=(e.dcd||0)-dt;const zg=golemTgt(e);if(!zg&&(pl.inv>0||pl.roll>0))return false;
     {if(e.tw>0){e.tw-=dt;if(e.tw>0)return false;if(d>=e.r+14)return false}else if(d<e.r+8&&e.dcd<=0){e.tw=.3;e.dcd=2.2;telegraph(e);return false}else return false}
-    {e.dcd=2.2;e.atkA=.4;pl.sta=Math.max(0,pl.sta-35);pl.staDelay=1;S.stamFlash=.5}return false},
+    {e.dcd=2.2;e.atkA=.4;if(zg)golemHurt(e.tg,enemyDamage(e.dmg,SL.dmgDiv));else{pl.sta=Math.max(0,pl.sta-35);pl.staDelay=1;S.stamFlash=.5}}return false},
   // false will-o'-wisp waits; when you come close it flares and bursts
   wisp(e,dx,dy,d,dt){e.walk+=dt;if(e.boom>0){e.boom-=dt;if(e.boom<=0){if(d<38)hurtPlayer(enemyDamage(14),dx/d,dy/d);shake(.2,.25);play('fire',0);for(let i=0;i<26;i++){const a=i/26*Math.PI*2;S.parts.push({k:'e',x:e.x,y:e.y,z:8,vx:Math.cos(a)*90,vy:Math.sin(a)*50,vz:rnd(5,25),c:Math.random()<.5?'#7fffd0':'#d8ffe8',life:rnd(.3,.6)})}e.xp=0;e.hp=0;killEnemy(e,0,1)}return true}
     if(d<30){e.boom=.55;play('pick',0)}return true},
   // horned demon charges with lowered horns
   bies(e,dx,dy,d,dt,hw){e.cT=(e.cT===undefined?2:e.cT)-dt;
     if(e.mode==='wind'){e.mt-=dt;if(e.mt<=0){e.mode='charge';e.mt=.65;play('roll',0)}return true}
-    if(e.mode==='charge'){e.mt-=dt;const ox=e.x,oy=e.y;moveBox(e,e.cx*175*dt,e.cy*175*dt,hw,3);e.walk+=dt*3;if(d<e.r+8&&pl.inv<=0){hurtPlayer(enemyDamage(22),e.cx,e.cy);moveBox(pl,e.cx*12,e.cy*9,4,3)}
+    if(e.mode==='charge'){e.mt-=dt;const ox=e.x,oy=e.y;moveBox(e,e.cx*175*dt,e.cy*175*dt,hw,3);e.walk+=dt*3;if(d<e.r+8&&golemTgt(e))golemHurt(e.tg,enemyDamage(22));else if(d<e.r+8&&pl.inv<=0){hurtPlayer(enemyDamage(22),e.cx,e.cy);moveBox(pl,e.cx*12,e.cy*9,4,3)}
       if(e.mt<=0||Math.hypot(e.x-ox,e.y-oy)<175*dt*.3){e.mode=null;e.cT=rnd(3,4.5)}return true}
     if(e.cT<=0&&d>40&&d<190){e.mode='wind';e.mt=.6;e.cx=dx/d;e.cy=dy/d;play('growl',0);return true}return false},
   leszy:leszyAI,strzyga:strzygaAI};
@@ -3020,7 +3077,7 @@ function leszyAI(e,dx,dy,d,dt){
   if(e.atkT>0)return false;
   if(e.tT<=0&&d>60&&W.treeP&&W.treeP.length){e.mode='merge';e.mt=.8;e.tT=rnd(8,11);return true}
   if(e.sT<=0){e.mode='summon';e.mt=.9;e.sT=rnd(10,13);play('howl',0);return true}
-  if(e.rT<=0&&d<220){e.mode='root';e.mt=.9;e.tx=pl.x;e.ty=pl.y;e.rT=rnd(4,5.5);play('bossGrowl',0);return true}
+  if(e.rT<=0&&d<220){e.mode='root';e.mt=.9;e.tx=e.x+dx;e.ty=e.y+dy;e.rT=rnd(4,5.5);play('bossGrowl',0);return true}
   return false}
 // the Strzyga Mother: first soul flies, screams (slows you) and dives with her talons; second soul crawls, leaps and raises barrow wights
 function strzygaAI(e,dx,dy,d,dt){
@@ -3028,9 +3085,9 @@ function strzygaAI(e,dx,dy,d,dt){
   if(e.trans>0){e.trans-=dt;if(e.trans<=0){e.phase=2;e.spd=30;e.roarT=1.2;e.lT=2.5;e.wT=4;play('bossGrowl',0);shake(.4,.8);say('Strzyga wstaje z drugą duszą. Pełznie na czworakach, szybsza niż przedtem.')}return true}
   if(e.roarT>0){e.roarT-=dt;return true}
   if(e.phase!==2){e.scT=(e.scT===undefined?4:e.scT)-dt;e.cT=(e.cT===undefined?3:e.cT)-dt;e.bT=(e.bT===undefined?7:e.bT)-dt;
-    if(e.mode==='scream'){e.mt-=dt;if(e.mt<=0){e.mode=null;if(d<180){S.slowT=2.5;ftInfo('Spowolnienie')}for(let i=0;i<36;i++){const a=i/36*Math.PI*2;S.parts.push({k:'d',x:e.x+Math.cos(a)*10,y:e.y+Math.sin(a)*6,z:16,vx:Math.cos(a)*140,vy:Math.sin(a)*70,vz:0,c:'#c8d2dc',life:.6})}}return true}
+    if(e.mode==='scream'){e.mt-=dt;if(e.mt<=0){e.mode=null;if(Math.hypot(pl.x-e.x,pl.y-e.y)<180){S.slowT=2.5;ftInfo('Spowolnienie')}for(let i=0;i<36;i++){const a=i/36*Math.PI*2;S.parts.push({k:'d',x:e.x+Math.cos(a)*10,y:e.y+Math.sin(a)*6,z:16,vx:Math.cos(a)*140,vy:Math.sin(a)*70,vz:0,c:'#c8d2dc',life:.6})}}return true}
     if(e.mode==='wind'){e.mt-=dt;if(e.mt<=0){e.mode='dive';e.mt=.5}return true}
-    if(e.mode==='dive'){e.mt-=dt;e.x+=e.cx*190*dt;e.y+=e.cy*190*dt;e.x=Math.max(30,Math.min(WW-30,e.x));e.y=Math.max(30,Math.min(WH-30,e.y));if(d<e.r+8&&pl.inv<=0)hurtPlayer(enemyDamage(22),e.cx,e.cy);if(e.mt<=0){e.mode=null;e.cT=rnd(3,4.5)}return true}
+    if(e.mode==='dive'){e.mt-=dt;e.x+=e.cx*190*dt;e.y+=e.cy*190*dt;e.x=Math.max(30,Math.min(WW-30,e.x));e.y=Math.max(30,Math.min(WH-30,e.y));if(d<e.r+8&&golemTgt(e))golemHurt(e.tg,enemyDamage(22));else if(d<e.r+8&&pl.inv<=0)hurtPlayer(enemyDamage(22),e.cx,e.cy);if(e.mt<=0){e.mode=null;e.cT=rnd(3,4.5)}return true}
     if(e.scT<=0&&d<170){e.mode='scream';e.mt=.8;e.scT=rnd(7,9);play('bossGrowl',0);return true}
     if(e.bT<=0){e.bT=rnd(9,12);for(let i=0;i<4;i++)spawnEnemy('bat',e.x+rnd(-20,20),e.y+rnd(-12,12))}
     if(e.cT<=0&&d>40&&d<210){e.mode='wind';e.mt=.45;e.cx=dx/d;e.cy=dy/d;play('growl',0);return true}
@@ -3041,7 +3098,7 @@ function strzygaAI(e,dx,dy,d,dt){
   if(e.mode==='down'){e.mt-=dt;e.lh=Math.max(0,e.lh-dt*14);if(e.mt<=0){e.lh=0;e.mode=null;e.atkA=.5;shake(.6,.5);play('slam',0);addVfx(A.fx.nova,.4,e.x,e.y,.08,64/8,'ground');if(Math.hypot(pl.x-e.x,pl.y-e.y)<62)hurtPlayer(enemyDamage(24),0,1);pool(e.x,e.y,24,8)}return true}
   if(e.mode==='raise'){e.mt-=dt;if(Math.random()<dt*30)S.parts.push({k:'m',x:e.x+rnd(-40,40),y:e.y+rnd(-20,20),z:0,vx:0,vy:0,vz:rnd(6,14),c:'#4a7a5a',life:rnd(.6,1.2)});if(e.mt<=0){e.mode=null;for(let i=0;i<3;i++){const a=Math.random()*Math.PI*2;spawnEnemy('wight',e.x+Math.cos(a)*44,e.y+Math.sin(a)*26,{rise:1})}play('rise',0)}return true}
   if(e.atkT>0)return false;
-  if(e.lT<=0&&d<240){e.mode='up';e.mt=.8;e.tx=pl.x;e.ty=pl.y;e.lT=rnd(4.5,6);play('bossGrowl',0);return true}
+  if(e.lT<=0&&d<240){e.mode='up';e.mt=.8;e.tx=e.x+dx;e.ty=e.y+dy;e.lT=rnd(4.5,6);play('bossGrowl',0);return true}
   if(e.wT<=0){e.mode='raise';e.mt=1;e.wT=rnd(11,14);play('growl',0);return true}
   return false}
 const warningColor=()=>SETT.contrast?'#ffe270':'#ff5a4e';
@@ -3050,6 +3107,7 @@ function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=
   if(f.bolt)S.parts.push({k:'d',x:f.x,y:f.y,z:9,vx:0,vy:0,vz:0,c:'#d8cfb8',life:.12});
   else for(let k=0;k<(f.mesh?1:3);k++)S.parts.push({k:'e',x:f.x+rnd(-2,2),y:f.y+rnd(-1,1),z:9+rnd(-2,2),vx:rnd(-4,4),vy:0,vz:rnd(2,8),c:k?'#ff6a1a':'#ffb347',life:rnd(.15,.35)});
   let gone=f.life<=0||solidAt(f.x,f.y);
+  {const G=S.swordGuardian;if(!gone&&G&&!G.gone&&Math.hypot(G.x-f.x,G.y-f.y)<SL.guard.r+3){golemHurt(G,enemyDamage(f.bolt?6:7,SL.projDiv));gone=true}}
   if(!gone&&!pl.dead&&Math.hypot(pl.x-f.x,pl.y-f.y)<8){const sp=Math.hypot(f.vx,f.vy)||1,nx=f.vx/sp,ny=f.vy/sp;
     if(pl.block&&pl.inv<=0&&-(pl.fx*nx+pl.fy*ny)>.3&&pl.blockT<parryWin()+.06){onParry();pl.parryT=.45;S.hitstop=.12;padRumble(.6,.3,140);guardFeedback('parry',nx,ny,f);shake(.15,.15);ftInfo('Odbicie!')}
     else hurtPlayer(enemyDamage(f.bolt?6:7,SL.projDiv),nx,ny);gone=true}
@@ -3294,6 +3352,7 @@ function buildEnemyGrid(){ENEMY_GRID.clear();for(const e of S.enemies){if(e.dead
 function nearbyEnemies(e){const a=[],x=Math.floor(e.x/CELL),y=Math.floor(e.y/CELL);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const q=ENEMY_GRID.get((x+dx)+','+(y+dy));if(q)a.push(...q)}return a}
 
 function update(dt){
+  if(S&&S.phase==='play')bannerTick(dt);
   if(S&&S.intro){introTick(dt);return}
   if(S&&S.phase==='play')pumpNotice();if(!S||S.phase!=='play'||S.notice||S.choosing||S.shop||S.paused)return;
   if(S.hitstop>0){S.hitstop-=dt;if(rollPress)S.bufRoll=1;return}
@@ -3312,7 +3371,7 @@ function update(dt){
   updEproj(dt);updPicks(dt);
   for(const c of S.corpses){c.t+=dt;const L=c.big?30:7;if(c.t>L&&!c.gone){if(!c.own){c.mesh.material=c.mesh.material.clone();c.mesh.material.transparent=true;c.own=1}const f=1-(c.t-L)/2.2;c.mesh.material.opacity=Math.max(0,f);if(f<=0)c.gone=.001}}
   if(S.corpses.some(c=>c.gone&&c.t>c.gone))S.corpses=S.corpses.filter(c=>{if(c.gone&&c.t>c.gone){scene.remove(c.mesh);if(c.own)c.mesh.material.dispose();return false}return true});
-  for(let i=S.vfx.length-1;i>=0;i--){const f=S.vfx[i];f.t+=dt;if(f.t>=f.dur){scene.remove(f.mesh);S.vfx.splice(i,1)}}
+  for(let i=S.vfx.length-1;i>=0;i--){const f=S.vfx[i];f.t+=dt;if(f.t>=f.dur){scene.remove(f.mesh);if(f.ownMat)for(const a of f.anim)a.n.dispose();S.vfx.splice(i,1)}}
   for(const id in S.npc){const st=S.npc[id];if(st.state==='fading'){st.t-=dt;if(st.t<=0)st.state='gone'}}
   if(CH===4){if(Math.random()<dt*.04)play('howl',6);for(const q of W.wisps)if(Math.abs(q.x*16-pl.x)<240&&Math.abs(q.z*16-pl.y)<150&&Math.random()<dt*3)S.parts.push({k:'e',x:q.x*16+rnd(-4,4),y:q.z*16+rnd(-3,3),z:rnd(6,14),vx:rnd(-3,3),vy:0,vz:rnd(2,6),c:'#7fffd0',life:rnd(.6,1.2)})}
   if(CH===3)for(let i=0;i<4;i++){const q=W.rots[(Math.random()*W.rots.length)|0];if(q&&Math.abs(q[0]*16-pl.x)<220&&Math.abs(q[1]*16-pl.y)<140&&Math.random()<dt*14)S.parts.push({k:'e',x:q[0]*16+rnd(2,14),y:q[1]*16+rnd(2,14),z:0,vx:0,vy:0,vz:rnd(3,9),c:Math.random()<.5?'#e07a30':'#c24a20',life:rnd(.5,1.1)})}
@@ -3343,7 +3402,7 @@ const SHOP=[
   {id:'brew',name:'Gorzki wywar',d:'Leczy całe życie.',cost:20},
   {id:'heart',name:'Serce z popiołu',d:'+25 do maksymalnego życia.',cost:35},
   {id:'whet',name:'Osełka z kości',d:'+10% obrażeń wszystkich umiejętności.',cost:30},
-  {id:'amulet',name:'Amulet wiatru',d:'+1 ładunek staminy uników (najwyżej 3).',cost:60},
+  {id:'amulet',name:'Amulet wiatru',d:'+20 do maksymalnej staminy (do 180; cechy mogą dać więcej).',cost:60},
   {id:'scroll',name:'Zwój pamięci',d:'Natychmiastowy awans o jeden poziom.',cost:45},
   {id:'magnet',name:'Kamień przyciągania',d:'+40% zasięgu zbierania ogników i monet.',cost:25}];
 const price=it=>Math.round(it.cost*Math.pow(1.35,S.bought[it.id]||0)*(1-(S.disc||0)));
@@ -3610,12 +3669,13 @@ function hud(){renderActiveHud();if(!S)return;drawMini(1/60);const left=Math.max
   st.style.width=Math.min(100,pl.staMax/1.8)+'%';
   for(let i=0;i<nseg;i++){const seg=st.children[i],v=Math.max(0,pl.sta/pl.staMax);seg.firstChild.firstChild.style.width=(v*100)+'%';seg.classList.toggle('full',v>=1)}
   st.classList.toggle('flash',(S.stamFlash||0)>0);
+  {const mn=$('mana');if(mn){if(!mn.childElementCount)mn.innerHTML='<div class="seg fb st mn"><span class="trk"><i></i></span><b class="l"></b><b class="m"></b><b class="r"></b></div>';const mm=pl.manaMax||SL.mana.max,v=Math.max(0,Math.min(1,(pl.mana||0)/mm)),sg=mn.firstChild;mn.style.width=Math.min(100,mm/1.8)+'%';sg.firstChild.firstChild.style.width=(v*100)+'%';sg.classList.toggle('full',v>=1);mn.classList.toggle('flash',(S.manaFlash||0)>0)}}
   {const mm=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`,b=[];
     if(S.rebirth)b.push('<span class="tr">'+(S.rebirthUsed?'Odrodzenie zużyte · EXP postaci −50%':'Odrodzenie gotowe')+'</span>');if(S.trial)b.push(`<span class="tr">Próba Mili: ${S.trial.k}/20 · ${Math.ceil(S.trial.t)} s</span>`);
     if(S.bless)b.push(`Błogosławieństwo +${S.bless.amt} życia · ${mm(S.bless.t)}`);
     if(S.fury>0)b.push(`Szał Mili +20% obrażeń · ${mm(S.fury)}`);
     if(S.heri>0)b.push(`Znak Heriego: regeneracja staminy +15% · ${mm(S.heri)}`);
-    if(S.bloodPrimed>0)b.push('Piętno gotowe: następny cios oznacza cel');if(S.retaliate>0)b.push('Żelazny odwet gotowy');if(S.swordGuardian)b.push('Kamienny obrońca: osłona');
+    if(S.bloodPrimed>0)b.push('Piętno gotowe: następny cios oznacza cel');if(S.retaliate>0)b.push('Żelazny odwet gotowy');if(S.swordGuardian)b.push(`Kamienny obrońca: ${Math.ceil(S.swordGuardian.hp)} PŻ · ${Math.ceil(S.swordGuardian.t)} s`);
     if(pl.riposte>0)b.push(`<span class="tr">Riposta gotowa: ×${riMul().toFixed(1).replace('.',',')}</span>`);
     if(pl.broken>0)b.push('<span class="tr">Garda przełamana!</span>');
     if(S.herb>0)b.push(`Napar szeptuchy, leczenie · ${mm(S.herb)}`);
@@ -3629,7 +3689,7 @@ function hud(){renderActiveHud();if(!S)return;drawMini(1/60);const left=Math.max
 let coarse=matchMedia('(pointer:coarse)').matches;
 try{const v=localStorage.getItem('pn_touch');if(v==='1'||v==='0')coarse=v==='1'}catch(e){}
 function applyTouchMode(){$('opts').classList.add('sl');$('figKb').hidden=false;$('touchTgl').checked=coarse;
-  $('warn').textContent=coarse&&innerHeight>innerWidth?'Obróć telefon poziomo.':''}
+  $('warn').textContent=''}
 
 function applyStory(){$('storyTgl').checked=!STORYMODE;$('sFab').classList.toggle('on',STORYMODE);$('sArc').classList.toggle('on',!STORYMODE);$('sFab').setAttribute('aria-pressed',String(STORYMODE));$('sArc').setAttribute('aria-pressed',String(!STORYMODE));$('storyModeHint').textContent=STORYMODE?'Rozdziały odblokowujesz po kolei.':'Wszystkie rozdziały dostępne od razu.';}
 $('sFab').addEventListener('click',()=>{$('storyTgl').checked=false;$('storyTgl').dispatchEvent(new Event('change'))});$('sArc').addEventListener('click',()=>{$('storyTgl').checked=true;$('storyTgl').dispatchEvent(new Event('change'))});
@@ -3645,7 +3705,8 @@ applyTouchMode();
 // full screen on phones and tablets: standard API, Safari's webkit variant (iPad), nothing to do when launched from the home screen
 function goFull(){const d=document.documentElement,inApp=navigator.standalone||matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
   if(inApp||document.fullscreenElement||document.webkitFullscreenElement)return;const fs=d.requestFullscreen||d.webkitRequestFullscreen;if(!fs)return;
-  try{const p=fs.call(d);if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+  try{const p=fs.call(d);if(p&&p.then)p.then(lockLandscape,()=>{});else lockLandscape()}catch(e){}}
+function lockLandscape(){}// the game works in both orientations; nothing is locked
 // ===== FABUŁA (wariant A: Pakt jako dług) =====
 // Cała fabuła jest w tym bloku i w kilku miejscach oznaczonych "STORY". Aby ją wyłączyć: odznacz „Fabuła” w menu
 // albo ustaw `let STORY=false`. Pełne cofnięcie: demo-hd2d/zrodlo-przed-fabula.html (wersja 58 bez fabuły).
@@ -3802,13 +3863,13 @@ function introTick(dt){if(!INTRO)return;const I=INTRO;I.t+=dt;if(I.wait>0)I.wait
 
 $('intro').addEventListener('click',()=>introNext());
 // muzyka tytułowa startuje przy pierwszym dotknięciu/klawiszu (przeglądarki blokują dźwięk przed gestem użytkownika)
-function musFirst(){try{if(AC&&AC.state==='suspended'&&!(S&&S.paused))AC.resume()}catch(e){}if(S||MUS.cur)return;try{initAudio();if(AC&&AC.state==='suspended')AC.resume();musStart(AUDIO_DATA.intro?'intro':'title')}catch(e){}}
+function musFirst(){try{if(AC&&AC.state==='suspended'&&!(S&&S.paused))acResume()}catch(e){}if(S||MUS.cur)return;try{initAudio();if(AC&&AC.state==='suspended')acResume();musStart(AUDIO_DATA.intro?'intro':'title')}catch(e){}}
 addEventListener('pointerdown',musFirst,true);addEventListener('keydown',musFirst,true);addEventListener('click',musFirst,true);addEventListener('touchend',musFirst,true);
 for(const e of document.querySelectorAll('.musSl')){e.value=Math.round(musVol*100);e.addEventListener('input',()=>musSetVol(e.value/100))}
 function storyBoss(e){if(!STORY||S.dg||e.dgBoss)return;const t=STORY_BOSS[CH+e.type]||STORY_BOSS[e.type];if(t)setTimeout(()=>{if(S&&S.phase==='play'&&!pl.dead)say(t)},3600)}
 let startBusy=false;
 function beginRun(){if(startBusy)return;startBusy=true;const b=$('prepGo'),label=b.innerHTML;b.disabled=true;b.textContent='Przygotowywanie rozdziału…';if(coarse)goFull();requestAnimationFrame(()=>setTimeout(()=>{try{if(!$('prep').hidden)start(PREP.ch)}catch(e){console.error(e);toMenu();say('Nie udało się przygotować rozdziału. Odśwież grę i spróbuj ponownie.')}finally{startBusy=false;b.disabled=false;b.innerHTML=label}},0))}
-function start(ch){if(!A)return;ftClear();hbClear();$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=$('bHeavy').hidden=false;$('btns').classList.add('sl');resetInput();if(coarse)goFull();if(coarse||SETT.quality==='low')for(const k of Object.keys(WORLDS))if(+k!==ch)releaseWorld(+k);ensureWorld(ch);useWorld(ch);initAudio();if(AC&&AC.state==='suspended')AC.resume();newGame();applyPrep();lastHud='';MUS.base=ch;for(const k of Object.keys(MUS_BUFS))musRelease(k);if(ch===1)musLoadBuf('crypt');if(ch===1&&STORY)musLoadBuf('intro');if(!(ch===1&&AUDIO_DATA.intro))musStart(ch);for(const id of ['title','end','lvl','dialog','prep'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16);if(ch>=1&&ch<=5)storyIntro(ch);if(ch===1&&INTRO&&AUDIO_DATA.intro)musStart('intro')}
+function start(ch){if(!A)return;ftClear();hbClear();$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=$('bHeavy').hidden=false;$('btns').classList.add('sl');resetInput();if(coarse)goFull();if(coarse||SETT.quality==='low')for(const k of Object.keys(WORLDS))if(+k!==ch)releaseWorld(+k);ensureWorld(ch);useWorld(ch);initAudio();if(AC&&AC.state==='suspended')acResume();newGame();applyPrep();lastHud='';MUS.base=ch;for(const k of Object.keys(MUS_BUFS))musRelease(k);if(ch===1)musLoadBuf('crypt');if(ch===1&&STORY)musLoadBuf('intro');if(!(ch===1&&AUDIO_DATA.intro))musStart(ch);for(const id of ['title','end','lvl','dialog','prep'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16);if(ch>=1&&ch<=5)storyIntro(ch);if(ch===1&&INTRO&&AUDIO_DATA.intro)musStart('intro')}
 // ---- postać: poziom, perki i wyzwania nocy (postęp zapisany pod kluczem 's'; dawne dane Hordy 'a' są ignorowane) ----
 const PERKS=[
  {id:'zaliczka',lv:1,n:'Zaliczka',pl:'+50 monet na start',mi:'wrogów o 25% więcej',bx:.10,fx:k=>{S.coins+=50;k.en*=1.25}},
@@ -3864,7 +3925,7 @@ function recordRun(C,won,t,lvl,kills){const k='s'+C,r=SETT.save[k]||(SETT.save[k
   if(won){r.win=r.win?Math.min(r.win,t):t}r.t=Math.max(r.t||0,t);r.lvl=Math.max(r.lvl||0,lvl);r.kills=Math.max(r.kills||0,kills);saveStore()}
 function renderRecords(){{const q=prog(),n=$('chN');if(n){n.textContent=q.lv;$('chBar').style.setProperty('--p',q.lv>=PMAX?1:q.xp/PNEED(q.lv));$('chXp').textContent=q.lv>=PMAX?'Poziom maksymalny':q.xp+' / '+PNEED(q.lv)+' XP do poziomu '+(q.lv+1)}}for(let i=1;i<=5;i++){const b=$('start'+i);if(!b||b.disabled&&!b.querySelector('small'))continue;if(i===4&&!IMGS?.cz_ground||i===5&&!IMGS?.cy_ground)continue;const r=SETT.save['s'+i],lk=chLocked(i);b.disabled=lk;b.classList.toggle('lk',lk);
     b.innerHTML='<small>Rozdział '+CHR[i-1]+':</small>'+CHN[i-1]+(lk?'<span class="recline">Zablokowany · ukończ rozdział '+CHR[i-2]+' lub włącz Arcade na ekranie tytułowym</span>':r?'<span class="recline'+(r.win?' ok':'')+'">'+(r.win?'✓ ukończony '+mmss(r.win)+' · ':'najdłużej '+mmss(r.t)+' · ')+'poz. '+r.lvl+' · zabici '+r.kills+'</span>':'')}}
-function endGame(won){$('activeSkillHud').hidden=true;clearSwordTransient();if(swordGlow)swordGlow.visible=false;$('notice').hidden=true;S.notice=null;S.noticeQueue=[];S.witChoice=false;for(const id of ['lvl','shop','dialog','pause'])$(id).hidden=true;musStop(2.5);const inDg=!!S.dg,C=inDg?1:CH;S.phase='end';$('touch').hidden=true;$('boss').hidden=true;$('prompt').hidden=true;const surv=S.t,m=Math.floor(surv/60),s=Math.floor(surv%60);if(!inDg)recordRun(C,won,surv,S.lvl,S.kills);$('endXp').textContent=grantXp(won,surv);$('chal').hidden=true;
+function endGame(won){$('activeSkillHud').hidden=true;clearSwordTransient();if(swordGlow)swordGlow.visible=false;$('notice').hidden=true;S.notice=null;S.noticeQueue=[];S.banner=null;$('msg').classList.remove('on');S.witChoice=false;for(const id of ['lvl','shop','dialog','pause'])$(id).hidden=true;musStop(2.5);const inDg=!!S.dg,C=inDg?1:CH;S.phase='end';$('touch').hidden=true;$('boss').hidden=true;$('prompt').hidden=true;const surv=S.t,m=Math.floor(surv/60),s=Math.floor(surv%60);if(!inDg)recordRun(C,won,surv,S.lvl,S.kills);$('endXp').textContent=grantXp(won,surv);$('chal').hidden=true;
   $('endKicker').textContent=won?`Rozdział ${['I','II','III','IV','V'][C-1]} ukończony`:(C===1?'Noc cię pochłonęła':C===2?'Dolne Miasto cię pochłonęło':C===3?'Złotogród cię pochłonął':C===5?'Cytadela cię pochłonęła':'Czarnobór cię pochłonął');
   $('endTitle').classList.toggle('lost',!won);$('endTitle').classList.toggle('swit',won&&C===1);for(const [c,k] of [[2,'wrota'],[3,'kopuly'],[4,'brzask'],[5,'splata']])$('endTitle').classList.toggle(k,won&&C===c);$('endTitle').setAttribute('aria-label',won?(['','Świt','Wrota','Kopuły','Brzask','Spłata'][C]||''):'Poległeś');$('endTitle').innerHTML=won?(C===1?'Ś<em>wit</em>':C===2?'Wro<em>ta</em>':C===3?'Kopu<em>ły</em>':C===5?'Spła<em>ta</em>':'Brza<em>sk</em>'):'Pole<em>głeś</em>';
   $('endText').textContent=won?(C===1?'Słońce wstaje nad zgliszczami Brzeźnicy. Pod spaloną kaplicą widzisz schody prowadzące w dół, do Dolnego Miasta.':C===2?'Wrota na powierzchnię rozwierają się z jękiem. Za tobą, w głębi pod lawą, coś ogromnego otwiera oczy.':C===5?'Rejestr Wierzyciela płonie. Pieczęcie pękają jedna po drugiej, a w Cytadeli po raz pierwszy robi się cicho.':C===4?'Mgła opada w dolinach. Na Łysej Górze dogasają ogniska, a w kurhanach znów jest cicho. Na razie.':'Bestia leży martwa u stóp katedry. Dzwony biją dalej, choć nikt ich nie porusza. Złoto kopuł nie grzeje.')
@@ -3914,13 +3975,13 @@ function manPage(id){
   if(id==='start')return mBox('Czym jest Nightbrand','Jesteś piętnowanym najemnikiem w świecie, w którym noc wypuściła martwych. Każdy rozdział to jedna <b>noc</b>: przetrwaj do świtu, zbieraj siłę i pokonaj bossa, który wstaje na końcu. Walczysz sam przeciwko coraz większej fali wrogów, a wygrywasz mądrym wyborem ulepszeń i ruchem, nie samym klikaniem.')
    +mBox('Jak wygląda jedna noc',mUl(['<b>Zegar nocy odlicza 12 minut. Sklep, boss pośredni, krypta i finał wydłużają podejście.</b> Wrogów przybywa z minuty na minutę, są też coraz mocniejsi.','Z poległych wrogów wypadają <b>ogniki</b> (doświadczenie) i <b>monety</b>. Zbierasz je, podchodząc blisko. Z pokonanych wrogów z <b>3% szansą</b> wypada też <b>serduszko</b>, które leczy 10% życia. Za ogniki rośnie <b>poziom nocy</b>, a każdy awans leczy część życia i daje wybór jednej z trzech kart.','<b>Północ (po 6 minutach):</b> martwi cofają się w cień, a kupcowa <b>Marga</b> rozkłada kram. Masz chwilę na zakupy za zebrane monety (porozmawiaj z nią klawiszem E).','W rozdziałach I–III po północy pojawia się <b>Poborca Zakonu</b>. Kradnie złoto, więc warto go zabić. W rozdziale IV w tym miejscu czeka Leszy, a w V Arcysędzia Rachmistrz.','<b>Po 12 minutach</b> wstaje główny boss rozdziału. Zabij go, a noc kończy się wygraną.','Jeśli życie spadnie do zera, noc kończy się porażką. Ale <b>postęp postaci zostaje</b>, więc kolejna próba jest łatwiejsza.']))
    +mBox('Pięć rozdziałów',mUl(['<b>I · Spalona Brzeźnica</b>: wioska, cmentarz i krypta pod nim. Boss: Zrost.','<b>II · Dolne Miasto</b>: krasnoludzkie kopalnie i kuźnie. Boss: Zrost.','<b>III · Złotogród</b>: zgniłe miasto bogaczy. Boss: Morhad, Bestia Tysiąca Rzezi.','<b>IV · Czarnobór</b>: las i Łysa Góra. Bossowie: Leszy i Strzyga Matka.','<b>V · Cytadela Wierzycieli</b>: siedziba Zakonu. Bossowie: Arcysędzia Rachmistrz i Wierzyciel.','W trybie Fabularnym zaczynasz od rozdziału I, a kolejne odblokowujesz, ukończając poprzedni. W Arcade (Opcje → Ustawienia) wszystkie są od razu dostępne. Każdy rozdział ma własny rekord czasu.']))
-   +mBox('Pasek życia, stamina, unik','Pasek życia pokazuje, ile jeszcze wytrzymasz, a drugi pasek to <b>stamina</b>. Unik (Spacja lub Shift) daje chwilę nietykalności i pozwala przejść przez wroga, ale kosztuje staminę. Jeśli nie wiesz co robić: <b>ruszaj się</b>, nie stój w miejscu.');
+   +mBox('Pasek życia, stamina, unik','Pasek życia pokazuje, ile jeszcze wytrzymasz, a drugi pasek to <b>stamina</b>. Niebieski pasek pod nią to <b>mana</b> na skille ze slotów. Unik (Spacja lub Shift) daje chwilę nietykalności i pozwala przejść przez wroga, ale kosztuje staminę. Jeśli nie wiesz co robić: <b>ruszaj się</b>, nie stój w miejscu.');
   if(id==='slasher')return mBox('Podstawy walki','Atakujesz w stronę kursora myszy (na padzie: prawą gałką). Wszystko kosztuje <b>staminę</b>, która szybko odnawia się, gdy nic nie robisz.')
    +mUl(['<b>Lekki cios</b> (J lub lewy przycisk myszy): szybki, łączy się w <b>serię trzech ciosów</b>. Trzeci cios jest najmocniejszy i najmocniej ogłusza.','<b>Ciężki cios</b> (K lub przytrzymaj atak): wolniejszy, ale mocny i bardzo ogłusza.','<b>Blok</b> (L lub prawy przycisk myszy): zmniejsza obrażenia, ale kosztuje staminę. Jeśli stamina się skończy, gard pęka.','<b>Unik</b> (Spacja lub Shift): szybki przeskok z krótką nietykalnością.'].map(x=>x)).replace(/<ul>/,'<ul class="mbl">')
    +mBox('Parowanie i riposta (najważniejsza rzecz)',mP('Jeśli naciśniesz blok <b>tuż przed trafieniem</b>, odbijasz cios zamiast go przyjąć. To <b>parowanie</b>. Po nim przez krótką chwilę masz <b>ripostę</b>: Twój następny cios jest krytyczny (kilka razy mocniejszy) i wysyła <b>falę cięcia</b>, która leci przed siebie i przebija wszystkich wrogów. Dlatego parowanie jest lepsze niż zwykły blok.'))
    +mBox('Czerwony błysk',mP('Gdy wróg zabłyśnie <b>na czerwono</b>, jego cios jest <b>nie do sparowania</b> (ani zablokowania). Wtedy rób <b>unik</b>. Bossowie robią to często, więc nie broń się na siłę.'))
    +mBox('Postawa bossów','Duzi wrogowie nie dają się ogłuszyć zwykłym ciosem. Za to każdy Twój cios zbija im <b>postawę</b>. Gdy się przełamie, boss na chwilę zastyga, a Ty zadajesz mu wtedy więcej obrażeń (to też liczy się do Stylu Zabójcy).')
-   +mBox('Znak',mP('Gdy zdobędziesz umiejętność <b>Odrzut Mocy</b>, przypisany slot <b>Q / E / F</b> (pad: LT + X / Y / B; dotyk: ikona) wypuszcza falę, która odrzuca i ogłusza wrogów oraz zbija pociski. Kosztuje 20 staminy i ma odnowienie.'))
+   +mBox('Znak',mP('Gdy zdobędziesz umiejętność <b>Odrzut Mocy</b>, przypisany slot <b>Q / E / F</b> (pad: LT + X / Y / B; dotyk: ikona) wypuszcza falę, która odrzuca i ogłusza wrogów oraz zbija pociski. Kosztuje 24 many i ma odnowienie.'))
    +'<h2 class="mh">Odrzut Mocy</h2>'+mSkill('aard')
    +mBox('Awans',mP('Przy awansie wybierasz jedną z 3 kart. Karty to <b>cechy</b> (stałe ulepszenia), <b>style walki</b>, <b>pakty</b>, <b>techniki</b> i <b>zaklęcia ostrza</b>. Kartę wybierasz myszą albo klawiszami <b>1 2 3</b>. Klawisz <b>R</b> przerzuca karty: pierwszy raz w danym awansie za darmo, potem za monety (cena rośnie).'))
    +'<h2 class="mh">Cechy postaci</h2>'+['_vit','_end','_str','_dex'].map(k=>`<div class="mrow">${mI(k)}<b>${SK[k].name}</b><span>${SK[k].d}</span></div>`).join('');
@@ -3928,7 +3989,7 @@ function manPage(id){
     for(const b of ['def','off','wav'])h+=`<h2 class="mh br-${b}">${br[b]}</h2><div class="mset"><b>Bonus zestawu (${SET_N}):</b> ${BR[b].set}</div>`+Object.keys(STY).filter(k=>STY[k].br===b).map(k=>`<div class="mrow">${mI(k)}<div class="mn"><b>${STY[k].name}</b><small>maks. ${STY[k].max}</small></div><span>${STY[k].d}</span></div>`).join('');
     h+='<h2 class="mh">Pakty (przewaga z ceną)</h2>'+mP('Od 4. poziomu nocy mogą trafić się <b>pakty</b>: duży bonus okupiony wadą. Możesz mieć najwyżej dwa.')+Object.keys(STY).filter(k=>STY[k].pact).map(k=>`<div class="mrow">${mI(k)}<b>${STY[k].name}</b><span>${STY[k].d}</span></div>`).join('');
     h+='<h2 class="mh">Zaklęcia ostrza</h2>'+mP('Pierwsze zaklęcie jest <b>główne</b> (do 10 poziomów). Drugie, zgodne zaklęcie jest <b>wspierające</b> (do 3 poziomów, słabszy status, bez finiszera i bez mnożnika miecza). Łącznie najwyżej dwa żywioły, także licząc pociski i ziemię. <b>Ogień i lód wykluczają się</b> w każdej kolejności. Trzy znaki głównego ostrza wykańczają zwykłego wroga.')+['venom','fireblade','iceblade','bloodblade'].map(k=>mSkill(k)).join('');
-    h+='<h2 class="mh">Techniki miecza i magia wspierająca</h2>'+mP('Trzy sloty aktywne: Q / E / F, na padzie LT + X / Y / B, na dotyku trzy ikony. Rozmowa: Enter lub Y. Wyposażenie zmieniasz w pauzie poza walką. Pociski kosztują 12 staminy i mają 4 s odnowienia. Kolce i obrońca: 20 staminy. Piętno krwi: 12 staminy. Odnowienia nie resetują się przy przekładaniu skilli. Pozostałe techniki miecza nie zajmują slotów. Ciężki cios naładujesz przytrzymując J, lewy przycisk myszy, X lub RT; na ekranie dotykowym przytrzymaj Szybki atak. Ziemia jest jednym żywiołem: możesz w jej ramach nauczyć się kolców i obrońcy.')+NEW_SWORD_SK.map(k=>mSkill(k)).join('');return h}
+    h+='<h2 class="mh">Techniki miecza i magia wspierająca</h2>'+mP('Trzy sloty aktywne: Q / E / F, na padzie LT + X / Y / B, na dotyku trzy ikony. Rozmowa: Enter lub Y. Wyposażenie zmieniasz w pauzie poza walką. Skille ze slotów płacą <b>maną</b> (niebieski pasek pod staminą), nie staminą. Pociski lodu/ognia: 18 many, 8 s; Jadowy kolec: 20 many, 10 s. Kolce i Odrzut Mocy: 24 many. Obrońca: 34 many, 30 s; golem ściąga na siebie wrogów. Piętno krwi: 16 many. Mana odnawia się powoli sama, a każde trafienie mieczem oddaje 1 punkt. Odnowienia nie resetują się przy przekładaniu skilli. Pozostałe techniki miecza nie zajmują slotów. Ciężki cios naładujesz przytrzymując J, lewy przycisk myszy, X lub RT; na ekranie dotykowym przytrzymaj Szybki atak. Ziemia jest jednym żywiołem: możesz w jej ramach nauczyć się kolców i obrońcy.')+NEW_SWORD_SK.map(k=>mSkill(k)).join('');return h}
   if(id==='prog'){return mBox('Poziom postaci','To <b>stały postęp</b>, niezależny od pojedynczej nocy. Po każdej nocy (nawet przegranej) dostajesz doświadczenie postaci. Potrzebne jest <b>'+PNEED(1)+' dla pierwszego poziomu</b>, a każdy kolejny o '+(PNEED(2)-PNEED(1))+' więcej. Maksymalny poziom to <b>'+PMAX+'</b>. Pasek widzisz na ekranie głównym i w „Nim zapadnie noc”.')
    +mBox('Perki: wybierasz do 3',mP('Przed każdą nocą ekran <b>„Nim zapadnie noc”</b> pozwala wybrać do <b>trzech perków</b>. Każdy daje <b>zaletę i wadę</b>, a dodatkowo zwiększa doświadczenie postaci zdobyte w tej nocy. Nowe perki odblokowujesz poziomami postaci. Co wybrałeś, zapamiętuje się na kolejne noce.')
     +'<div class="mtab">'+PERKS.map(p=>`<div class="mrow"><div class="mn"><b>${p.n}</b><small>poziom ${p.lv}</small></div><span><span class="pl">${p.pl}</span> · <span class="mi">${perkMinus(p)}</span> · bonus doświadczenia +${Math.round(p.bx*100)}%</span></div>`).join('')+'</div>')
@@ -3960,9 +4021,9 @@ function refreshDat(){const f=m=>{const q=PROG[m],cur=true,open=DATOPEN===m;let 
  return `<button type="button" class="ban${open?' open':''}${cur?' cur':''}" data-m="${m}" aria-expanded="${open}"><b>Postęp i rekordy</b><span>Poziom postaci ${q.lv} · rozdziały z rekordem: ${rs}</span></button>`+(open?`<div class="banbody">${rows}</div>`:'')};$('datInfo').innerHTML=f('s')}
 $('datInfo').addEventListener('click',e=>{const d=e.target.closest('.dset');if(d)return;const b=e.target.closest('.ban');if(!b)return;DATOPEN=DATOPEN===b.dataset.m?null:b.dataset.m;refreshDat();const nb=$('datInfo').querySelector('.ban[data-m="'+b.dataset.m+'"]');if(nb)nb.focus()});
 function togglePause(on){if(!S||S.phase!=='play'||S.notice||S.choosing||S.shop||S.dialog||S.intro)return;S.paused=on===undefined?!S.paused:on;if(S.paused){fillPauseKeys();renderLoadout();pl.swingT=0}renderActiveHud();$('pause').hidden=!S.paused;$('touch').hidden=S.paused||!coarse;
-  for(const k in keys)keys[k]=false;resetInput();if(AC){if(S.paused&&AC.state==='running')AC.suspend();else if(!S.paused&&AC.state==='suspended')AC.resume()}if(S.paused)setTimeout(()=>$('resumeBtn').focus(),30)}
+  for(const k in keys)keys[k]=false;resetInput();if(AC){if(S.paused&&AC.state==='running')AC.suspend();else if(!S.paused&&AC.state==='suspended')acResume()}if(S.paused)setTimeout(()=>$('resumeBtn').focus(),30)}
 function resetInput(){for(const k in keys)keys[k]=false;mouseL=mouseR=tAtk=tBlock=false;heavyPress=signPress=rollPress=talkPress=false;tj.x=tj.y=0;if(typeof stick!=='undefined')stick.hidden=true}
-function toMenu(){$('activeSkillHud').hidden=true;$('notice').hidden=true;if(S){S.notice=null;S.noticeQueue=[];S.witChoice=false}INTRO=null;$('intro').hidden=true;resetInput();if(S)S.paused=false;$('pause').hidden=true;if(AC&&AC.state==='suspended')AC.resume();clearScene();S=null;for(const id of ['end','hud','boss','prompt','dialog','lvl','shop'])$(id).hidden=true;$('touch').hidden=true;ensureWorld(1);useWorld(1);dg.clearRect(0,0,WW,WH);decalDirty=true;$('title').hidden=false;hbClear();renderRecords();MUS.base=0;musStart(AUDIO_DATA.intro?'intro':'title');setTimeout(()=>$('start1').focus(),50)}
+function toMenu(){$('activeSkillHud').hidden=true;$('notice').hidden=true;$('msg').classList.remove('on');if(S){S.notice=null;S.noticeQueue=[];S.banner=null;S.witChoice=false}INTRO=null;$('intro').hidden=true;resetInput();if(S)S.paused=false;$('pause').hidden=true;if(AC&&AC.state==='suspended')acResume();clearScene();S=null;for(const id of ['end','hud','boss','prompt','dialog','lvl','shop'])$(id).hidden=true;$('touch').hidden=true;ensureWorld(1);useWorld(1);dg.clearRect(0,0,WW,WH);decalDirty=true;$('title').hidden=false;hbClear();renderRecords();MUS.base=0;musStart(AUDIO_DATA.intro?'intro':'title');setTimeout(()=>$('start1').focus(),50)}
 $('start1').addEventListener('click',()=>openPrep(1));$('start2').addEventListener('click',()=>openPrep(2));$('againBtn').addEventListener('click',()=>openPrep(CH===9?1:CH));$('nextBtn').addEventListener('click',()=>openPrep(Math.min(5,CH+1)));$('start3').addEventListener('click',()=>openPrep(3));$('start4').addEventListener('click',()=>openPrep(4));$('start5').addEventListener('click',()=>openPrep(5));$('prepGo').addEventListener('click',beginRun);$('prepBack').addEventListener('click',()=>{$('prep').hidden=true;toMenu()});$('menuBtn').addEventListener('click',toMenu);$('resumeBtn').addEventListener('click',()=>togglePause(false));$('pauseMenuBtn').addEventListener('click',toMenu);$('shopClose').addEventListener('click',closeShop);
 $('dialog').addEventListener('click',()=>{if(S&&S.dialog)advanceDialog()});
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(S&&S.intro){e.preventDefault();if(k==='escape'){if(INTRO){INTRO.wait=0;INTRO.i=INTRO.lines.length-1;INTRO.full=true;introNext()}}else if([' ','enter','e','j'].includes(k))introNext();return}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
@@ -3976,10 +4037,10 @@ addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});addEventListener(
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&S&&S.phase==='play'&&!S.paused)togglePause(true)});
 const touch=$('touch'),stick=$('stick'),knob=$('knob');let sid=null,sx0=0,sy0=0;
 let tapD=null;
-touch.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;tapD={x:e.clientX,y:e.clientY,t:performance.now()};if(S&&S.dialog){advanceDialog();return}if(SETT.touchLeft?e.clientX<innerWidth*.4:e.clientX>innerWidth*.6)return;sid=e.pointerId;sx0=e.clientX;sy0=e.clientY;stick.hidden=false;stick.style.left=sx0+'px';stick.style.top=sy0+'px';knob.style.transform='';try{touch.setPointerCapture(e.pointerId)}catch(err){}});
-touch.addEventListener('pointermove',e=>{if(e.pointerId!==sid)return;let dx=e.clientX-sx0,dy=e.clientY-sy0;const d=Math.hypot(dx,dy),m=40;if(d>m){dx=dx/d*m;dy=dy/d*m}tj.x=dx/m;tj.y=dy/m;if(Math.hypot(tj.x,tj.y)<.2){tj.x=0;tj.y=0}knob.style.transform=`translate(${dx}px,${dy}px)`});
-touch.addEventListener('pointerup',e=>{const d=tapD;tapD=null;if(!d||!S||S.phase!=='play'||S.dialog||S.choosing||S.shop||pl.dead)return;if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>16||performance.now()-d.t>450)return;
-  const tg=nearMerchant()||nearNpc()||nearPowerFire()||nearExit();if(!tg)return;V.set(tg.x/16,1,tg.y/16).project(cam);const r=$('screen').getBoundingClientRect(),sx=r.left+(V.x+1)/2*r.width,sy=r.top+(1-V.y)/2*r.height;if(Math.hypot(e.clientX-sx,e.clientY-sy)<80)talkPress=true});
+touch.addEventListener('pointerdown',e=>{if(e.target.tagName==='BUTTON')return;const [px,py]=lp(e.clientX,e.clientY),vw=ROT?innerHeight:innerWidth;tapD={x:px,y:py,t:performance.now()};if(S&&S.dialog){advanceDialog();return}if(SETT.touchLeft?px<vw*.4:px>vw*.6)return;sid=e.pointerId;sx0=px;sy0=py;stick.hidden=false;stick.style.left=sx0+'px';stick.style.top=sy0+'px';knob.style.transform='';try{touch.setPointerCapture(e.pointerId)}catch(err){}});
+touch.addEventListener('pointermove',e=>{if(e.pointerId!==sid)return;const [px,py]=lp(e.clientX,e.clientY);let dx=px-sx0,dy=py-sy0;const d=Math.hypot(dx,dy),m=40;if(d>m){dx=dx/d*m;dy=dy/d*m}tj.x=dx/m;tj.y=dy/m;if(Math.hypot(tj.x,tj.y)<.2){tj.x=0;tj.y=0}knob.style.transform=`translate(${dx}px,${dy}px)`});
+touch.addEventListener('pointerup',e=>{const d=tapD;tapD=null;if(!d||!S||S.phase!=='play'||S.dialog||S.choosing||S.shop||pl.dead)return;const [ux,uy]=lp(e.clientX,e.clientY);if(Math.hypot(ux-d.x,uy-d.y)>16||performance.now()-d.t>450)return;
+  const tg=nearMerchant()||nearNpc()||nearPowerFire()||nearExit();if(!tg)return;V.set(tg.x/16,1,tg.y/16).project(cam);const r=lrect($('screen')),sx=r.left+(V.x+1)/2*r.width,sy=r.top+(1-V.y)/2*r.height;if(Math.hypot(ux-sx,uy-sy)<80)talkPress=true});
 const endS=e=>{if(e.pointerId!==sid)return;sid=null;tj.x=0;tj.y=0;stick.hidden=true};touch.addEventListener('pointerup',endS);touch.addEventListener('pointercancel',endS);
 const tb=(id,fn)=>$(id).addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(S&&S.dialog){advanceDialog();return}fn()});
 tb('bRoll',()=>rollPress=true);tb('bHeavy',()=>heavyPress=true);tb('bPause',()=>togglePause(true));
@@ -3992,14 +4053,20 @@ addEventListener('mouseup',e=>{if(e.button===0)mouseL=false;if(e.button===2)mous
 scrEl.addEventListener('contextmenu',e=>{if(S&&S.phase==='play')e.preventDefault()});
 scrEl.addEventListener('mousemove',e=>{const r=scrEl.getBoundingClientRect();mouseX=e.clientX-r.left;mouseY=e.clientY-r.top;mouseT=clock});
 
-function fit(){const r=$('stage').getBoundingClientRect(),s=Math.min(r.width/320,r.height/180);const w=Math.floor(320*s),h=Math.floor(180*s);
-  const scr=$('screen');scr.style.width=w+'px';scr.style.height=h+'px';scr.style.fontSize=(Math.max(10,s*5.2)*SETT.fts/100)+'px';
+// The game follows the device: landscape or portrait, never turned by code. It fills the whole window by widening
+// the view: at least the old 16:9 picture height is visible in landscape; in portrait the visible width equals that
+// height and the extra room goes up and down. Wider than 2.4:1 (ultrawide) gets thin side bars instead.
+var ROT=false;// fit() can run before this line, so its numbers are literals: max aspect 2.4, base vertical FOV 24°
+function lp(x,y){return [x,y]}
+function lrect(el){return el.getBoundingClientRect()}
+function fit(){const st=$('stage'),r=st.getBoundingClientRect();let w=Math.max(1,Math.floor(r.width)),h=Math.max(1,Math.floor(r.height));if(w/h>2.4)w=Math.floor(h*2.4);const s=Math.min(w/320,h/180),port=h>w;
+  const scr=$('screen');scr.style.width=w+'px';scr.style.height=h+'px';scr.classList.toggle('port',port);document.documentElement.classList.toggle('port',port);scr.style.fontSize=(Math.max(10,s*5.2)*SETT.fts/100)+'px';
   renderer.setPixelRatio(SETT.quality==='low'?1:Math.min(1.5,window.devicePixelRatio||1));renderer.setSize(w,h,false);
-  const rh=SETT.quality==='low'?360:RT_H,rw=Math.round(rh*w/h);rt.setSize(rw,rh);postMat.uniforms.res.value.set(rw,rh);cam.aspect=w/h;cam.updateProjectionMatrix()}
+  const q=SETT.quality==='low'?360:RT_H,rw=port?q:Math.round(q*w/h),rh=port?Math.round(q*h/w):q;rt.setSize(rw,rh);postMat.uniforms.res.value.set(rw,rh);
+  cam.aspect=w/h;cam.fov=2*Math.atan(Math.tan(12*Math.PI/180)/Math.min(1,w/h))*180/Math.PI;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);fit();
 // iPhone (above all as a home-screen app) often reports the new size late after rotating, so fit again on every signal and a moment later
 const refit=()=>{fit();setTimeout(fit,120);setTimeout(fit,400);setTimeout(fit,900)};
-try{matchMedia('(orientation:portrait) and (pointer:coarse)').addEventListener('change',e=>{if(e.matches&&S&&S.phase==='play'&&!S.paused&&!S.intro)togglePause(true)})}catch(e){}
 addEventListener('orientationchange',refit);addEventListener('pageshow',refit);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refit()});
 if(window.visualViewport)visualViewport.addEventListener('resize',fit);
 if(window.ResizeObserver)new ResizeObserver(()=>fit()).observe($('stage'));
@@ -4010,7 +4077,15 @@ let last=performance.now();
 const PAD={x:0,y:0,ax:0,ay:0,aimT:-99,prev:[],cur:[],atk:false,blk:false,on:false,g:null,menu:'',lock:0,nav:0,navD:0};
 function padRumble(s,w,ms){try{const g=PAD.g;if(g&&g.vibrationActuator)g.vibrationActuator.playEffect('dual-rumble',{duration:ms,strongMagnitude:s,weakMagnitude:w})}catch(e){}}
 function padDz(x,y,dz){const m=Math.hypot(x,y);if(m<dz)return [0,0];const k=Math.min(1,(m-dz)/(1-dz))/m;return [x*k,y*k]}
-function padMenuId(){if(S&&S.notice)return 'notice';if(S&&S.witChoice)return 'witChoices';if(S&&S.phase==='end'&&!$('end').hidden)return 'end';for(const id of ['pause','shop','lvl','prep','conf','manual','opts','end','title']){const el=$(id);if(el&&!el.hidden)return id}return ''}
+function padMenuId(){if(recoveryActive)return 'recovery';if(S&&S.notice)return 'notice';if(S&&S.witChoice)return 'witChoices';if(S&&S.phase==='end'&&!$('end').hidden)return 'end';for(const id of ['pause','shop','lvl','prep','conf','manual','opts','end','title']){const el=$(id);if(el&&!el.hidden)return id}return ''}
+// Menus: up/down/left/right pick the nearest control in that direction on screen (not the next one in the list).
+function navMove(id,d){const root=$(id);if(!root)return false;const items=[...root.querySelectorAll('button,input,summary')].filter(e=>!e.disabled&&e.offsetParent!==null);if(!items.length)return false;
+  const ae=document.activeElement,cur=items.includes(ae)?ae:null;if(!cur){const s1=id==='title'?$('start1'):null;(s1&&items.includes(s1)?s1:items[0]).focus();return true}
+  const c=lrect(cur),cx=c.left+c.width/2,cy=c.top+c.height/2;let best=null,bs=1e9;
+  for(const e of items){if(e===cur)continue;const r=lrect(e),dx=r.left+r.width/2-cx,dy=r.top+r.height/2-cy;const main=d==='d'?dy:d==='u'?-dy:d==='r'?dx:-dx,side=d==='d'||d==='u'?dx:dy;if(main<=2)continue;const sc=main+Math.abs(side)*2.2;if(sc<bs){bs=sc;best=e}}
+  if(!best){const i=items.indexOf(cur),step=d==='d'||d==='r'?1:-1;best=items[(i+step+items.length)%items.length]}
+  best.focus({preventScroll:true});try{best.scrollIntoView({block:'nearest'})}catch(e){}return true}
+addEventListener('keydown',e=>{const m={arrowdown:'d',arrowup:'u',arrowleft:'l',arrowright:'r'}[e.key.toLowerCase()];if(!m||recoveryActive)return;const id=padMenuId();if(!id||id==='notice')return;const ae=document.activeElement;if(ae&&ae.type==='range'&&(m==='l'||m==='r'))return;if(ae&&(ae.tagName==='SELECT'||ae.tagName==='TEXTAREA'||ae.type==='text'))return;if(navMove(id,m)){e.preventDefault();e.stopImmediatePropagation()}},true);
 function padNav(id,dt,pr,g){
   const root=$(id);const items=[...root.querySelectorAll('button,input,summary')].filter(e=>!e.disabled&&e.offsetParent!==null);if(!items.length)return;
   const ae=document.activeElement;let i=items.indexOf(ae);if(i<0){const s1=id==='title'?items.indexOf($('start1')):-1;i=s1>=0?s1:0;items[i].focus()}
@@ -4022,7 +4097,7 @@ function padNav(id,dt,pr,g){
   const grabOff=()=>{PAD.grab=null;for(const e of document.querySelectorAll('.rng.grab'))e.classList.remove('grab')};
   if(PAD.grab&&PAD.grab!==cur)grabOff();
   if(dir){if(PAD.grab===cur){if(hor){cur.value=String(Math.max(+cur.min,Math.min(+cur.max,+cur.value+dir*5)));cur.dispatchEvent(new Event('input',{bubbles:true}));cur.dispatchEvent(new Event('change',{bubbles:true}))}}
-    else{const n=items[(i+dir+items.length)%items.length];n.focus();try{n.scrollIntoView({block:'nearest'})}catch(e){}}}
+    else navMove(id,d===1?'d':d===-1?'u':d===2?'r':'l')}
   if(pr(0)){if(cur.type==='range'){if(PAD.grab===cur)grabOff();else{PAD.grab=cur;if(cur.parentNode)cur.parentNode.classList.add('grab')}}else cur.click()}
   if(pr(1)&&PAD.grab){grabOff();return}
   // LB / RB: przełączanie zakładek w Opcjach i Instrukcji
@@ -4043,7 +4118,7 @@ function padTick(dt){
     if(u||d||l||r){PAD.cur[12]=PAD.cur[12]||!!u;PAD.cur[13]=PAD.cur[13]||!!d;PAD.cur[14]=PAD.cur[14]||!!l;PAD.cur[15]=PAD.cur[15]||!!r}}
   const pr=i=>PAD.cur[i]&&!PAD.prev[i];
   if(!PAD.on&&PAD.cur.some(Boolean)){PAD.on=true;document.body.classList.add('padnav');const k=$('keysPad');if(k)k.hidden=false}
-  if(PAD.cur.some(Boolean)){try{if(AC&&AC.state==='suspended'&&!(S&&S.paused))AC.resume()}catch(e){}}
+  if(PAD.cur.some(Boolean)){try{if(AC&&AC.state==='suspended'&&!(S&&S.paused))acResume()}catch(e){}}
   const mid=padMenuId();setTimeout(padMark,0);if(mid!==PAD.menu){PAD.menu=mid;PAD.lock=.4;PAD.fresh=true;PAD.grab=null;for(const e of document.querySelectorAll('.rng.grab'))e.classList.remove('grab')}if(PAD.lock>0)PAD.lock-=dt;
   // wstęp fabularny
   if(S&&S.intro){PAD.x=PAD.y=0;PAD.atk=PAD.blk=false;if(pr(0)||pr(1)||pr(2))introNext();if(pr(9)&&INTRO){INTRO.wait=0;INTRO.i=INTRO.lines.length-1;INTRO.full=true;introNext()}return}
@@ -4079,11 +4154,36 @@ return [{t:1,text:tc?(SETT.touchLeft?'Prawy':'Lewy')+' kciuk: przeciągnij, aby 
 {t:12,text:'Blok tuż przed trafieniem paruje. Jasne podświetlenie zapowiada cios; czerwone wymaga uniku.',done:()=>S.actions.block>0},
 {t:20,text:tc?'Unik: przycisk przy ataku. Potrzebujesz pełnego kosztu staminy.':pd?'A: unik. Przesuwa cię i daje krótką nietykalność.':'Spacja lub Shift: unik. Unikaj czerwonego podświetlenia i łańcucha.',done:()=>S.actions.dodge>0},
 {t:30,text:'Zbieraj ogniki i monety. Awans leczy '+Math.round(S.pk.lvHeal*100)+'% życia. O północy kupisz ulepszenia u Margi.',done:()=>S.actions.collect>0},
-...([{t:35,text:'Magia wspiera miecz: pierwszy żywioł ostrza jest główny, drugi wspierający. Łącznie najwyżej dwa żywioły. Ogień wyklucza lód — także w pociskach.',done:()=>true},{t:40,text:tc?'Trzy ikony to wyposażone skille. Dotknij wybraną. W pauzie poza walką możesz zmienić wyposażenie. Pocisk kosztuje 12 staminy, odnowienie 4 s.':pd?'Przytrzymaj LT i naciśnij X, Y lub B, aby użyć skilla ze slotu. A nadal wykonuje unik, LB blok, RT lekki atak, RB ciężki. Wyposażenie zmienisz w pauzie poza walką.':'Q / E / F uruchamiają wyposażone skille. Celuj kursorem; bez myszy patrz w kierunku celu. Rozmowa: Enter. Wyposażenie zmienisz w pauzie poza walką.',done:()=>true},{t:43,text:'Techniki wspierają szermierkę: Przełamanie wymaga naładowanego ciężkiego ciosu, Odwet — parowania; kolce, obrońcę i piętno aktywujesz ze slotów, Krok przez cień — uniku i lekkiego ciosu. Szczegóły każdej techniki znajdziesz w Instrukcji → Style.',done:()=>true}]),{t:45,text:'Cel: przetrwaj noc i pokonaj finałowego bossa. Sklep i bossowie wydłużają podejście.',done:()=>true}];}
+...([{t:35,text:'Magia wspiera miecz: pierwszy żywioł ostrza jest główny, drugi wspierający. Łącznie najwyżej dwa żywioły. Ogień wyklucza lód — także w pociskach.',done:()=>true},{t:40,text:tc?'Trzy ikony to wyposażone skille. Dotknij wybraną. W pauzie poza walką możesz zmienić wyposażenie. Skille płacą maną (niebieski pasek). Koszt many i odnowienie sprawdzisz w opisie skilla.':pd?'Przytrzymaj LT i naciśnij X, Y lub B, aby użyć skilla ze slotu. A nadal wykonuje unik, LB blok, RT lekki atak, RB ciężki. Wyposażenie zmienisz w pauzie poza walką.':'Q / E / F uruchamiają wyposażone skille. Celuj kursorem; bez myszy patrz w kierunku celu. Rozmowa: Enter. Wyposażenie zmienisz w pauzie poza walką.',done:()=>true},{t:43,text:'Techniki wspierają szermierkę: Przełamanie wymaga naładowanego ciężkiego ciosu, Odwet — parowania; kolce, obrońcę i piętno aktywujesz ze slotów, Krok przez cień — uniku i lekkiego ciosu. Szczegóły każdej techniki znajdziesz w Instrukcji → Style.',done:()=>true}]),{t:45,text:'Cel: przetrwaj noc i pokonaj finałowego bossa. Sklep i bossowie wydłużają podejście.',done:()=>true}];}
 function tutTick(dt){const h=$('tut');if(!HINTS_ENABLED||tutorialDone()||S.dg||CH!==1||STORYINTRO_ACTIVE()){$('tutSkip').hidden=true;h.classList.remove('on');return}if(TUT.sid!==S){TUT.sid=S;TUT.i=0;TUT.shown=0;TUT.x0=[pl.x,pl.y]}const steps=tutList();if(TUT.i>=steps.length){finishTutorial();return}const q=steps[TUT.i];if(S.t<q.t)return;$('tutText').textContent=q.text;h.classList.add('on');$('tutSkip').hidden=false;TUT.shown+=dt;if(TUT.shown>=5&&q.done()){TUT.i++;TUT.shown=0;h.classList.remove('on')}}
 
 function STORYINTRO_ACTIVE(){return !!(S&&S.intro)}
-function frame(now){const elapsed=Math.min(.5,Math.max(0,(now-last)/1000));last=now;const frozen=!!(S&&(S.paused||S.notice||S.intro||S.choosing||S.shop||S.dialog||S.phase!=='play'));const dt=elapsed;clock+=frozen?0:dt;padTick(Math.min(.05,dt));let remaining=document.hidden?0:dt;while(remaining>1e-7){const step=Math.min(.025,remaining);update(step);if(S&&S.phase==='play'&&!S.paused&&!S.notice&&!S.intro&&!S.choosing&&!S.shop&&!S.dialog&&!pl.dead)tutTick(step);else{$('tut').classList.remove('on');$('tutSkip').hidden=true}remaining-=step;rollPress=talkPress=false;if(S&&(S.paused||S.notice||S.choosing||S.shop||S.dialog||S.phase!=='play'))break}hbTick();if(!S)ftClear();else if(!frozen)ftTick(dt);if(A){const locked=!!(S&&(S.paused||S.notice||S.intro||S.choosing||S.shop||S.dialog||S.phase!=='play'));syncScene(locked?0:Math.min(.05,dt));if(S&&S.parts.length>MAXP-50)S.parts.splice(0,S.parts.length-(MAXP-50))}draw();hud();requestAnimationFrame(frame)}
+// Recovery is independent of the renderer, so its controls work even after a failed frame.
+let recoveryActive=false,contextLost=false,errorMemory=[];
+const recovery=document.createElement('div');recovery.id='recovery';recovery.hidden=true;recovery.setAttribute('role','alertdialog');recovery.setAttribute('aria-modal','true');recovery.setAttribute('aria-label','Problem z grą');recovery.style.cssText='position:absolute;inset:0;z-index:99999;background:#100f12f5;color:#eee;padding:8%;overflow:auto;pointer-events:auto';
+recovery.innerHTML='<h2>Gra została wstrzymana</h2><p id="recoveryText"></p><button class="go" id="recoveryMenu" type="button">Wróć do menu</button><p><button class="go alt" id="recoveryReload" type="button">Przeładuj grę</button></p><p>Trwały postęp pozostaje zapisany. Bieżąca noc nie zostanie wznowiona po przeładowaniu.</p>';$('screen').appendChild(recovery);
+function readErrors(){try{const v=JSON.parse(localStorage.getItem('pn_errors')||'[]');return Array.isArray(v)?v.slice(-20):[]}catch(e){return errorMemory}}
+function recordError(kind,value,source=''){try{const errors=readErrors();errors.push({time:new Date().toISOString(),kind,message:String(value&&value.message||value||'Nieznany błąd').slice(0,2000),stack:String(value&&value.stack||'').slice(0,4000),source:String(source).slice(0,500)});errorMemory=errors.slice(-20);try{localStorage.setItem('pn_errors',JSON.stringify(errorMemory))}catch(e){}}catch(e){}}
+function showRecovery(text){recoveryActive=true;if(S)S.paused=true;resetInput();$('recoveryText').textContent=text;recovery.hidden=false;$('recoveryMenu').disabled=contextLost;$('recoveryReload').focus()}
+function handleGameError(kind,value,source){recordError(kind,value,source);try{showRecovery('Wystąpił błąd. Wróć do menu. Raport dla testera znajdziesz w Opcjach → Dane zapisu.')}catch(e){recoveryActive=true;recovery.hidden=false}}
+// Only a failure inside the game loop stops the game. Other errors are logged; ours also get a short note on screen.
+function acResume(){try{const p=AC&&AC.resume();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+let lastErrNote=-1e9;
+function noteError(kind,value,source){recordError(kind,value,source);const now=performance.now();if(now-lastErrNote<10000)return;lastErrNote=now;try{const m=$('msg');m.textContent='Wystąpił drobny błąd. Gra działa dalej; raport jest w Opcjach → Dane zapisu.';m.classList.add('on');clearTimeout(msgT);msgT=setTimeout(()=>m.classList.remove('on'),3400)}catch(e){}}
+function foreignError(e){const f=e.filename||'';if(!f)return /^script error\.?$/i.test(String(e.message||'').trim())||!e.error;try{const u=new URL(f,location.href);return u.href.split(/[?#]/)[0]!==location.href.split(/[?#]/)[0]&&u.origin!==location.origin}catch(x){return true}}
+window.addEventListener('error',e=>{if(e.target&&e.target!==window)return;if(foreignError(e)){recordError('external',e.message||'Script error',e.filename||'');return}noteError('error',e.error||e.message,(e.filename||'')+':'+(e.lineno||0))});
+window.addEventListener('unhandledrejection',e=>{e.preventDefault();const r=e.reason,n=r&&r.name;if(n==='NotAllowedError'||n==='AbortError'||n==='NotSupportedError'){recordError('ignored',r);return}noteError('unhandledrejection',r)});
+$('recoveryReload').onclick=()=>location.reload();
+$('recoveryMenu').onclick=()=>{if(contextLost)return;try{toMenu();last=performance.now();recoveryActive=false;recovery.hidden=true}catch(e){recordError('menu',e);$('recoveryText').textContent='Nie udało się wrócić do menu. Przeładuj grę; trwały postęp pozostanie zapisany.'}};
+recovery.addEventListener('pointerdown',e=>e.stopPropagation());
+window.addEventListener('keydown',e=>{if(recoveryActive&&e.key!=='Tab'){e.stopImmediatePropagation();e.preventDefault();if(e.key==='Enter')document.activeElement.click()}},true);
+cvs.addEventListener('webglcontextlost',e=>{e.preventDefault();contextLost=true;recordError('webglcontextlost','Utrata kontekstu WebGL');showRecovery('Utracono obraz. Gra jest wstrzymana. Po odzyskaniu obrazu gra przeładuje się bez usuwania trwałego postępu. Jeśli obraz nie wraca, wybierz Przeładuj grę.')});
+cvs.addEventListener('webglcontextrestored',()=>{recordError('webglcontextrestored','Bezpieczne przeładowanie');location.reload()});
+function errorReport(){return JSON.stringify({game:'Nightbrand',url:location.href.split('?')[0],userAgent:navigator.userAgent,quality:SETT.quality,touch:coarse,errors:readErrors()},null,2)}
+$('copyErrors').onclick=async()=>{const report=errorReport();try{await navigator.clipboard.writeText(report);saveMsg('Skopiowano raport błędów.')}catch(e){const t=document.createElement('textarea');t.value=report;t.setAttribute('aria-label','Raport błędów do skopiowania');$('pane-dat').appendChild(t);t.focus();t.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}if(ok)t.remove();saveMsg(ok?'Skopiowano raport błędów.':'Zaznaczony raport skopiuj ręcznie.')}};
+function frameLimit(){return SETT.quality==='low'||coarse?.2:.5}
+function frame(now){try{runFrame(now)}catch(e){handleGameError('frame',e)}requestAnimationFrame(frame)}
+function runFrame(now){if(recoveryActive){last=now;try{padTick(.016)}catch(e){}return}const elapsed=Math.min(frameLimit(),Math.max(0,(now-last)/1000));last=now;const frozen=!!(S&&(S.paused||S.notice||S.intro||S.choosing||S.shop||S.dialog||S.phase!=='play'));const dt=elapsed;clock+=frozen?0:dt;padTick(Math.min(.05,dt));let remaining=document.hidden?0:dt;while(remaining>1e-7){const step=Math.min(.025,remaining);update(step);if(S&&S.phase==='play'&&!S.paused&&!S.notice&&!S.intro&&!S.choosing&&!S.shop&&!S.dialog&&!pl.dead)tutTick(step);else{$('tut').classList.remove('on');$('tutSkip').hidden=true}remaining-=step;rollPress=talkPress=false;if(S&&(S.paused||S.notice||S.choosing||S.shop||S.dialog||S.phase!=='play'))break}hbTick();if(!S)ftClear();else if(!frozen)ftTick(dt);if(A){const locked=!!(S&&(S.paused||S.notice||S.intro||S.choosing||S.shop||S.dialog||S.phase!=='play'));syncScene(locked?0:Math.min(.05,dt));if(S&&S.parts.length>MAXP-50)S.parts.splice(0,S.parts.length-(MAXP-50))}draw();hud()}
 
 function saveAccess(){try{const q={};for(const k of ['quality','shake','flash','contrast','oneHand','touchScale','touchLeft'])q[k]=SETT[k];localStorage.setItem('pn_access',JSON.stringify(q))}catch(e){}}
 function applyAccess(){document.body.classList.toggle('no-flash',!SETT.flash);document.body.classList.toggle('contrast',SETT.contrast);document.body.classList.toggle('touch-left',SETT.touchLeft);document.documentElement.style.setProperty('--touchScale',SETT.touchScale);postMat.uniforms.low.value=SETT.quality==='low'?1:0;renderer.shadowMap.enabled=SETT.quality!=='low';for(const w of Object.values(WORLDS))applySurfaceQuality(w);for(const [id,k] of [['qualityLow','quality'],['shakeTgl','shake'],['flashTgl','flash'],['contrastTgl','contrast'],['oneHandTgl','oneHand'],['touchLeftTgl','touchLeft']])$(id).checked=k==='quality'?SETT.quality==='low':SETT[k];$('touchSizeSl').value=SETT.touchScale*100;fit()}
