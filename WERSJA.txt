@@ -1,3 +1,5 @@
+28.10.2026 — FENIX: ramki, banery i łańcuchy Gemini z prawdziwą przezroczystością; wycentrowany panel i rząd kart awansu w poziomie. Kod rozgrywki bez zmian. nightbrand-codex-20261028-98; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Krótki przegląd UI PASS. Wersja lokalna, bez publikacji.
+
 28.10.2026 — FENIX: tytuł karty „Nightbrand”; przyczyna śmierci na ekranie końca nocy, jawny sprawca każdego trafienia i pocisku. Bez zmian balansu. nightbrand-codex-20261028-96; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Wersja lokalna, bez publikacji GitHub.
 
 FENIX — 28.10.2026. nightbrand-codex-20261028-94; index.html 20684 B; SHA-256 0dd66f734f8d9a11860d15428da0292428a49f0d47dea160dd1d8b416b4ee6f4. Gra z osobnych plików web/index.html + web/assets/. Publikacja obejmuje wyłącznie pliki gry; stare materiały itch/ wyłączone z precache.
