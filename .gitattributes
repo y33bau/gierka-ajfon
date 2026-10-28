@@ -1,0 +1,2 @@
+# Preserve exact published bytes (including release SHA-256).
+* -text

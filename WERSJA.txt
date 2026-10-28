@@ -1,3 +1,5 @@
+FENIX — 28.10.2026. nightbrand-codex-20261028-94; index.html 20684 B; SHA-256 0dd66f734f8d9a11860d15428da0292428a49f0d47dea160dd1d8b416b4ee6f4. Gra z osobnych plików web/index.html + web/assets/. Publikacja obejmuje wyłącznie pliki gry; stare materiały itch/ wyłączone z precache.
+
 28.10.2026 — nowe okno awansu: lista w pionie, równe karty w poziomie, ochrona wyboru 2,5 s. „Trzeci cios combo”. nightbrand-codex-20261028-86; HTML 14368712 B; SHA-256 ad35b052c061b089d9d3fbbc0b157d91b0986ea20e54c65d5a5dd11dc512a493; testy 226 kontroli PASS, 9/9 widoków i 45/45 trafień.
 
 28.10.2026 Claude — rejestracja sw.js z .catch (bez fałszywego błędu w raporcie). nightbrand-claude-20261028-76; HTML 14362850 B; SHA-256 4a50d03a9e9b4d042d264785be810c5de3ab2e1436b74c7d104960cb150e9f56.
