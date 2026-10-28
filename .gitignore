@@ -58,3 +58,6 @@ itch/
 *.log
 .env
 .env.*
+
+# Obsolete asset retained locally, never publish again
+/assets/09bbd4524cdb5b55fb8f94f9393e5c151f43078a5c5230cb52a569b7f0eb8ef6.js
