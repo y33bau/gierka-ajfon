@@ -1,3 +1,5 @@
+28.10.2026 — FENIX: nowe przezroczyste napisy nagłówków i logo Gemini, poprawne proporcje i etykiety dostępności. nightbrand-codex-20261028-103; SHA-256 index.html 0679c95c54313a7dfe49655d7c041d1e2970f3c837517098a382bf4da2672f2c. Wersja lokalna, bez publikacji.
+
 28.10.2026 — FENIX: naprawiono start z perkami/wyzwaniem (applyPrep przekazuje właściwą tabelę mnożników). Bez zmiany wartości perków. nightbrand-codex-20261028-99; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Test kombinacji 10044/10044 PASS, Wyrusz/zapis 21/21 PASS. Wersja lokalna, czeka na akceptację do publikacji.
 
 28.10.2026 — FENIX: ramki, banery i łańcuchy Gemini z prawdziwą przezroczystością; wycentrowany panel i rząd kart awansu w poziomie. Kod rozgrywki bez zmian. nightbrand-codex-20261028-98; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Krótki przegląd UI PASS. Wersja lokalna, bez publikacji.
