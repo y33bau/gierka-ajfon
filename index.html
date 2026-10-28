@@ -43,7 +43,7 @@ body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:h
 .stam{display:flex;gap:0;margin-top:-.25em}
 .buffs{display:flex;flex-direction:column;gap:.1em;margin-top:.35em;font-size:.95em;color:#f0d58a;text-shadow:0 1px 2px #000,0 0 6px #000;font-variant-numeric:tabular-nums lining-nums}
 .buffs .tr{color:#ff9a6a}
-.stam .seg{flex:1} #screen #msg{top:4.3em;left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:min(62%,36em);box-sizing:border-box;padding:.3em 1.4em;font-family:var(--text);font-weight:600;font-size:1.12em;line-height:1.25;color:#e6dcc0;text-align:center;text-wrap:balance;text-shadow:0 2px 0 #000,0 0 8px #000;background:linear-gradient(90deg,transparent,rgba(8,4,6,.7) 14%,rgba(8,4,6,.7) 86%,transparent);transition:opacity .35s;z-index:6;pointer-events:none} #screen #msg.boss{color:#f0b9a4} #screen.port #msg{top:13.9em;max-width:92%;font-size:1.05em} @media (prefers-reduced-motion:reduce){#screen #msg{transition:none}} #stage{min-height:0;min-width:0;overflow:hidden} #screen #pause>.btnrow{align-self:stretch;width:auto;max-width:none;background:#0a0509;box-shadow:0 -8px 14px #0a0509} #screen #pause{padding-bottom:0} #screen.port #shop .cards{grid-template-columns:repeat(2,minmax(0,1fr))} .hb.gd i{box-sizing:border-box;width:40px;height:5px;border:1px solid #080706;box-shadow:0 0 0 1px #292319;background:#15120c} .hb.gd u{background:#c9b27a} .mana{margin-top:-.15em} .mana .fb.st{--h:1.25em} .mana .fb.st>.trk>i{filter:hue-rotate(190deg) saturate(3.5) brightness(1.15)} #activeSkillHud .no-mana .ic{filter:grayscale(.6) brightness(.45) sepia(.4) hue-rotate(180deg)}
+.stam .seg{flex:1} #screen #msg{top:calc(4.3em * 1.333333333);left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:min(62%,36em);box-sizing:border-box;padding:.3em 1.4em;font-family:var(--text);font-weight:600;font-size:.84em;line-height:1.25;color:#e6dcc0;text-align:center;text-wrap:balance;text-shadow:0 2px 0 #000,0 0 8px #000;background:linear-gradient(90deg,transparent,rgba(8,4,6,.7) 14%,rgba(8,4,6,.7) 86%,transparent);transition:opacity .35s;z-index:6;pointer-events:none} #screen #msg.boss{color:#f0b9a4} #screen.port #msg{top:calc(13.9em * 1.333333333);max-width:92%;font-size:.7875em} @media (prefers-reduced-motion:reduce){#screen #msg{transition:none}} #stage{min-height:0;min-width:0;overflow:hidden} #screen #pause>.btnrow{align-self:stretch;width:auto;max-width:none;background:#0a0509;box-shadow:0 -8px 14px #0a0509} #screen #pause{padding-bottom:0} #screen.port #shop .cards{grid-template-columns:repeat(2,minmax(0,1fr))} .hb.gd i{box-sizing:border-box;width:40px;height:5px;border:1px solid #080706;box-shadow:0 0 0 1px #292319;background:#15120c} .hb.gd u{background:#c9b27a} .mana{margin-top:-.15em} .mana .fb.st{--h:1.25em} .mana .fb.st>.trk>i{filter:hue-rotate(190deg) saturate(3.5) brightness(1.15)} #activeSkillHud .no-mana .ic{filter:grayscale(.6) brightness(.45) sepia(.4) hue-rotate(180deg)}
 .right{text-align:right;line-height:1.3;text-shadow:0 1px 0 #000,0 0 6px #000}
 .time{font-size:1.35em;font-weight:600;font-variant-numeric:tabular-nums lining-nums;letter-spacing:.02em}
 .small{color:var(--bone-dim);font-size:1em;font-variant-numeric:tabular-nums lining-nums}
@@ -2425,11 +2425,11 @@ const SK={
   fireblade:{name:'Ognisty Miecz',kind:'Zaklęcie ostrza',max:10,ic:'inferno'},
   iceblade:{name:'Lodowe Ostrze',kind:'Zaklęcie ostrza',max:10,ic:'frost'},
   bloodblade:{name:'Spływająca Krwią Katana',kind:'Zaklęcie ostrza',max:10,ic:'blood'},
-  aard:{name:'Odrzut Mocy',kind:'Znak',max:5,ic:'area',lv:['Aktywuj z wyposażonego slotu: fala mocy przed tobą odrzuca i ogłusza wrogów, zbija pociski. 24 many, odnowienie 8 s.','Dalej, mocniej, odnowienie 7 s.','Dalej, mocniej, odnowienie 6 s.','Dalej, mocniej, odnowienie 5 s.','Fala we wszystkie strony, odnowienie 4,5 s.']},
+  aard:{name:'Odrzut Mocy',kind:'Znak',max:5,ic:'area',lv:['24 many, odnowienie 8 s. Fala przed tobą: odrzut, ogłuszenie, zbija pociski.','Dalej i mocniej · odnowienie 7 s.','Dalej i mocniej · odnowienie 6 s.','Dalej i mocniej · odnowienie 5 s.','Fala dookoła · odnowienie 4,5 s.']},
   _vit:{name:'Witalność',kind:'Cecha',sub:'Cecha postaci',d:'+15 do maksymalnego życia.',ic:'heart'},
   _end:{name:'Wytrzymałość',kind:'Cecha',sub:'Cecha postaci',d:'+15 do maksymalnej staminy.',ic:'boot'},
-  _str:{name:'Siła',kind:'Cecha',sub:'Cecha postaci',d:'+10% obrażeń zadawanych mieczem.',ic:'might'},
-  _dex:{name:'Zręczność',kind:'Cecha',sub:'Cecha postaci',d:'Ciosy zużywają o 10% mniej staminy.',ic:'whet'},
+  _str:{name:'Siła',kind:'Cecha',sub:'Cecha postaci',d:'+10% obrażeń miecza.',ic:'might'},
+  _dex:{name:'Zręczność',kind:'Cecha',sub:'Cecha postaci',d:'Ciosy −10% staminy.',ic:'whet'},
   _gold:{name:'Sakwa złota',kind:'Łup',extra:true,d:'+25 monet.'},
   _heal:{name:'Gorzki wywar',kind:'Łup',extra:true,d:'Leczy całe życie.'}
 };
@@ -2600,24 +2600,24 @@ function aimDir(){if(clock-PAD.aimT<.15)return [PAD.ax,PAD.ay];if(coarse||clock-
 // keyboard and touch: lock on to the closest enemy roughly in front
 function autoAim(){let b=null,bd=1e9;for(const e of S.enemies){if(e.dead||e.rise>0||e.type==='wisp')continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>75||d<1)continue;const f=(dx*pl.fx+dy*pl.fy)/d;if(f<-.2)continue;const sc=d*(1.6-f);if(sc<bd){bd=sc;b=[dx/d,dy/d]}}return b}
 // ---- STYLE WALKI (slasher): trzy gałęzie kart z poziomami. Osiem poziomów w jednej gałęzi daje bonus zestawu ----
-const BR={def:{n:'Obrońca',set:'Parowanie daje 0,35 s nietykalności. Raz na 2,5 s leczy 2% życia.'},off:{n:'Zabójca',set:'Każde trafienie ogłuszonego wroga zwraca 6 staminy.'},wav:{n:'Mistrz fal',set:'Fale zadają +30% obrażeń i nakładają status zaklęcia ostrza.'}},SET_N=8;
+const BR={def:{n:'Obrońca',set:'Parowanie: 0,35 s nietykalności; +2% życia (raz na 2,5 s).'},off:{n:'Zabójca',set:'Trafienie ogłuszonego wroga zwraca 6 staminy.'},wav:{n:'Mistrz fal',set:'Fale +30% obrażeń i nakładają status ostrza.'}},SET_N=8;
 const STY={
-  garda:{br:'def',name:'Żelazna Garda',ic:'quen',max:5,d:'Blok kosztuje o 10% mniej staminy za poziom (poziom 5: o połowę mniej).'},
-  oko:{br:'def',name:'Czujne Oko',ic:'shadow',max:5,d:'Okno parowania dłuższe o 0,02 s za poziom. Łatwiej trafić w ostatnią chwilę.'},
-  riposta:{br:'def',name:'Śmiertelna Riposta',ic:'sword',max:5,d:'Riposta po parowaniu +0,4 do mnożnika obrażeń i trwa o 0,25 s dłużej za poziom.'},
-  odzysk:{br:'def',name:'Odzysk Tchu',ic:'boot',max:3,d:'Udane parowanie zwraca 10 staminy za poziom. Od poziomu 3 leczy 2% życia, najwyżej raz na 2,5 s.'},
-  ostrze:{br:'off',name:'Szybkie Ostrze',ic:'whet',max:5,d:'Lekkie ciosy kosztują o 8% mniej staminy i szybciej wracasz do gotowości (−6% czasu za poziom).'},
-  dobicie:{br:'off',name:'Dobicie',ic:'blood',max:5,d:'+12% obrażeń za poziom wobec wrogów ogłuszonych, w ripoście i po przełamaniu postawy.'},
-  rytm:{br:'off',name:'Rytm Śmierci',ic:'might',max:5,d:'Trzeci cios combo zadaje +18% obrażeń za poziom.'},
-  taniec:{br:'off',name:'Taniec Ostrzy',ic:'haste',max:3,d:'Unik kosztuje o 12% mniej staminy, a pierwszy cios po uniku zadaje +25% obrażeń za poziom.'},
-  fala:{br:'wav',name:'Fala Mocy',ic:'area',max:5,d:'Fala cięcia zadaje +25% obrażeń za poziom.'},
-  zasieg:{br:'wav',name:'Daleka Fala',ic:'frost',max:5,d:'Fala cięcia leci o 18% dalej i jest szersza za poziom.'},
-  echo:{br:'wav',name:'Echo Parowania',ic:'earth',max:3,d:'Po parowaniu wypuszczasz więcej fal: poziom 1 to dwie fale, poziom 2 i 3 trzy (poziom 3: fale +20% obrażeń).'},
-  zryw:{br:'wav',name:'Zryw Ostrza',ic:'inferno',max:3,d:'Co (6 − poziom) trafienie lekkim ciosem wypuszcza falę (60% obrażeń), nawet bez parowania.'},
-  krew:{pact:1,name:'Pakt Krwi',ic:'heart',max:1,d:'+35% obrażeń, ale maksymalne życie −25%.'},
-  szklo:{pact:1,name:'Szklany Miecz',ic:'wisp',max:1,d:'+50% obrażeń, ale wrogowie ranią cię o 30% mocniej.'},
-  zelazo:{pact:1,name:'Pakt Żelaza',ic:'amulet',max:1,d:'+40% maksymalnej staminy, ale −15% obrażeń.'},
-  cisza:{pact:1,name:'Pakt Ciszy',ic:'brew',max:1,d:'Stamina odnawia się o 50% szybciej, ale maksymalne życie −20%.'}};
+  garda:{br:'def',name:'Żelazna Garda',ic:'quen',max:5,d:'Blok −10% staminy za poziom (poz. 5: −50%).'},
+  oko:{br:'def',name:'Czujne Oko',ic:'shadow',max:5,d:'Okno parowania +0,02 s za poziom.'},
+  riposta:{br:'def',name:'Śmiertelna Riposta',ic:'sword',max:5,d:'Riposta: mnożnik +0,4 i +0,25 s za poziom.'},
+  odzysk:{br:'def',name:'Odzysk Tchu',ic:'boot',max:3,d:'Parowanie zwraca 10 staminy za poziom. Poz. 3: +2% życia (raz na 2,5 s).'},
+  ostrze:{br:'off',name:'Szybkie Ostrze',ic:'whet',max:5,d:'Lekki cios: −8% staminy i −6% czasu powrotu za poziom.'},
+  dobicie:{br:'off',name:'Dobicie',ic:'blood',max:5,d:'+12% obrażeń za poziom wobec ogłuszonych, w ripoście i po przełamaniu.'},
+  rytm:{br:'off',name:'Rytm Śmierci',ic:'might',max:5,d:'3. cios combo: +18% obrażeń za poziom.'},
+  taniec:{br:'off',name:'Taniec Ostrzy',ic:'haste',max:3,d:'Za poziom: unik −12% staminy, pierwszy cios po uniku +25% obrażeń.'},
+  fala:{br:'wav',name:'Fala Mocy',ic:'area',max:5,d:'Fala cięcia: +25% obrażeń za poziom.'},
+  zasieg:{br:'wav',name:'Daleka Fala',ic:'frost',max:5,d:'Fala cięcia: +18% zasięgu i szerokości za poziom.'},
+  echo:{br:'wav',name:'Echo Parowania',ic:'earth',max:3,d:'Po parowaniu więcej fal: poz. 1 – dwie, poz. 2–3 – trzy (poz. 3: +20% obrażeń).'},
+  zryw:{br:'wav',name:'Zryw Ostrza',ic:'inferno',max:3,d:'Co (6 − poziom) trafienie lekkim ciosem wypuszcza falę (60% obrażeń).'},
+  krew:{pact:1,name:'Pakt Krwi',ic:'heart',max:1,d:'+35% obrażeń, −25% maks. życia.'},
+  szklo:{pact:1,name:'Szklany Miecz',ic:'wisp',max:1,d:'+50% obrażeń, wrogowie ranią cię o 30% mocniej.'},
+  zelazo:{pact:1,name:'Pakt Żelaza',ic:'amulet',max:1,d:'+40% maks. staminy, −15% obrażeń.'},
+  cisza:{pact:1,name:'Pakt Ciszy',ic:'brew',max:1,d:'+50% regeneracji staminy, −20% maks. życia.'}};
 for(const k in STY){const t=STY[k];t.kind=t.pact?'Pakt':'Styl · '+BR[t.br].n;if(t.pact)t.sub='Przewaga z ceną';Object.assign(SK[k]=SK[k]||{},t)}
 const sk=k=>(S&&S.sk&&S.sk[k])||0;
 const brSum=br=>Object.keys(STY).filter(k=>STY[k].br===br).reduce((a,k)=>a+sk(k),0),brOn=br=>brSum(br)>=SET_N;
@@ -2693,25 +2693,27 @@ const SLASH_SK=['venom','fireblade','iceblade','bloodblade','aard'],ENCH=['venom
 const ENC={venom:{col:'#8ac04a',col2:'#4a6a22',name:'Zatrucie'},fireblade:{col:'#ff6a1a',col2:'#ffb347',name:'Spopielenie'},iceblade:{col:'#7fd0ff',col2:'#d8f0ff',name:'Zamrożenie'},bloodblade:{col:'#c4202a',col2:'#560a0d',name:'Wykrwawienie'}};
 const encChance=L=>.15+.05*(L-1),encDmg=L=>1+.07*Math.floor(L/2),encMarks=e=>BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'?5:3;
 const encLevel=()=>{if(S.mainEnchant&&S.sk[S.mainEnchant])return[S.mainEnchant,S.sk[S.mainEnchant]];for(const k of ENCH)if(S.sk[k])return[k,S.sk[k]];return[null,0]};
-function encLvText(k,L){const st={venom:`trucizna ${2+L} obrażeń/s przez 4 s`,fireblade:`podpalenie ${(3+1.5*L).toFixed(1).replace('.0','').replace('.',',')} obrażeń/s przez 3 s`,iceblade:`spowolnienie o ${Math.round((1-Math.max(.3,.6-.03*L))*100)}% na 2,5 s`,bloodblade:`krwawienie ${(2+L)*2.5} obrażeń/s przez 3 s`}[k];
-  const fin={venom:'zatrucie zaraża sąsiadów',fireblade:'wybuch rani pobliskich',iceblade:'odłamki spowalniają sąsiadów',bloodblade:`leczy cię o ${4+L} życia`}[k];
-  return `Szansa ${Math.round(encChance(L)*100)}% na status przy trafieniu: ${st}. 3 statusy zabijają zwykłego wroga (${fin}).`+(L>=2?` Obrażenia miecza +${Math.floor(L/2)*7}%.`:'')+(L%2===0?' Nowy próg obrażeń!':'')}
+function encLvText(k,L){const st={venom:`trucizna ${2+L} obr/s przez 4 s`,fireblade:`podpalenie ${(3+1.5*L).toFixed(1).replace('.0','').replace('.',',')} obr/s przez 3 s`,iceblade:`spowolnienie ${Math.round((1-Math.max(.3,.6-.03*L))*100)}% na 2,5 s`,bloodblade:`krwawienie ${String((2+L)*2.5).replace('.',',')} obr/s przez 3 s`}[k];
+  const fin={venom:'trucizna przechodzi na sąsiadów',fireblade:'wybuch rani pobliskich',iceblade:'odłamki spowalniają sąsiadów',bloodblade:`+${4+L} życia dla ciebie`}[k];
+  return `${Math.round(encChance(L)*100)}% szansy na status: ${st}. 3 statusy zabijają zwykłego wroga (${fin}).`+(L>=2?` Miecz +${Math.floor(L/2)*7}% obrażeń`+(L%2===0?' (nowy próg).':'.'):'')}
 for(const k of ['venom','fireblade','iceblade','bloodblade'])SK[k].lv=[...Array(10).keys()].map(i=>encLvText(k,i+1));
 // Slasher: intentional sword actions, a main element and one compatible support.
 const ELEMENT_NAME={fire:'Ogień',ice:'Lód',venom:'Trucizna',blood:'Krew',earth:'Ziemia'};
 const ELEMENT_OF={fireblade:'fire',iceblade:'ice',venom:'venom',bloodblade:'blood',embershot:'fire',frostshot:'ice',bloodseal:'blood',earthcut:'earth',stoneguard:'earth',venomshot:'venom'};
 const NEW_SWORD_SK=['frostshot','embershot','venomshot','breach','shadowstep','retaliation','execution','bloodseal','earthcut','stoneguard'];
+// distances are shown as words, not units: up to 40 short, 80 medium, 120 long, above very long
+const RANGE_W=v=>v<=40?'krótki':v<=80?'średni':v<=120?'długi':'bardzo długi',AREA_W=v=>v<=80?'średni':v<=120?'duży':'bardzo duży';
 Object.assign(SK,{
- venomshot:{name:'Jadowy kolec',kind:'Wsparcie · Trucizna',ic:'drop',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: kolec przebija ${[3,4,6][L-1]} różnych wrogów, ${12+2*L} obrażeń i zatrucie ${2+L} obrażeń/s przez 3 s (boss: połowa). Koszt 20 many, odnowienie 10 s. Bez kumulacji trucizny; ściany zatrzymują pocisk.`)},
- frostshot:{name:'Odłamek szronu',kind:'Wsparcie · Lód',ic:'frostshot',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: odłamek przebija do ${[3,4,6][L-1]} różnych wrogów, ${16+2*L} obrażeń każdemu, spowolnienie ${25+5*L}% przez 1,5 s (boss: 10%). Zasięg ${120+10*L}, koszt 18 many, odnowienie 8 s. Ściana go zatrzymuje.`)},
- embershot:{name:'Żar z ostrza',kind:'Wsparcie · Ogień',ic:'embershot',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: żar przebija do ${[3,4,6][L-1]} różnych wrogów, ${14+2*L} obrażeń każdemu i 2 obrażenia/s przez ${1+.5*L} s. Zasięg ${100+10*L}, koszt 18 many, odnowienie 8 s. Bez eksplozji; ściana go zatrzymuje.`)},
- breach:{name:'Przełamanie',kind:'Technika miecza',ic:'breach',max:3,lv:[1,2,3].map(L=>`Naładowany ciężki cios dodaje ${20+10*L} punktów przełamania postawy bossów. Zwykłego wroga odrzuca i ogłusza na ${(.6+.15*L).toFixed(2).replace('.',',')} s. Wykonaj przytrzymując lekki atak.`)},
- shadowstep:{name:'Krok przez cień',kind:'Technika miecza',ic:'shadowstep',max:3,lv:[1,2,3].map(L=>`Po uniku masz 1,2 s: następny lekki cios doskakuje do wroga przed tobą, maks. ${18+6*L} jednostek. Doskok kosztuje dodatkowe 8 staminy, zatrzymuje się przed ścianą. Bez dodatkowej nietykalności.`)},
- retaliation:{name:'Żelazny odwet',kind:'Technika miecza',ic:'retaliation',max:3,lv:[1,2,3].map(L=>`Udane parowanie ładuje jeden ciężki kontratak na 2 s: +${10*L}% obrażeń. Premia zużywa się także przy pudle. Nie zwiększa obrażeń fal.`)},
- execution:{name:'Egzekucja',kind:'Technika miecza',ic:'execution',max:3,lv:[1,2,3].map(L=>`Ciężki cios zadaje +${20+10*L}% obrażeń zwykłemu wrogowi mającemu najwyżej 20% życia. Musisz podejść i trafić; bez nietykalności i automatycznego zabicia. Bossowie: +${5*L}% poniżej 10% życia.`)},
- bloodseal:{name:'Piętno krwi',kind:'Wsparcie · Krew',ic:'bloodseal',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu (16 many, 8 s odnowienia): przez 5 s następny trafiony cios mieczem oznacza jednego wroga na 5 s. Zabicie go mieczem ładuje na 4 s jeden następny cios: +${10+5*L}% obrażeń. Brak leczenia; oznaczenie nie przenosi się na kolejne cele.`)},
- earthcut:{name:'Rozcięcie ziemi',kind:'Wsparcie · Ziemia',ic:'earthcut',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu: uderzenie w ziemię wypuszcza linię kolców do ${48+8*L} jednostek. ${8+4*L} obrażeń na cel, koszt 24 many, odnowienie 6 s. Kolce zatrzymują się na ścianach.`)},
- stoneguard:{name:'Kamienny obrońca',kind:'Wsparcie · Ziemia',ic:'stoneguard',max:3,lv:[1,2,3].map(L=>`Aktywuj ze slotu (34 many): przyzywasz na 10 s kamiennego golema z ${[80,100,120][L-1]}% twojego maks. życia. Idzie do najbliższego wroga i ściąga na siebie zwykłych przeciwników w promieniu ${[96,112,128][L-1]} jednostek. Bossowie z paskiem życia na dole ekranu idą za nim najwyżej 5 s. Ranią go tylko bezpośrednie ciosy i pociski. Nie zadaje obrażeń, nie leczy, nie blokuje ci przejścia. Odnowienie 30 s.`)}
+ venomshot:{name:'Jadowy kolec',kind:'Wsparcie · Trucizna',ic:'drop',max:3,lv:[1,2,3].map(L=>`20 many, odnowienie 10 s. Kolec: ${12+2*L} obr., ${[3,4,6][L-1]} ${L<3?'cele':'celów'}. Zatrucie ${2+L} obr/s przez 3 s (na bossa połowa), nie kumuluje się.`)},
+ frostshot:{name:'Odłamek szronu',kind:'Wsparcie · Lód',ic:'frostshot',max:3,lv:[1,2,3].map(L=>`18 many, odnowienie 8 s. Odłamek: ${16+2*L} obr., ${[3,4,6][L-1]} ${L<3?'cele':'celów'}, zasięg ${RANGE_W(120+10*L)}. Spowolnienie ${25+5*L}% na 1,5 s (na bossa 10%).`)},
+ embershot:{name:'Żar z ostrza',kind:'Wsparcie · Ogień',ic:'embershot',max:3,lv:[1,2,3].map(L=>`18 many, odnowienie 8 s. Żar: ${14+2*L} obr., ${[3,4,6][L-1]} ${L<3?'cele':'celów'}, zasięg ${RANGE_W(100+10*L)}. Podpalenie 2 obr/s przez ${String(1+.5*L).replace('.',',')} s.`)},
+ breach:{name:'Przełamanie',kind:'Technika miecza',ic:'breach',max:3,lv:[1,2,3].map(L=>`Naładowany ciężki cios (przytrzymaj lekki atak): +${20+10*L} przełamania postawy bossa. Zwykły wróg: odrzut i ogłuszenie ${(.6+.15*L).toFixed(2).replace('.',',')} s.`)},
+ shadowstep:{name:'Krok przez cień',kind:'Technika miecza',ic:'shadowstep',max:3,lv:[1,2,3].map(L=>`Lekki cios do 1,2 s po uniku doskakuje do wroga przed tobą (zasięg ${RANGE_W(18+6*L)}). Dopłata 8 staminy.`)},
+ retaliation:{name:'Żelazny odwet',kind:'Technika miecza',ic:'retaliation',max:3,lv:[1,2,3].map(L=>`Po udanym parowaniu następny ciężki cios (do 2 s): +${10*L}% obrażeń. Przepada przy pudle.`)},
+ execution:{name:'Egzekucja',kind:'Technika miecza',ic:'execution',max:3,lv:[1,2,3].map(L=>`Ciężki cios: +${20+10*L}% obrażeń zwykłym wrogom poniżej 20% życia. Na bossa: +${5*L}% poniżej 10% życia.`)},
+ bloodseal:{name:'Piętno krwi',kind:'Wsparcie · Krew',ic:'bloodseal',max:3,lv:[1,2,3].map(L=>`16 many, odnowienie 8 s. Następne trafienie mieczem (do 5 s) oznacza wroga. Zabij go mieczem: następny cios (do 4 s) +${10+5*L}% obrażeń.`)},
+ earthcut:{name:'Rozcięcie ziemi',kind:'Wsparcie · Ziemia',ic:'earthcut',max:3,lv:[1,2,3].map(L=>`24 many, odnowienie 6 s. Linia kolców, zasięg ${RANGE_W(48+8*L)}: ${8+4*L} obr. każdemu celowi.`)},
+ stoneguard:{name:'Kamienny obrońca',kind:'Wsparcie · Ziemia',ic:'stoneguard',max:3,lv:[1,2,3].map(L=>`34 many, odnowienie 30 s. Golem na 10 s, życie ${[80,100,120][L-1]}% twojego. Ściąga zwykłych wrogów (obszar ${AREA_W([96,112,128][L-1])}), bossów najwyżej na 5 s. Nie atakuje i nie leczy.`)}
 });
 SLASH_SK.push(...NEW_SWORD_SK);
 function chosenElements(){return [...new Set(Object.keys(ELEMENT_OF).filter(k=>sk(k)).map(k=>ELEMENT_OF[k]))]}
@@ -3272,7 +3274,7 @@ function cardHTML(k,i){const l=S.sk[k]||0,d=SK[k],T=STY[k],cls=T?(T.pact?'pk':'b
   if(T&&T.pact){const p=FXPACT[k];fx=`<span class="fx"><b class="up">${p[0]}</b><b class="dn">${p[1]}</b></span>`;desc='';}
   else{const q=fxPair(k,l);if(q){fx=`<span class="fx"><em>${q[0]}</em><b>${q[1]}</b><s>→</s><b class="up">${q[2]}</b></span>`;small=true}}
   const close=T&&!T.pact&&!brOn(T.br)&&brSum(T.br)+1>=SET_N;
-  if(ENCH.includes(k)){const support=!!S.mainEnchant&&S.mainEnchant!==k;desc=support?`Wspierające ostrze (${ELEMENT_NAME[ELEMENT_OF[k]]}), maks. 3 poziomy. Połowa szansy statusu, 35% siły obrażeń statusu; lód: 15% spowolnienia (boss: 10%). Bez znaków i finiszera. Nie zwiększa obrażeń miecza.`:desc+' Od poziomu 3: '+(k==='fireblade'?'unik zostawia krótki, słaby żar.':k==='iceblade'?'ciężki cios rozbija mróz i spowalnia sąsiadów.':'główne zaklęcie zachowuje pełną siłę.');desc+=' '+(ELEMENT_OF[k]==='fire'?'Wyklucza lód.':ELEMENT_OF[k]==='ice'?'Wyklucza ogień.':'Można połączyć z jednym innym żywiołem.');}return {cls,html:`<span class="num">${i+1}</span><span class="ck">${d.kind}</span><span class="cn"><i class="ic ic-${d.ic||(k==='_gold'?'coin':k==='_heal'?'brew':k)}"></i>${d.name}</span><span class="cl${l?'':' new'}">${sub}</span>${fx}${close?'<span class="setb">Domyka zestaw!</span>':''}${desc?`<span class="cd${small?' sm':''}">${T&&small?STY[k].d:desc}</span>`:''}`}}
+  if(ENCH.includes(k)){const support=!!S.mainEnchant&&S.mainEnchant!==k;desc=support?`Ostrze wspierające (${ELEMENT_NAME[ELEMENT_OF[k]]}), maks. 3 poz.: połowa szansy, 35% siły statusu; lód: spowolnienie 15% (na bossa 10%). Bez znaków, finiszera i premii miecza.`:desc+(k==='fireblade'?' Od poz. 3: unik zostawia słaby żar.':k==='iceblade'?' Od poz. 3: ciężki cios rozbija mróz i spowalnia sąsiadów.':'');desc+=' '+(ELEMENT_OF[k]==='fire'?'Wyklucza lód.':ELEMENT_OF[k]==='ice'?'Wyklucza ogień.':'Łączy się z 1 innym żywiołem.');}return {cls,html:`<span class="num">${i+1}</span><span class="ck">${d.kind}</span><span class="cn"><i class="ic ic-${d.ic||(k==='_gold'?'coin':k==='_heal'?'brew':k)}"></i>${d.name}</span><span class="cl${l?'':' new'}">${sub}</span>${fx}${close?'<span class="setb">Domyka zestaw!</span>':''}${desc?`<span class="cd${small?' sm':''}">${T&&small?STY[k].d:desc}</span>`:''}`}}
 function renderBuild(pre){const el=$('lvBuild');if(!el)return;
   let h='';for(const b of ['def','off','wav']){const n=brSum(b),segs=Array.from({length:SET_N},(_,i)=>`<i class="${i<n?'on':(pre===b&&i===n?'pre':'')}"></i>`).join('');
     h+=`<div class="brb ${b}${brOn(b)?' full':''}"><b>${BR[b].n}</b><span class="seg">${segs}</span>${Math.min(n,SET_N)}/${SET_N}<small>${brOn(b)?'Zestaw aktywny: ':'Zestaw: '}${BR[b].set}</small></div>`}
@@ -3293,7 +3295,7 @@ function openLevelUp(){resetInput();S.choosing=true;pl.swingT=0;play('level',0);
 function pactApply(k){if(k==='krew'){S.str*=1.35;pl.max=Math.round(pl.max*.75);pl.hp=Math.min(pl.hp,pl.max)}else if(k==='szklo'){S.str*=1.5;S.vuln=(S.vuln||1)*1.3}else if(k==='zelazo'){pl.staMax=Math.round(pl.staMax*1.4);pl.sta=pl.staMax;S.str*=.85}else if(k==='cisza'){S.regenMul=(S.regenMul||1)*1.5;pl.max=Math.round(pl.max*.8);pl.hp=Math.min(pl.hp,pl.max)}ftInfo(STY[k].name)}
 function pick(i){if(!S||!S.choosing)return;const k=S.choices[i];if(!k)return;if(SLASH_SK.includes(k)&&!canLearnSlasher(k))return;if(k==='_vit'){pl.max+=15;heal(15);play('heal',0)}else if(k==='_end'){pl.staMax+=15;pl.sta=pl.staMax;play('bless',0)}else if(k==='_str'){S.str*=1.1;play('bless',0)}else if(k==='_dex'){S.dex*=.9;play('bless',0)}else if(k==='_gold'){S.coins+=25;play('coin',0)}else if(k==='_heal'){pl.hp=pl.max;play('heal',0)}else{const b0=STY[k]&&STY[k].br?brOn(STY[k].br):false;S.sk[k]=(S.sk[k]||0)+1;learnElement(k);autoEquipActive(k);S.hl={k,t:clock};if(STY[k]){play('bless',0);if(STY[k].pact)pactApply(k);else if(!b0&&brOn(STY[k].br)){ftInfo('Zestaw stylu: '+BR[STY[k].br].n);play('level',0)}}}
   if(S.sk[k]===1)S.cd[k]=.3;
-  if(HINTS_ENABLED&&sk(k)===1&&(NEW_SWORD_SK.includes(k)||ENCH.includes(k))){const text=ENCH.includes(k)?(S.mainEnchant===k?'To twoje główne zaklęcie ostrza. Rozwijasz je do 10. poziomu.':'To wspierające zaklęcie ostrza: maks. 3 poziomy, słabszy status, bez finiszera i premii obrażeń miecza.')+' '+elementalSummary():SK[k].lv[0];say(SK[k].name+': '+text+(ACTIVE_SLASHER.includes(k)?(S.activeSlots.includes(k)?' Przypisano do slotu '+(S.activeSlots.indexOf(k)+1)+' ('+['Q','E','F'][S.activeSlots.indexOf(k)]+').':' Umiejętność w rezerwie: wyposaż ją w pauzie poza walką.') : ''),'hint')}S.pendLv--;chipsDirty=true;if(S.pendLv>0){openLevelUp();return}S.choosing=false;$('lvl').hidden=true;$('touch').hidden=!coarse}
+  if(HINTS_ENABLED&&sk(k)===1&&(NEW_SWORD_SK.includes(k)||ENCH.includes(k))){const nm=SK[k].name;let text;if(ENCH.includes(k))text=nm+': '+(S.mainEnchant===k?'główne ostrze, do 10 poz.':'ostrze wspierające, maks. 3 poz.')+' '+elementalSummary();else if(ACTIVE_SLASHER.includes(k)){const c=ACTIVE_CFG[k],at=S.activeSlots.indexOf(k);text=nm+(at>=0?' → slot '+['Q','E','F'][at]:' → rezerwa (wyposaż w pauzie)')+' · '+c.cost+' many, odnowienie '+String(c.wait(1)).replace('.',',')+' s.'}else text=nm+': '+SK[k].lv[0];say(text,'hint')}S.pendLv--;chipsDirty=true;if(S.pendLv>0){openLevelUp();return}S.choosing=false;$('lvl').hidden=true;$('touch').hidden=!coarse}
 function nearNpc(){if(!S||pl.dead)return null;for(const n of W.npcs){if(n.lure||(S.npc[n.id].state!=='alive'&&S.npc[n.id].state!=='offered'))continue;if(Math.hypot(pl.x-n.x,pl.y-n.y)<30)return n}return null}
 const NL=n=>n.id==='mila'&&S.npc.mila.retry?MILA_RETRY:n.id==='wolch'&&S.npc.wolch.state==='offered'?WOLCH_ACCEPT:n.lines;
 function openDialog(n){S.witChoice=false;$('witChoices').hidden=true;document.querySelector('#dialog .next').hidden=false;resetInput();S.dialog=n;S.dlg=0;$('dlgWho').textContent=n.name;$('dlgTxt').textContent=NL(n)[0];$('dialog').hidden=false}
@@ -4220,5 +4222,5 @@ requestAnimationFrame(frame);
 
 
 
-<script>try{if(location.protocol.startsWith('http')&&navigator.serviceWorker)navigator.serviceWorker.register('sw.js')}catch(e){}</script>
+<script>try{if(location.protocol.startsWith('http')&&navigator.serviceWorker)navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}</script>
 </body></html>
