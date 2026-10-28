@@ -1,0 +1,95 @@
+28.10.2026 — nowe okno awansu: lista w pionie, równe karty w poziomie, ochrona wyboru 2,5 s. „Trzeci cios combo”. nightbrand-codex-20261028-86; HTML 14368712 B; SHA-256 ad35b052c061b089d9d3fbbc0b157d91b0986ea20e54c65d5a5dd11dc512a493; testy 226 kontroli PASS, 9/9 widoków i 45/45 trafień.
+
+28.10.2026 Claude — rejestracja sw.js z .catch (bez fałszywego błędu w raporcie). nightbrand-claude-20261028-76; HTML 14362850 B; SHA-256 4a50d03a9e9b4d042d264785be810c5de3ab2e1436b74c7d104960cb150e9f56.
+
+28.10.2026 Claude — w opisach skilli „obr.” zamiast „dmg”. nightbrand-claude-20261028-75; HTML 14362830 B; SHA-256 a296d4c5ee5154c60b8ed6585507721ee2c34f9fb305a97838f8956322ea7e8a. Bez testów (tylko tekst).
+
+28.10.2026 Claude — zwięzłe opisy umiejętności, stylów i komunikatów o nowych skillach (tylko teksty). Baza: cache 73 czata. nightbrand-claude-20261028-74; HTML 14362826 B; SHA-256 49bc135fca017260f599e0c82303328b5dac0a0e64fec21fbb4c92c7d60bbff4.
+
+28.10.2026 — tekst komunikatów mniejszy o 25%, pozycja i czas bez zmian. nightbrand-codex-20261028-73; HTML 14364048 B; SHA-256 6b73a8f9cdfb46ac1adf06e10d9cf2ef31663cdf3db88104c12e6e316be9c1e9; messages 26/26 PASS.
+
+28.10.2026 — komunikaty 3–7 s zależnie od długości (próg 60, +0,025 s/znak), bez zmian wyglądu i braku pauzy. nightbrand-codex-20261028-72; HTML 14364008 B; SHA-256 f46a9e0fd7dfa1101f7b5dc71bd66a8b77ae30eb534722e7b656eb0cdd800418. Testy messages 26/26, power-fires 32/32, slasher-expansion 48/48, orientation 30/30 PASS.
+
+28.10.2026 — przejęcie Claude cache 69: pion i poziom według urządzenia, pełne okno, komunikaty bez pauzy. nightbrand-codex-20261028-70; HTML 14363830 B; SHA-256 a3a1e54bc0acfb62aafd16a026831753c5a46d22f7f47b8f8418e3853c6fa43d. Lokalne testy 18/18 komunikatów, 30/30 orientacji, 65/65 review, 15/15 no-horde PASS.
+
+28.10.2026 Claude — pasek komunikatu jeszcze niżej (4,3 em od góry), wyśrodkowanie bez zmian. nightbrand-claude-20261028-69; HTML 14363830 B; SHA-256 a3a1e54bc0acfb62aafd16a026831753c5a46d22f7f47b8f8418e3853c6fa43d. Bez testów (na prośbę autora; jedna wartość CSS).
+
+28.10.2026 Claude — pasek komunikatu przesunięty niżej (3,6 em od góry zamiast 2,4 em), żeby nie nachodził na pasek HP; wyśrodkowanie bez zmian. nightbrand-claude-20261028-68; HTML 14363830 B; SHA-256 e8e066603a83e990e86bc94b5e1ddddf5296785b07fc9edab28a40336fd81c3c. Bez testów (na prośbę autora; zmiana jednej wartości CSS).
+
+28.10.2026 Claude — komunikaty jako pasek u góry bez pauzy, 3 s, jeden po drugim; okno „Dalej” usunięte. nightbrand-claude-20261028-67; HTML 14363830 B; SHA-256 c87e2c0b2aa26f087ec181980ddfa56591a5fb48c94f3b093345314916140842. Testy messages 18/18, regresje PASS.
+
+28.10.2026 Claude — pion i poziom według telefonu (bez wymuszonego obrotu), gra wypełnia cały ekran przez poszerzenie widoku. Baza: cache 65 czata. nightbrand-claude-20261028-66; HTML 14362234 B; SHA-256 1fba33fa42e23f6e56438a4f8b65efb69cb481f1f3eeae57242b9ef85f62551b. Testy orientation 30/30, 81 ekranów w 9 kształtach okna, regresje PASS.
+
+28.10.2026 — mały złoty pasek życia golema 40×5 px, bez nazwy, 7 px nad głową. nightbrand-codex-20261028-65; HTML 14363076 B; SHA-256 4869e9d091a550ae6a47936430800d8a64cdfca0d1543b6238292bc5cca38c16; golem 31/31 PASS.
+
+28.10.2026 — przejęcie bazy Claude cache 63 z nowym golemem. Lokalny cache nightbrand-codex-20261028-64; HTML 14362155 B; SHA-256 2a2e7798b665574393a0605eb393d3048503c369d67051ea715f7131fb0c73b9. Lokalne testy golem 27/27, review 65/65, no-horde 15/15 PASS.
+
+28.10.2026 Claude — Kamienny obrońca ściąga wrogów: 34 many, 30 s, do 10 s, własne życie 80/100/120% HP, bossowie z dolnym paskiem najwyżej 5 s; stara osłona usunięta. Baza: cache 62 czata. nightbrand-claude-20261028-63; HTML 14362155 B; SHA-256 2a2e7798b665574393a0605eb393d3048503c369d67051ea715f7131fb0c73b9. Testy golem 27/27, regresje PASS, stability 20/20.
+
+28.10.2026 — stamina: pięć lekkich + unik lub dwa ciężkie + unik; Jadowy kolec, efekty żywiołów na ostrzu. Golem bez zmian. nightbrand-codex-20261028-62; HTML 14357905 B; SHA-256 1c0e92ef769fc5dcad2919f70e8940e00c584b5c15b33c30ccbddda3f942076f. Testy skills 24/24, review 65/65, mana 46/46, regresje PASS.
+
+28.10.2026 — stabilność: odzyskiwanie WebGL, raport 20 błędów i kopiowanie w Opcjach → Dane zapisu, limit nadrabiania low/dotyk 0,2 s. nightbrand-codex-20261028-57; HTML 14348741 B; SHA-256 b1ac1ca16031da8bb2e85edc476790c8e302edb558f07f41fd6486af9d81b2d6. Testy: review 65/65, no-horde 15/15, stability 19/19, mapy i Cytadela PASS.
+
+28.10.2026 — Heri: regeneracja staminy +15% przez 3 minuty. Tylko ten bonus i jego opisy; reszta prac odłożona. Cache nightbrand-codex-20261028-54; HTML 14344558 B; test Heriego 14/14 PASS.
+
+28.10.2026 — usunięcie trybu Hordy (Claude), scalenie lokalne Codex. Jeden tryb walki mieczem, bez zmiany balansu i grafik. Cache nightbrand-codex-20261028-53; HTML 14344520 B; zapas 655480 B. SHA-256 2f67b27e9fc26e7daeab76bac6d41262e9336abccc9d21ab13aa009d3c232b2a. Opis docs/USUNIECIE_HORDY.md.
+
+27.10.2026 — łagodniejsza krzywa II-V po uwagach testerów o Normalu. V: stare obrażenia i liczebność, maks. +6% HP. I i nerf ghuli zachowane. Cache nightbrand-codex-20261027-52; HTML 14365771 B, zapas 634229 B.
+
+27.10.2026 — rozdział I jako rozgrzewka, wolniejsze i rzadsze skoki ghuli z zapowiedzią, skalowanie map I-V. Niezależne odnowienia pocisków gracza i AI. Cache nightbrand-codex-20261027-51; HTML 14365778 B, zapas 634222 B. Szczegóły docs/SKALOWANIE_ROZDZIALOW.md.
+
+27.10.2026 — trzy aktywne sloty Slashera: Q/E/F i LT+X/Y/B, małe ikony HUD, wyposażenie w pauzie poza walką. Rozmowa Enter / Y; RT/RB/LB do walki. Cache nightbrand-codex-20261027-47; HTML 14364743 B, zapas 635257 B. Szczegóły docs/SLASHER_TRZY_SLOTY.md.
+
+27.10.2026 — dziewięć nowych skilli Slashera, ikony, efekty żywiołów ostrza i opisy samouczka. Ogień wyklucza lód; główny i wspierający żywioł. Horda pozostaje. Cache nightbrand-codex-20261027-42; HTML 14353661 B, zapas 646339 B. Testy nowych skilli 48/48, standardowe 73/73 PASS. Szczegóły docs/SLASHER_NOWE_UMIEJETNOSCI.md.
+
+27.10.2026 — czytelniejsze opisy umiejętności, spójny przegląd zestawów i układ mobilny. Paski bez zmian. Cache nightbrand-codex-20261027-36; HTML 14096496 B; zapas 903504 B.
+
+27.10.2026 — ogniska mocy, wskrzeszenie, wybór losu Wita, podpowiedzi i komunikaty zdarzeń. Ramki oraz klikalne elementy z łańcucha; paski zachowane. Dialog Wita: przyznanie się do spalenia ludzi żywcem i dobijania uciekających, usprawiedliwienie rozkazem, błaganie o śmierć.
+Cache nightbrand-codex-20261027-34; HTML 14094296 B; zapas 905704 B.
+
+27.10.2026 — spójniejsze menu i wybór Fabularny/Arcade na ekranie tytułowym.
+Cache nightbrand-codex-20261027-25; HTML 13825354 B; zapas 1174646 B, minimum 500000 B.
+Usunięto osobną małą studnię przy starcu w Brzeźnicy. Odświeżone panele menu, pauzy, przygotowania, rozwoju i sklepu. NPC, balans i muzyka zachowane. Review 73/73, mapy i UI komputer/telefon PASS. Galeria docs/MENU_UI.html.
+
+27.10.2026 — ukończone posadzki i kontakt rekwizytów z ziemią.
+Cache nightbrand-codex-20261027-22; HTML 13818165 B; zapas 1181835 B (minimum 500000 B).
+Testy gotowego pliku: 73/73 ogólne, mapy, grafika, bohater, walka, Cytadela, muzyka, intro, pamięć, plany wszystkich map, WebGL1 i WebGL2 — PASS. Galeria: docs/POSADZKI_V2.html. Nagrania MP3 i skale miksu zachowane; płynne zapętlenie I–II.
+
+27.10.2026 — posadzki z planem, cache nightbrand-codex-20261027-20.
+HTML 13 817 959 B; zapas 1 182 041 B. Obowiązkowa rezerwa: 500 000 B.
+Wszystkie rozdziały i krypta: spokojne strefy, połączone tory tylko w wybranych ciągach, zaplanowane linie i ornamenty, jednolity obóz, dywan bez przecinających go pasów. Rekwizyty osadzone według widocznej podstawy. Mapy, kolizje, położenie obiektów i balans zachowane. Muzyka MP3 i głośność zachowane; płynna pętla I–II bez cięcia nagrań.
+Galeria: docs/POSADZKI_V2.html. Starsze wpisy poniżej opisują historię.
+
+Nightbrand - wariant Codex 150, 27.10.2026.
+Niezależne poprawki walki, balansu, zapisu, czytelności i wydajności.
+Otwórz index.html. Na telefonie tryb wydajności jest domyślny.
+Pełne zestawienie w folderze projektu: docs/WARIANT_CODEX.md.
+Korekta zapowiedzi: podświetlenie postaci zamiast ikon nad przeciwnikami; kręgi na ziemi zachowane.
+Korekta kontaktu: odstęp między postaciami i poprawny kierunek bloku/parowania z bliska; unik przechodzi przez wrogów.
+Korekta Cytadeli: logiczna skala mebli i drobiazgów, mniej dekoracji oraz szerokie drogi między salami.
+Korekta Slashera: awans leczy 10%, Bez litości 5% (uzgodnione z autorem); częstsze ciosy wrogów, ograniczenie ciągłego przerywania lekkimi atakami, większy koszt staminy.
+Mapy I-IV i krypta: mniejsze i logiczniejsze rekwizyty, mniej przeszkód, chronione alejki i dojścia, poszerzone drzwi, most i przeprawy nad lawą.
+Oprawa graficzna: osobne światło i kolory rozdziałów, łagodniejsze cienie, światło palenisk na ziemi, spokojniejsze podłoże i kamień, płynąca woda i lawa, delikatny ruch koron drzew, subtelniejsze kontury NPC oraz czytelniejszy HUD.
+
+Grafiki HD, 27.10.2026: odnowiono 51 arkuszy bohatera, NPC, potworów, wszystkich bossów i otoczenia. Zachowano skalę świata, przejścia i balans. Limit HTML: 15 000 000 bajtów. Opis: docs/GRAFIKI_HD.md; porównanie: docs/PODGLAD_GRAFIK_HD.html.
+
+27.10.2026: optymalizacja CSS bez zmiany wyglądu (8 ekranów identycznych piksel po pikselu), usunięte duplikaty i stare ikony. Podłoża 64x64, ściany 32x32, obracane/odbijane warianty naturalnego terenu, łagodne łączenia i drobne ślady. Ciągła lamówka dywanu Cytadeli. Budżet HTML: 15 000 000 bajtów, obowiązkowo co najmniej 1 000 000 bajtów zapasu. Szczegóły i wyniki: docs/PODSUMOWANIE_PROJEKTU.md.
+
+27.10.2026: nowy bohater Slashera według wskazanego przez autora modelu klasycznego, miecz w dłoniach, czytelny chód, ataki, blok, parowanie i riposta. Pięć arkuszy / 120 klatek. Chód zależy od faktycznie pokonanej drogi. Balans i momenty trafienia zachowane. Podgląd: docs/BOHATER_ANIMACJE.html. Testy bohatera 19/19, regresji 73/73, 52 arkusze i 626 niepustych klatek. HTML około 13,05 MB.
+
+27.10.2026: dopracowane odgłosy miecza, trafienia w stal, bloku i parowania; skupione krótsze iskry kontaktu; krótka reakcja samej grafiki wroga; wspólna pozycja gotowości po ciosach. Mechanika i czasy walki zachowane. Testy: reakcje 17/17, bohater 19/19, regresja 73/73, widok telefonu i przełączanie jakości PASS. HTML około 13,06 MB.
+
+27.10.2026: intro/menu „The Final Toll” zastąpiono „Into the Abyss”. Całe 238,4 s bez skracania; MP3 48 kb/s mono 32 kHz, 1 431 044 bajty. Nowy oryginał zachowano, stary utwór usunięto z biblioteki. HTML 13 976 352 bajty, zapas 1 023 648. Sprawdzone próbki, osadzenie i odtwarzanie w przeglądarce.
+
+Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompresja nadal MP3 48 kb/s mono 32 kHz. Plik 1 050 668 bajtów; HTML 13 469 184 bajty, zapas 1 530 816. Test próbek i przeglądarki zaliczony. Pełny nowy oryginał zachowano w bibliotece autora.
+
+27.10.2026: muzyka I–III i Dungeon wymieniona na utwory z MUZYKA/NEW, bez przycinania. MP3 mono 22,05 kHz, ABR21k (średnio około 20k), razem 2 452 262 bajty. Intro podniesione w miksie z 0,45 do 0,8 (~+5dB), jego koniec nadal 2:55. Suwak muzyki zachowany. Stare cztery oryginały i nieużywana muzyka dungeonu usunięte. HTML 13 714 559 bajtów; zapas 1 285 441. Minimum zapasu przy budowie 1,2 MB. Testy próbek, osadzenia i odtwarzania w przeglądarce zaliczone.
+
+27.10.2026 Codex: pięć nowych malarskich ilustracji fabularnych I–V w assets/intro-painted. Oryginały 1672x941; gra AVIF1600x900, awaryjny WebP384x216. Loader obsługuje brak AVIF, CSS intro używa auto zamiast pixelated; usunięto stary pikselowy canvas i migotanie. Fabula, muzyka i balans zachowane. Przygotowanie: tools/prepare-story-art.cjs; ogólny kompresor chroni nowe wpisy manifestu. HTML 13 798 890 B, zapas 1 201 110 B (uwaga: niemal pełny budżet). Testy story-art PASS, review73/73, HD52 arkusze/626 klatek/222 sekwencje. Galeria docs/ILUSTRACJE_FABULARNE.html. Szczegóły docs/PODSUMOWANIE_PROJEKTU.md. Cache story14.
+
+
+
+
+
+
+

@@ -788,6 +788,41 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 #activeSkillHud .slot-cd{top:15px;font-size:21px}
 @media(max-height:500px){#activeSkillHud{bottom:8px;gap:4px}#activeSkillHud .active-slot{width:40px;min-height:54px;padding:2px;border-width:3px}#activeSkillHud .ic{width:23px;height:23px}#activeSkillHud small{font-size:9px}}
 
+
+/* Level choice: compact list in portrait, three calm cards in landscape. */
+#screen #lvl{align-items:center;justify-content:flex-start!important;padding:max(12px,2vh) 4%;background:radial-gradient(ellipse at 50% 40%,rgba(35,25,24,.9),rgba(5,4,7,.96));}
+#screen #lvl .level-panel{width:min(100%,64em);margin:auto;flex:none;display:flex;flex-direction:column;gap:.6em;min-width:0}
+#screen #lvl .level-heading{text-align:center;position:relative;padding-bottom:.6em}
+#screen #lvl .level-heading .kicker{font-size:.72em;letter-spacing:.2em;color:#bfa773;margin:0 0 .25em}
+#screen #lvl h2{font-family:var(--text);font-size:1.8em;line-height:1.15;color:#eee1be;font-weight:700}
+#screen #lvl .level-ornament{display:block;width:min(70%,21em);height:1px;margin:.65em auto .15em;background:linear-gradient(90deg,transparent,#947850,transparent);position:relative}
+#screen #lvl .level-ornament:after{content:'';position:absolute;left:50%;top:-3px;width:7px;height:7px;transform:translateX(-50%) rotate(45deg);background:#baa16a;box-shadow:0 0 0 3px #191314}
+#screen #lvl .slots{font-family:var(--text);font-size:.92em;line-height:1.3;text-align:center;color:#c4b699;padding:.4em .7em;border-bottom:1px solid #65543b55;background:transparent;box-shadow:none;border-image:none}
+#screen #lvl #cards{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:.7em;flex:none}
+#screen #lvl .card{font-size:clamp(11px,1em,16px);height:auto;min-height:0;align-self:stretch;box-sizing:border-box;width:100%;border-width:6px!important;padding:.8em .85em!important;gap:.3em;box-shadow:0 3px 12px #0006;transition:box-shadow .15s,background-color .15s;min-width:0}
+#screen #lvl .card .ck{font-size:.68em;letter-spacing:.1em;line-height:1.3}
+#screen #lvl .card .cn{font-size:1.4em;line-height:1.15;overflow-wrap:anywhere}
+#screen #lvl .card .cl{font-size:.88em;line-height:1.25}
+#screen #lvl .card .cd,#screen #lvl .card .cd.sm{font-size:1.08em;line-height:1.35;white-space:normal;overflow:visible;max-height:none}
+#screen #lvl .card .fx em{font-size:.8em;line-height:1.25} #screen #lvl .card .fx b{font-size:1.1em} #screen #lvl .level-build{font-size:clamp(11px,.85em,14px);color:#bfae8c} #screen #lvl .level-build summary{cursor:pointer;text-align:center;padding:.35em;min-height:24px;box-sizing:border-box} #screen #lvl .level-build[open] summary{margin-bottom:.5em} #screen #lvl .card .fx{font-size:.9em;padding:.35em;min-width:0;flex-wrap:wrap}
+#screen #lvl .card:hover,#screen #lvl .card:focus-visible,#screen #lvl .card.pf{background-color:#30251b;outline:2px solid #d4bb84;outline-offset:2px;box-shadow:0 0 0 4px #90754a33,0 5px 18px #0008;transform:none}
+#screen #lvl.choice-wait .card,#screen #lvl.choice-wait .lvbtns .go{opacity:.65;cursor:wait} #screen #lvl .level-wait-note{min-height:1.25em;font-size:max(11px,.78em);line-height:1.25;text-align:center;color:#bca77f}
+#screen #lvl #lvBuild{display:flex;font-size:1em;margin:0;gap:.4em .7em}
+#screen #lvl #lvBuild .brb{flex:1;min-width:min(100%,12em);padding:.35em .5em;border:0!important;border-image:none!important;box-shadow:none;background:transparent}
+#screen #lvl #lvBuild .brb b{font-size:1.15em;margin-bottom:.2em} #screen #lvl #lvBuild .brb small{font-size:1em;line-height:1.25;margin-top:.2em} #screen #lvl #lvBuild .chip{font-size:1em;padding:.1em .4em;border-width:1px!important;border-image:none!important} #screen #lvl #lvBuild .element-summary{font-size:1em;line-height:1.25;margin:.1em 0}
+#screen #lvl .lvbtns{justify-content:center;flex-wrap:wrap;margin:.1em 0 0}
+#screen #lvl .lvbtns .go{font-size:.92em;min-height:36px}
+#screen.port #lvl .level-panel{width:min(100%,42em);gap:.55em}
+#screen.port #lvl #cards{grid-template-columns:minmax(0,1fr);gap:.6em}
+#screen.port #lvl .card{width:100%;box-sizing:border-box;display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:.75em;padding:.75em .85em .8em!important;position:relative}
+#screen.port #lvl .card .ck,#screen.port #lvl .card .cn,#screen.port #lvl .card .cl{grid-column:2} #screen.port #lvl .card .cd,#screen.port #lvl .card .fx,#screen.port #lvl .card .setb{grid-column:1/-1} #screen.port #lvl .card .cn{font-size:1.35em}
+#screen.port #lvl .card .cn .ic{position:absolute;left:.65em;top:.65em;width:40px;height:40px;margin:0}
+#screen.port #lvl .card .num{right:.65em;top:.5em;font-size:.75em}
+#screen.port #lvl #lvBuild .brb{min-width:0;flex-basis:28%}
+@media(max-height:500px){#screen:not(.port) #lvl{font-size:clamp(10px,2.6vh,11px)}#screen:not(.port) #lvl .level-panel{width:100%;max-width:none}}
+@media(max-height:380px){#screen:not(.port) #lvl{font-size:10px}}
+@media(prefers-reduced-motion:reduce){#screen #lvl .card{transition:none}}
+
 </style>
 
 <div id="orient">
@@ -822,12 +857,12 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
         <div class="btnrow"><button class="go alt" id="shopClose" type="button">Zwiń kram · E</button></div>
       </div>
       <div class="overlay" id="lvl" hidden>
-        <div class="kicker">Ogniki płoną w tobie</div>
-        <h2 id="lvlTitle">Poziom 2</h2>
+        <div class="level-panel"><div class="level-heading"><div class="kicker">Nowy poziom</div>
+        <h2 id="lvlTitle">Poziom 2</h2><span class="level-ornament" aria-hidden="true"></span></div>
         <div class="slots" id="slots">Aktywne 1 z 4 · Pasywne 0 z 2</div>
-        <div class="cards" id="cards"></div>
-        <div id="lvBuild"></div>
-        <div class="lvbtns"><button class="go alt" id="rerollBtn" type="button"></button><span class="hint">R · przerzut · 1 / 2 / 3 · wybór</span></div>
+        <div id="levelWait" class="level-wait-note" role="status" aria-live="polite"></div><div class="cards" id="cards"></div>
+        <details class="level-build"><summary>Twój rozwój · style i zdobyte umiejętności</summary><div id="lvBuild"></div></details>
+        <div class="lvbtns"><button class="go alt" id="rerollBtn" type="button"></button><span class="hint">R · przerzut · 1 / 2 / 3 · wybór</span></div></div>
       </div>
       <div id="intro" hidden><div class="iimg" id="iimg"></div><div class="ivig"></div><div class="itxt"><div class="ikick" id="ikick"></div><p id="itxtp"></p><div class="ihint" id="ihint"></div></div></div>
       <div class="overlay" id="title">
@@ -2608,7 +2643,7 @@ const STY={
   odzysk:{br:'def',name:'Odzysk Tchu',ic:'boot',max:3,d:'Parowanie zwraca 10 staminy za poziom. Poz. 3: +2% życia (raz na 2,5 s).'},
   ostrze:{br:'off',name:'Szybkie Ostrze',ic:'whet',max:5,d:'Lekki cios: −8% staminy i −6% czasu powrotu za poziom.'},
   dobicie:{br:'off',name:'Dobicie',ic:'blood',max:5,d:'+12% obrażeń za poziom wobec ogłuszonych, w ripoście i po przełamaniu.'},
-  rytm:{br:'off',name:'Rytm Śmierci',ic:'might',max:5,d:'3. cios combo: +18% obrażeń za poziom.'},
+  rytm:{br:'off',name:'Rytm Śmierci',ic:'might',max:5,d:'Trzeci cios combo: +18% obrażeń za poziom.'},
   taniec:{br:'off',name:'Taniec Ostrzy',ic:'haste',max:3,d:'Za poziom: unik −12% staminy, pierwszy cios po uniku +25% obrażeń.'},
   fala:{br:'wav',name:'Fala Mocy',ic:'area',max:5,d:'Fala cięcia: +25% obrażeń za poziom.'},
   zasieg:{br:'wav',name:'Daleka Fala',ic:'frost',max:5,d:'Fala cięcia: +18% zasięgu i szerokości za poziom.'},
@@ -3262,7 +3297,7 @@ function cardDesc(k,d){let t=d.d;if(!d.pact&&!brOn(d.br)&&brSum(d.br)+1>=SET_N)t
 function styleLine(){return ['def','off','wav'].map(b=>BR[b].n+' '+Math.min(SET_N,brSum(b))+'/'+SET_N).join(' · ')}
 // przed → po: jedna liczba zamiast opisu
 const FXL={garda:['Koszt bloku',L=>Math.round(100*(1-.1*L))+'%'],oko:['Okno parowania',L=>(SL.parry+.02*L).toFixed(2).replace('.',',')+' s'],riposta:['Mnożnik riposty',L=>'×'+(SL.riposte+.4*L).toFixed(1).replace('.',',')],odzysk:['Zwrot staminy po parowaniu',L=>10*L],
-  ostrze:['Koszt lekkiego ciosu',L=>Math.round(100*(1-.08*L))+'%'],dobicie:['Obrażenia wobec ogłuszonych',L=>'+'+12*L+'%'],rytm:['3. cios combo',L=>'+'+18*L+'%'],taniec:['Koszt uniku',L=>Math.round(100*(1-.12*L))+'%'],
+  ostrze:['Koszt lekkiego ciosu',L=>Math.round(100*(1-.08*L))+'%'],dobicie:['Obrażenia wobec ogłuszonych',L=>'+'+12*L+'%'],rytm:['Trzeci cios combo',L=>'+'+18*L+'%'],taniec:['Koszt uniku',L=>Math.round(100*(1-.12*L))+'%'],
   fala:['Obrażenia fal',L=>'+'+25*L+'%'],zasieg:['Zasięg fal',L=>'+'+18*L+'%'],echo:['Fale po parowaniu',L=>L<1?1:L===1?2:3],zryw:['Fala co … trafień',L=>L<1?'—':6-L]};
 const FXPACT={krew:['+35% obrażeń','−25% życia'],szklo:['+50% obrażeń','wrogowie +30% obrażeń'],zelazo:['+40% staminy','−15% obrażeń'],cisza:['+50% regeneracji staminy','−20% życia']};
 function fxPair(k,l){const T=STY[k];if(T&&!T.pact&&FXL[k]){const f=FXL[k];return[f[0],f[1](l),f[1](l+1)]}
@@ -3282,15 +3317,19 @@ function renderBuild(pre){const el=$('lvBuild');if(!el)return;
   el.innerHTML=h+(chips.length?`<div class="chips">${chips.join('')}</div>`:'')+`<p class="element-summary">${elementalSummary()}</p>`}
 function rrPrice(){return S.rr>0?0:10+5*(S.rrPaid||0)}
 function renderCards(){$('lvlTitle').textContent=`Poziom ${S.lvl-S.pendLv+1}`;$('slots').textContent=ENCH.some(k=>S.sk[k])?'Wybierz styl, cechę lub pakt':'Wybierz technikę, styl lub magię wspierającą';const box=$('cards');box.innerHTML='';
-  S.choices.forEach((k,i)=>{const c=cardHTML(k,i),b=document.createElement('button');b.type='button';b.className='card '+c.cls;b.id='card'+i;b.innerHTML=c.html;b.addEventListener('click',()=>pick(i));
+  S.choices.forEach((k,i)=>{const c=cardHTML(k,i),b=document.createElement('button');b.type='button';b.className='card '+c.cls;b.id='card'+i;b.innerHTML=c.html;b.addEventListener('pointerdown',()=>{b.dataset.openingBlocked=performance.now()<levelReadyAt?'1':'0'});b.addEventListener('click',e=>{const blocked=e.detail>0&&b.dataset.openingBlocked==='1';delete b.dataset.openingBlocked;if(!blocked)pickLevelCard(i)});
     const br=STY[k]&&!STY[k].pact?STY[k].br:null;const pv=()=>renderBuild(br),un=()=>renderBuild();b.addEventListener('mouseenter',pv);b.addEventListener('focus',pv);b.addEventListener('mouseleave',un);b.addEventListener('blur',un);box.appendChild(b)});
   renderBuild();const rb=$('rerollBtn'),pr=rrPrice();rb.textContent=pr===0?'Przerzuć karty · darmowy':`Przerzuć karty · ${pr} monet`;rb.disabled=pr>0&&S.coins<pr}
 function rerollCards(){if(!S||!S.choosing)return;const pr=rrPrice();if(pr>0&&S.coins<pr){play('empty',0);return}
   if(pr===0)S.rr--;else{S.coins-=pr;S.rrPaid=(S.rrPaid||0)+1}
   const old=S.choices;let c=null;for(let t=0;t<8;t++){c=rollChoices();if(!c.some(k=>old.includes(k)))break}S.choices=c;play('bless',0);renderCards();setTimeout(()=>{const f=$('card0');f&&f.focus()},20)}
+const LEVEL_CHOICE_DELAY=2500;let levelReadyAt=0,levelReadyTimer=0;
+function pickLevelCard(i){if(performance.now()<levelReadyAt)return;pick(i)}
+function rerollLevelCards(){if(performance.now()<levelReadyAt)return;rerollCards()}
+function armLevelCards(){clearTimeout(levelReadyTimer);levelReadyAt=performance.now()+LEVEL_CHOICE_DELAY;$('lvl').classList.add('choice-wait');$('levelWait').textContent='Przeczytaj opisy — wybór dostępny po 2,5 s';levelReadyTimer=setTimeout(()=>{$('lvl').classList.remove('choice-wait');$('levelWait').textContent=''},LEVEL_CHOICE_DELAY)}
 function openLevelUp(){resetInput();S.choosing=true;pl.swingT=0;play('level',0);if(!pl.dead)pl.hp=Math.min(pl.max,pl.hp+pl.max*S.pk.lvHeal);// level healing is defined by the selected preparation perks
   S.choices=rollChoices();S.rr=1;renderCards();
-  $('lvl').hidden=false;$('touch').hidden=true;setTimeout(()=>{const f=$('card0');f&&f.focus()},30)}
+  $('lvl').hidden=false;document.querySelector('#lvl .level-build').open=false;armLevelCards();$('touch').hidden=true;setTimeout(()=>{const f=$('card0');f&&f.focus()},30)}
 // a ring of motes bursting from the hero when a rune is taken (gold for time, red for reach, others in their colours)
 function pactApply(k){if(k==='krew'){S.str*=1.35;pl.max=Math.round(pl.max*.75);pl.hp=Math.min(pl.hp,pl.max)}else if(k==='szklo'){S.str*=1.5;S.vuln=(S.vuln||1)*1.3}else if(k==='zelazo'){pl.staMax=Math.round(pl.staMax*1.4);pl.sta=pl.staMax;S.str*=.85}else if(k==='cisza'){S.regenMul=(S.regenMul||1)*1.5;pl.max=Math.round(pl.max*.8);pl.hp=Math.min(pl.hp,pl.max)}ftInfo(STY[k].name)}
 function pick(i){if(!S||!S.choosing)return;const k=S.choices[i];if(!k)return;if(SLASH_SK.includes(k)&&!canLearnSlasher(k))return;if(k==='_vit'){pl.max+=15;heal(15);play('heal',0)}else if(k==='_end'){pl.staMax+=15;pl.sta=pl.staMax;play('bless',0)}else if(k==='_str'){S.str*=1.1;play('bless',0)}else if(k==='_dex'){S.dex*=.9;play('bless',0)}else if(k==='_gold'){S.coins+=25;play('coin',0)}else if(k==='_heal'){pl.hp=pl.max;play('heal',0)}else{const b0=STY[k]&&STY[k].br?brOn(STY[k].br):false;S.sk[k]=(S.sk[k]||0)+1;learnElement(k);autoEquipActive(k);S.hl={k,t:clock};if(STY[k]){play('bless',0);if(STY[k].pact)pactApply(k);else if(!b0&&brOn(STY[k].br)){ftInfo('Zestaw stylu: '+BR[STY[k].br].n);play('level',0)}}}
@@ -3954,7 +3993,7 @@ function fillPauseKeys(){const t=$('pauseKeys');if(!t)return;const g=id=>($(id)?
   $('pause').classList.add('sl');pauseSub('')}
 function pauseSub(k){const t=$('pauseKeys');for(const x of t.querySelectorAll('[data-ps]'))x.classList.toggle('on',x.dataset.ps===k);for(const x of t.querySelectorAll('[data-pp]'))x.hidden=x.dataset.pp!==k}
 $('pauseKeys').addEventListener('click',e=>{const b=e.target.closest('[data-ps]');if(b)pauseSub(b.classList.contains('on')?'':b.dataset.ps)});
-$('rerollBtn').addEventListener('click',rerollCards);
+$('rerollBtn').addEventListener('click',rerollLevelCards);
 const SAVE_KEYS=['pn_save','pn_prog','pn_mode','pn_story','pn_bri','pn_sfx','pn_fts','pn_dmg','pn_mus','pn_touch','pn_diff','pn_access','pn_tut_s','pn_tut_a','pn_hints'];
 function saveMsg(s){$('saveMsg').textContent=s}
 $('expSave').addEventListener('click',()=>{try{const d={};for(const k of SAVE_KEYS){try{const v=localStorage.getItem(k);if(v!==null)d[k]=v}catch(e){}}
@@ -4032,7 +4071,7 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(S&&S.intro){e.prev
   if(S&&S.paused){if(k==='escape'||k==='p')togglePause(false);return}
   if(S&&S.phase==='play'&&!S.shop&&!S.choosing&&!S.dialog&&(k==='escape'||k==='p')){togglePause(true);return}
   if(S&&S.shop){if(/^[1-6]$/.test(k))buy(+k-1);else if(k==='e'||k==='escape'||k==='enter')closeShop();return}
-  if(S&&S.choosing){if(['1','2','3'].includes(k))pick(+k-1);else if(k==='r')rerollCards();return}
+  if(S&&S.choosing){if(['1','2','3'].includes(k))pickLevelCard(+k-1);else if(k==='r')rerollLevelCards();return}
   if(!S||S.phase!=='play'){if((k==='enter'||k===' ')&&document.activeElement.tagName!=='BUTTON'){const b=!$('title').hidden?$('start1'):(!$('end').hidden?$('againBtn'):null);if(b)b.click()}return}
   if(e.repeat)return;keys[k]=true;if(k===' '||k==='shift')rollPress=true;if(k==='k')heavyPress=true;if(['q','e','f'].includes(k))activateSlot(['q','e','f'].indexOf(k));if(k==='enter')talkPress=true});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseL=mouseR=false;if(S&&S.phase==='play'&&!S.paused)togglePause(true)});
@@ -4128,7 +4167,7 @@ function padTick(dt){
   if(mid){PAD.x=PAD.y=0;PAD.atk=PAD.blk=false;
     if(PAD.lock>0)return;
     if(PAD.fresh){PAD.fresh=false;const f=(mid==='title'&&$('start1')&&!$('start1').disabled?$('start1'):null)||[...$(mid).querySelectorAll('button,input')].filter(e=>!e.disabled&&e.offsetParent!==null)[0];if(f)f.focus();return}
-    if(mid==='lvl'&&pr(3)){rerollCards();return}
+    if(mid==='lvl'&&pr(3)){rerollLevelCards();return}
     padNav(mid,dt,pr,g);if(pr(9)&&mid==='pause')togglePause(false);return}
   if(!S||S.phase!=='play'){PAD.x=PAD.y=0;PAD.atk=PAD.blk=false;return}
   if(pr(9)){togglePause(true);return}
