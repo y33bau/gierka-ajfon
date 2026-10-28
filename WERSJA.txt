@@ -1,3 +1,15 @@
+FENIX — dopracowane proporcje i drobne teksty menu: 13 px na komputerze, 12 px na telefonie; wspólna oś kontrolek i stopki; większe logo w niskim poziomie. nightbrand-codex-20261028-122; SHA-256 index.html bca693d8859ed25060ac883d34dd139d70e2596917bb852629e885696b3135c2. Lokalnie, bez publikacji.
+
+28.10.2026 — FENIX: prawa kolumna menu wydłużona w dół o 14vh na komputerze, równe banery i odstępy. nightbrand-codex-20261028-119; SHA-256 index.html 9dbb1f0117d4ba68b0e0fc4b943fda00ca5a17d40bfe462b158aec042634249c. Lokalnie, bez publikacji.
+
+28.10.2026 — FENIX: prawa kolumna menu rozciągnięta w pionie, sześć równych wierszy i jednakowe odstępy; zachowane układy telefonu. nightbrand-codex-20261028-118; SHA-256 index.html 9dbb1f0117d4ba68b0e0fc4b943fda00ca5a17d40bfe462b158aec042634249c. Lokalnie, bez publikacji.
+
+28.10.2026 — FENIX: równych rozmiarów pola sterowania dotykowego i podpowiedzi; mniejszy Przebieg gry skrajnie po lewej; oczyszczone krawędzie logo. nightbrand-codex-20261028-117; SHA-256 index.html 8ec720539167f6d99beed45fdc9ef6805768003809ca59ce13dc0d21273263c5. Lokalnie, bez publikacji.
+
+28.10.2026 — FENIX: większe logo i przyciski menu, czytelne rekordy, mniejszy panel przebiegu gry i układ bez przewijania na czterech ekranach. nightbrand-codex-20261028-115; SHA-256 index.html 0679c95c54313a7dfe49655d7c041d1e2970f3c837517098a382bf4da2672f2c. Wersja lokalna, bez publikacji.
+
+28.10.2026 — FENIX: nowe przyciski, ramki, kontrolki i ikony Gemini; większe nagłówki, przezroczyste tło poziomu postaci, joystick 55% przezroczystości. nightbrand-codex-20261028-113; SHA-256 index.html 0679c95c54313a7dfe49655d7c041d1e2970f3c837517098a382bf4da2672f2c. Wersja lokalna, czeka na akceptację do publikacji.
+
 28.10.2026 — FENIX: nowe przezroczyste napisy nagłówków i logo Gemini, poprawne proporcje i etykiety dostępności. nightbrand-codex-20261028-103; SHA-256 index.html 0679c95c54313a7dfe49655d7c041d1e2970f3c837517098a382bf4da2672f2c. Wersja lokalna, bez publikacji.
 
 28.10.2026 — FENIX: naprawiono start z perkami/wyzwaniem (applyPrep przekazuje właściwą tabelę mnożników). Bez zmiany wartości perków. nightbrand-codex-20261028-99; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Test kombinacji 10044/10044 PASS, Wyrusz/zapis 21/21 PASS. Wersja lokalna, czeka na akceptację do publikacji.
