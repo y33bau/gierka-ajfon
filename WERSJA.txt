@@ -1,3 +1,5 @@
+28.10.2026 — FENIX: naprawiono start z perkami/wyzwaniem (applyPrep przekazuje właściwą tabelę mnożników). Bez zmiany wartości perków. nightbrand-codex-20261028-99; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Test kombinacji 10044/10044 PASS, Wyrusz/zapis 21/21 PASS. Wersja lokalna, czeka na akceptację do publikacji.
+
 28.10.2026 — FENIX: ramki, banery i łańcuchy Gemini z prawdziwą przezroczystością; wycentrowany panel i rząd kart awansu w poziomie. Kod rozgrywki bez zmian. nightbrand-codex-20261028-98; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Krótki przegląd UI PASS. Wersja lokalna, bez publikacji.
 
 28.10.2026 — FENIX: tytuł karty „Nightbrand”; przyczyna śmierci na ekranie końca nocy, jawny sprawca każdego trafienia i pocisku. Bez zmian balansu. nightbrand-codex-20261028-96; index.html 20671 B; SHA-256 6da3e7fea8742fdaaea81a7e2f5478b6b75155725452cbab323217e1394e9189. Wersja lokalna, bez publikacji GitHub.

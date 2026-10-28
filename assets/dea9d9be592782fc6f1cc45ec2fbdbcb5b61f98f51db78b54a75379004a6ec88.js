@@ -2966,7 +2966,7 @@ function renderPrep(){const q=prog();$('prepK').textContent=CHN[PREP.ch-1];$('pr
   const C=$('prepCh');C.innerHTML='';for(const c of CHALS){const on=PREP.chal===c.id,b=document.createElement('button');b.type='button';b.className='opt'+(on?' on':'');
     b.innerHTML=`<b>${on?'✓ ':''}${c.n}</b><span>${c.d}</span><span class="pl">nagroda: +${Math.round(c.bx*100)}% doświadczenia postaci${c.coins?' i '+c.coins+' monet od razu':''}</span>`;
     b.addEventListener('click',()=>{PREP.chal=on?null:c.id;q.ch=PREP.chal;saveProg();renderPrep();const nb=[...$('prepCh').children].find(x=>x.textContent.includes(c.n));nb&&nb.focus()});C.appendChild(b)}}
-function applyPrep(){const k=S.deathCause=null;S.pk=PK0();S.hitsT=0;S.parries=0;S.cEarn=0;S.chal=null;const q=prog();
+function applyPrep(){const k=S.pk=PK0();S.hitsT=0;S.parries=0;S.cEarn=0;S.chal=null;const q=prog();
   for(const id of PREP.perks){const d=PERKS.find(p=>p.id===id);if(d&&d.lv<=q.lv)d.fx(k)}
   pl.hp=pl.max;pl.staMax=pl.staMax||100;const c=CHALS.find(c=>c.id===PREP.chal);if(c)S.chal={c,done:false};S.perkIds=PREP.perks.slice();PREP.perks=[];PREP.chal=null}
 function chTick(){const h=$('chal');if(!h||!S)return;const ch=S.chal;if(!ch){if(!h.hidden)h.hidden=true;return}
