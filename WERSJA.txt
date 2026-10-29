@@ -1,3 +1,6 @@
+FENIX nightbrand-codex-20261028-178 — skille: Fala Mocy +10% za poziom (poz. 5: +20%, razem 60%), Zryw Ostrza co 6/4/3 trafienie, Kaskada cięć 25 many, Wir Ostrza 35 staminy; usunięte Czujne Oko, Dobicie, Krok przez cień i Egzekucja; instrukcja zaktualizowana (Claude). Opublikowano na GitHub.
+SHA-256 index.html: fbbf8b340696a3475f88cb0ecf255b8cb07e5108d71edf90473ef7ea29ec82b0.
+SHA-256 sw.js: 32bfa31ea0924b29df96a18e4ce6cfe7cad7c35494b4f94fc5eafe60d44e5621.
 FENIX nightbrand-codex-20261028-177 — wersja pionowa (telefon): bez samouczka i podpowiedzi, komunikaty fabularne i bossów jako przewijany pasek, rozmowy z postaciami bez zatrzymywania gry (Wit i Wolch nadal w oknie); wersja pozioma bez zmian (Claude). Opublikowano na GitHub.
 SHA-256 index.html: fbbf8b340696a3475f88cb0ecf255b8cb07e5108d71edf90473ef7ea29ec82b0.
 SHA-256 sw.js: 2689038fffba515ff55471191c6a0eca4e66aa81e171a99c9ce4f0238f58f5d2.

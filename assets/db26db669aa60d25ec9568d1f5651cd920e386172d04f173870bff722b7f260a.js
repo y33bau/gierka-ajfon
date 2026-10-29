@@ -2052,19 +2052,18 @@ function aimDir(){if(clock-PAD.aimT<.15)return [PAD.ax,PAD.ay];if(coarse||clock-
 function autoAim(){let b=null,bd=1e9;for(const e of S.enemies){if(e.dead||e.rise>0||e.type==='wisp')continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>75||d<1)continue;const f=(dx*pl.fx+dy*pl.fy)/d;if(f<-.2)continue;const sc=d*(1.6-f);if(sc<bd){bd=sc;b=[dx/d,dy/d]}}return b}
 // ---- STYLE WALKI (slasher): trzy gałęzie kart z poziomami. Osiem poziomów w jednej gałęzi daje bonus zestawu ----
 const BR={def:{n:'Obrońca',set:'Parowanie: 0,35 s nietykalności; +2% życia (raz na 2,5 s).'},off:{n:'Zabójca',set:'Trafienie ogłuszonego wroga zwraca 6 staminy.'},wav:{n:'Mistrz fal',set:'Fale +30% obrażeń i nakładają status ostrza.'}},SET_N=8;
+const FALA_B=[0,.1,.2,.3,.4,.6],ZRYW_N=[0,6,4,3];// Fala Mocy: łączny bonus na poziomie; Zryw: co ile trafień
 const STY={
   garda:{br:'def',name:'Żelazna Garda',ic:'quen',max:5,d:'Blok −10% staminy za poziom (poz. 5: −50%).'},
-  oko:{br:'def',name:'Czujne Oko',ic:'shadow',max:5,d:'Okno parowania +0,02 s za poziom.'},
   riposta:{br:'def',name:'Śmiertelna Riposta',ic:'sword',max:5,d:'Riposta: mnożnik +0,4 i +0,25 s za poziom.'},
   odzysk:{br:'def',name:'Odzysk Tchu',ic:'boot',max:3,d:'Parowanie zwraca 10 staminy za poziom. Poz. 3: +2% życia (raz na 2,5 s).'},
   ostrze:{br:'off',name:'Szybkie Ostrze',ic:'whet',max:5,d:'Lekki cios: −8% staminy i −6% czasu powrotu za poziom.'},
-  dobicie:{br:'off',name:'Dobicie',ic:'blood',max:5,d:'+12% obrażeń za poziom wobec ogłuszonych, w ripoście i po przełamaniu.'},
   rytm:{br:'off',name:'Rytm Śmierci',ic:'might',max:5,d:'Trzeci cios combo: +18% obrażeń za poziom.'},
   taniec:{br:'off',name:'Taniec Ostrzy',ic:'haste',max:3,d:'Za poziom: unik −12% staminy, pierwszy cios po uniku +25% obrażeń.'},
-  fala:{br:'wav',name:'Fala Mocy',ic:'area',max:5,d:'Fala cięcia: +25% obrażeń za poziom.'},
+  fala:{br:'wav',name:'Fala Mocy',ic:'area',max:5,d:'Fala cięcia: +10% obrażeń za poziom (poz. 5: +20%).'},
   zasieg:{br:'wav',name:'Daleka Fala',ic:'frost',max:5,d:'Fala cięcia: +18% zasięgu i szerokości za poziom.'},
   echo:{br:'wav',name:'Echo Parowania',ic:'earth',max:3,d:'Po parowaniu więcej fal: poz. 1 – dwie, poz. 2–3 – trzy (poz. 3: +20% obrażeń).'},
-  zryw:{br:'wav',name:'Zryw Ostrza',ic:'inferno',max:3,d:'Co (6 − poziom) trafienie lekkim ciosem wypuszcza falę (60% obrażeń).'},
+  zryw:{br:'wav',name:'Zryw Ostrza',ic:'inferno',max:3,d:'Co 6., 4. lub 3. trafienie lekkim ciosem (poz. 1–3) wypuszcza falę (60% obrażeń).'},
   krew:{pact:1,name:'Pakt Krwi',ic:'heart',max:1,d:'+35% obrażeń, −25% maks. życia.'},
   szklo:{pact:1,name:'Szklany Miecz',ic:'wisp',max:1,d:'+50% obrażeń, wrogowie ranią cię o 30% mocniej.'},
   zelazo:{pact:1,name:'Pakt Żelaza',ic:'amulet',max:1,d:'+40% maks. staminy, −15% obrażeń.'},
@@ -2072,13 +2071,13 @@ const STY={
 for(const k in STY){const t=STY[k];t.kind=t.pact?'Pakt':'Styl · '+BR[t.br].n;if(t.pact)t.sub='Przewaga z ceną';Object.assign(SK[k]=SK[k]||{},t)}
 const sk=k=>(S&&S.sk&&S.sk[k])||0;
 const brSum=br=>Object.keys(STY).filter(k=>STY[k].br===br).reduce((a,k)=>a+sk(k),0),brOn=br=>brSum(br)>=SET_N;
-const parryWin=()=>SL.parry+.02*sk('oko'),riMul=()=>SL.riposte+.4*sk('riposta'),blockMulX=()=>SL.blockMul*(1-.1*sk('garda'));
+const parryWin=()=>SL.parry,riMul=()=>SL.riposte+.4*sk('riposta'),blockMulX=()=>SL.blockMul*(1-.1*sk('garda'));
 function onParry(){S.combatLock=4;if(sk('retaliation'))S.retaliate=2;S.parries++;S.actions.parry++;pl.riposte=1.6+.25*sk('riposta');const o=sk('odzysk');if(o)pl.sta=Math.min(pl.staMax,pl.sta+10*o);
   const ready=!(pl.parryHealCd>0);if(ready&&(o>=3||brOn('def'))){heal(pl.max*((o>=3?.02:0)+(brOn('def')?.02:0)));pl.parryHealCd=2.5}
   if(brOn('def')){pl.inv=Math.max(pl.inv,.35);ftInfo('Mur obrońcy')}}
 function attackCost(kind){return (kind==='h'?SL.heavy.cost:SL.light.cost)*(S.dex||1)*(kind==='l'?1-.08*sk('ostrze'):1)}
 function startAttack(kind,combo=0,charged=false){if(pl.atk?.kind==='whirl')return;const P=kind==='h'?SL.heavy:SL.light,cost=attackCost(kind);if(pl.sta+1e-8<cost){S.stamFlash=.45;play('empty',.25);return}
-  if(kind==='l')swordShadowStep();const a=aimDir()||autoAim()||[pl.fx,pl.fy];pl.fx=a[0];pl.fy=a[1];
+  const a=aimDir()||autoAim()||[pl.fx,pl.fy];pl.fx=a[0];pl.fy=a[1];
   pl.sta=Math.max(0,pl.sta-cost);S.combatLock=4;S.actions.attack++;const wind=P.wind-(kind==='h'&&charged?P.charge:0);pl.staDelay=SL.delay;pl.atk={kind,combo,charged,retaliate:kind==='h'&&(S.retaliate||0)>0,stage:'wind',t:wind,visualWind:wind,dx:a[0],dy:a[1],hit:false,visualRiposte:pl.riposte>0};pl.queue=false;
   if(S.bloodCharge>0)S.bloodCharge=0;if(kind==='h')S.retaliate=0;const dur=wind+P.act+P.rec;pl.swingT=pl.swingDur=dur;if(Math.abs(a[0])>Math.abs(a[1])){pl.swingDir=2;pl.swingS=a[0]>0?1:-1}else{pl.swingDir=a[1]>0?0:1;pl.swingS=1}
   play(kind==='h'?'bladeHeavy':'bladeLight',.03)}
@@ -2089,7 +2088,7 @@ function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc
   let dmg=(a.kind==='h'?P.dmg:P.dmg[a.combo])*(1+.07*(S.lvl-1))*(S.str||1)*might()*encDmg(encLevel()[1]);if(crit)dmg*=riMul();if(a.kind==='l'&&a.combo===2)dmg*=1+.18*sk('rytm');if(pl.dance>0){dmg*=1+.25*sk('taniec');pl.dance=0}
   const waveDmg=dmg;if(a.retaliate)dmg*=1+.1*sk('retaliation');const ang=Math.atan2(a.dy,a.dx);let hits=0;
   for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>R+e.r||!sight(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>arc)continue;
-    const big=BIG.has(e.type)||e.type==='collector',weak=e.stun>0||e.recov>0||crit;const ex=sk('execution'),exMul=a.kind==='h'&&ex&&e.hp/e.max<=(big?.1:.2)?1+(big?.05*ex:.2+.1*ex):1;if(damageEnemy(e,dmg*exMul*(weak?1+.12*sk('dobicie'):1),dx/(d||1),dy/(d||1),a.kind==='h'?1.6:a.combo===2?1.2:.7)){hits++;swordTechniqueHit(e,a);supportEnchant(e,a,crit);applyEnchants(e,a,crit);if(weak&&brOn('off'))pl.sta=Math.min(pl.staMax,pl.sta+Math.min(6,Math.max(0,12-(a.refund||0))));if(weak&&brOn('off'))a.refund=(a.refund||0)+6}else continue;
+    const big=BIG.has(e.type)||e.type==='collector',weak=e.stun>0||e.recov>0||crit;if(damageEnemy(e,dmg,dx/(d||1),dy/(d||1),a.kind==='h'?1.6:a.combo===2?1.2:.7)){hits++;swordTechniqueHit(e,a);supportEnchant(e,a,crit);applyEnchants(e,a,crit);if(weak&&brOn('off'))pl.sta=Math.min(pl.staMax,pl.sta+Math.min(6,Math.max(0,12-(a.refund||0))));if(weak&&brOn('off'))a.refund=(a.refund||0)+6}else continue;
     // stagger: normal enemies are interrupted, big ones only when their poise breaks
     if(!e.dead){const st=a.kind==='h'?P.stun:P.stun[a.combo];if(big){breakPoise(e,a.kind==='h'?45:a.combo===2?20:12)}else{slashStagger(e,st,a.kind==='h'||crit)}}}
   ftCrit=false;ftHeavy=false;ftMelee=false;
@@ -2098,10 +2097,10 @@ function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc
   if(!trail||!emitCombatEffect(trail,pl.x+c*R*.12,pl.y+s*R*.12,visualSize,-screenAng(c,s)))addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize,'bill',-screenAng(c,s));
   {const en=ENCH.filter(k=>S.sk[k]);if(en.length)for(let i=0;i<16;i++){const t=ang+rnd(-arc,arc),rr=rnd(10,R),k=en[i%en.length];S.parts.push({k:'e',x:pl.x+Math.cos(t)*rr,y:pl.y+Math.sin(t)*rr,z:rnd(8,18),vx:0,vy:0,vz:rnd(4,12),c:Math.random()<.6?ENC[k].col:ENC[k].col2,life:rnd(.2,.45)})}}
   if(crit){pl.riposte=0;launchWave(a,ang,waveDmg);const ec=sk('echo');if(ec>=1){launchWave(a,ang-.28,waveDmg*(ec>=3?1.2:1),1);if(ec>=2)launchWave(a,ang+.28,waveDmg*(ec>=3?1.2:1),1)}if(hits)ftInfo('Cios krytyczny!')}
-  else if(hits&&a.kind==='l'&&sk('zryw')){S.hitN=(S.hitN||0)+1;if(S.hitN>=6-sk('zryw')){S.hitN=0;launchWave(a,ang,waveDmg)}}
+  else if(hits&&a.kind==='l'&&sk('zryw')){S.hitN=(S.hitN||0)+1;if(S.hitN>=ZRYW_N[sk('zryw')]){S.hitN=0;launchWave(a,ang,waveDmg)}}
   if(hits){S.hitstop=a.kind==='h'?.09:crit?.12:.045;shake(a.kind==='h'?.25:.1,.1);if(crit)play('katana',0)}}
 // fala cięcia: nagroda za parowanie, leci przed siebie i przebija wszystkich wrogów na swojej drodze (raz każdego)
-function launchWave(a,ang,base,quiet){const W0=a.kind==='h'?SL.wave.h:SL.wave.l,zs=sk('zasieg'),W=Object.assign({},W0,{life:W0.life*(1+.18*zs),r:W0.r*(1+.18*zs),size:W0.size*(1+.1*zs),dmg:W0.dmg*(1+.25*sk('fala'))*(brOn('wav')?1.3:1)}),c=Math.cos(ang),s=Math.sin(ang);addVfx(A.fx.slash,W.life,pl.x+c*14,pl.y+s*14,.6,W.size,'bill',-screenAng(c,s));
+function launchWave(a,ang,base,quiet){const W0=a.kind==='h'?SL.wave.h:SL.wave.l,zs=sk('zasieg'),W=Object.assign({},W0,{life:W0.life*(1+.18*zs),r:W0.r*(1+.18*zs),size:W0.size*(1+.1*zs),dmg:W0.dmg*(1+FALA_B[sk('fala')])*(brOn('wav')?1.3:1)}),c=Math.cos(ang),s=Math.sin(ang);addVfx(A.fx.slash,W.life,pl.x+c*14,pl.y+s*14,.6,W.size,'bill',-screenAng(c,s));
   (S.waves=S.waves||[]).push({f:S.vfx[S.vfx.length-1],x:pl.x+c*14,y:pl.y+s*14,vx:c*W.speed,vy:s*W.speed,t:W.life,r:W.r,dmg:base*W.dmg,hit:new Set()});play('katana',0);shake(.12,.1);padRumble(.4,.7,160);
   if(!quiet)ftInfo('Fala cięcia')}
 function waveTick(dt){if(!S.waves||!S.waves.length)return;for(let i=S.waves.length-1;i>=0;i--){const w=S.waves[i];w.t-=dt;w.x+=w.vx*dt;w.y+=w.vy*dt;if(w.f){w.f.x=w.x;w.f.y=w.y}
@@ -2152,19 +2151,17 @@ for(const k of ['venom','fireblade','iceblade','bloodblade'])SK[k].lv=[...Array(
 // Slasher: intentional sword actions, a main element and one compatible support.
 const ELEMENT_NAME={fire:'Ogień',ice:'Lód',venom:'Trucizna',blood:'Krew',earth:'Ziemia'};
 const ELEMENT_OF={fireblade:'fire',iceblade:'ice',venom:'venom',bloodblade:'blood'};// tylko zaklęcia ostrza; umiejętności aktywne nie liczą się do żywiołów
-const NEW_SWORD_SK=['frostshot','embershot','cascade','breach','shadowstep','retaliation','execution','earthcut','stoneguard','whirl'];
+const NEW_SWORD_SK=['frostshot','embershot','cascade','breach','retaliation','earthcut','stoneguard','whirl'];
 // distances are shown as words, not units: up to 40 short, 80 medium, 120 long, above very long
 const RANGE_W=v=>v<=40?'krótki':v<=80?'średni':v<=120?'długi':'bardzo długi',AREA_W=v=>v<=80?'średni':v<=120?'duży':'bardzo duży';
-const WHIRL={cost:40,damage:[8,10,12],hits:[4,5,6],radius:[32,38,44],cooldown:[10,9,8],duration:1.2,recovery:.25,speed:.6,inv:.25};
+const WHIRL={cost:35,damage:[8,10,12],hits:[4,5,6],radius:[32,38,44],cooldown:[10,9,8],duration:1.2,recovery:.25,speed:.6,inv:.25};
 Object.assign(SK,{
- whirl:{name:'Wir Ostrza',kind:'Technika aktywna',ic:'whirl',max:3,lv:[1,2,3].map(L=>`40 staminy, odnowienie ${WHIRL.cooldown[L-1]} s. Obrót 1,2 s: ${WHIRL.hits[L-1]} × ${WHIRL.damage[L-1]} obr. wokół ciebie, obszar ${['średni','średni+','duży'][L-1]}. Ruch 60%, bez obrony; nietykalność 0,25 s na starcie. Powrót 0,25 s. Bez ogłuszenia i odrzutu, także na bossa. Statusy ostrza najwyżej raz na cel, bez egzekucji żywiołu i leczenia.`)},
+ whirl:{name:'Wir Ostrza',kind:'Technika aktywna',ic:'whirl',max:3,lv:[1,2,3].map(L=>`35 staminy, odnowienie ${WHIRL.cooldown[L-1]} s. Obrót 1,2 s: ${WHIRL.hits[L-1]} × ${WHIRL.damage[L-1]} obr. wokół ciebie, obszar ${['średni','średni+','duży'][L-1]}. Ruch 60%, bez obrony; nietykalność 0,25 s na starcie. Powrót 0,25 s. Bez ogłuszenia i odrzutu, także na bossa. Statusy ostrza najwyżej raz na cel, bez egzekucji żywiołu i leczenia.`)},
  frostshot:{name:'Odłamek szronu',kind:'Wsparcie · Lód',ic:'frostshot',max:3,lv:[1,2,3].map(L=>`18 many, odnowienie 8 s. Duży odłamek: ${16+2*L} obr., ${[3,4,6][L-1]} ${L<3?'cele':'celów'}, zasięg ${RANGE_W(120+10*L)}. Spowolnienie ${25+5*L}% na 1,5 s (na bossa 10%).`)},
  embershot:{name:'Kula ognia',kind:'Wsparcie · Ogień',ic:'embershot',max:3,lv:[1,2,3].map(L=>`24 many, odnowienie 9 s. Duża, wolna kula: wybucha na pierwszym trafionym celu, który dostaje ${SL.shot.fireDmg[L-1]} obr. (100%), pobliscy wrogowie 50%. Podpala trafiony cel na ${String(1+.5*L).replace('.',',')} s.`)},
- cascade:{name:'Kaskada cięć',kind:'Technika aktywna',ic:'sword',max:3,lv:[1,2,3].map(L=>`20 many, odnowienie ${[7,6,5][L-1]} s. Seria 3 bardzo szybkich cięć przed sobą w ok. 0,6 s: ${SL.cascade.dmg[L-1]} obr. każde, razem ${3*SL.cascade.dmg[L-1]}. Bez statusów ostrza; bez nietykalności.`)},
+ cascade:{name:'Kaskada cięć',kind:'Technika aktywna',ic:'sword',max:3,lv:[1,2,3].map(L=>`25 many, odnowienie ${[7,6,5][L-1]} s. Seria 3 bardzo szybkich cięć przed sobą w ok. 0,6 s: ${SL.cascade.dmg[L-1]} obr. każde, razem ${3*SL.cascade.dmg[L-1]}. Bez statusów ostrza; bez nietykalności.`)},
  breach:{name:'Przełamanie',kind:'Technika miecza',ic:'breach',max:3,lv:[1,2,3].map(L=>`Naładowany ciężki cios (przytrzymaj lekki atak): +${20+10*L} przełamania postawy bossa. Zwykły wróg: odrzut i ogłuszenie ${(.6+.15*L).toFixed(2).replace('.',',')} s.`)},
- shadowstep:{name:'Krok przez cień',kind:'Technika miecza',ic:'shadowstep',max:3,lv:[1,2,3].map(L=>`Lekki cios do 1,2 s po uniku doskakuje do wroga przed tobą (zasięg ${RANGE_W(18+6*L)}). Dopłata 8 staminy.`)},
  retaliation:{name:'Żelazny odwet',kind:'Technika miecza',ic:'retaliation',max:3,lv:[1,2,3].map(L=>`Po udanym parowaniu następny ciężki cios (do 2 s): +${10*L}% obrażeń. Przepada przy pudle.`)},
- execution:{name:'Egzekucja',kind:'Technika miecza',ic:'execution',max:3,lv:[1,2,3].map(L=>`Ciężki cios: +${20+10*L}% obrażeń zwykłym wrogom poniżej 20% życia. Na bossa: +${5*L}% poniżej 10% życia.`)},
  earthcut:{name:'Rozcięcie ziemi',kind:'Wsparcie · Ziemia',ic:'earthcut',max:3,lv:[1,2,3].map(L=>`24 many, odnowienie 6 s. Linia kolców, zasięg ${RANGE_W(48+8*L)}: ${8+4*L} obr. każdemu celowi.`)},
  stoneguard:{name:'Kamienny obrońca',kind:'Wsparcie · Ziemia',ic:'stoneguard',max:3,lv:[1,2,3].map(L=>`34 many, odnowienie 30 s. Golem na 10 s, życie ${[80,100,120][L-1]}% twojego. Ściąga zwykłych wrogów (obszar ${AREA_W([96,112,128][L-1])}), bossów najwyżej na 5 s. Nie atakuje i nie leczy.`)}
 });
@@ -2184,7 +2181,7 @@ function supportEnchant(e,a,crit){const k=ENCH.find(k=>sk(k)&&k!==encLevel()[0])
 function swordSparks(x,y,col,n=8){for(let i=0;i<n;i++)S.parts.push({k:'e',x:x+rnd(-3,3),y:y+rnd(-2,2),z:rnd(8,16),vx:rnd(-12,12),vy:rnd(-8,8),vz:rnd(5,20),c:col,life:.2+rnd(0,.15)})}
 // Three equipped active skills. Cooldowns belong to skills, never to slots.
 const ACTIVE_SLASHER=['aard','earthcut','stoneguard','frostshot','embershot','cascade','whirl'];
-const ACTIVE_CFG={whirl:{cost:WHIRL.cost,resource:'stamina',cd:'whirlCd',wait:L=>WHIRL.cooldown[Math.min(3,L)-1]},aard:{cost:24,cd:'aardCd',wait:L=>Math.max(4.5,9-L),wind:.18},earthcut:{cost:24,cd:'earthCd',wait:()=>6,wind:.25},stoneguard:{cost:34,cd:'guardCd',wait:()=>30,wind:.3},frostshot:{cost:18,cd:'shotCd',wait:()=>8},embershot:{cost:24,cd:'shotCd',wait:()=>9},cascade:{cost:20,cd:'cascadeCd',wait:L=>[7,6,5][Math.min(3,Math.max(1,L))-1]}};
+const ACTIVE_CFG={whirl:{cost:WHIRL.cost,resource:'stamina',cd:'whirlCd',wait:L=>WHIRL.cooldown[Math.min(3,L)-1]},aard:{cost:24,cd:'aardCd',wait:L=>Math.max(4.5,9-L),wind:.18},earthcut:{cost:24,cd:'earthCd',wait:()=>6,wind:.25},stoneguard:{cost:34,cd:'guardCd',wait:()=>30,wind:.3},frostshot:{cost:18,cd:'shotCd',wait:()=>8},embershot:{cost:24,cd:'shotCd',wait:()=>9},cascade:{cost:25,cd:'cascadeCd',wait:L=>[7,6,5][Math.min(3,Math.max(1,L))-1]}};
 // Existing spells keep their mana payment. Active sword techniques may explicitly select stamina.
 function canPayMana(k){return pl.mana+1e-8>=ACTIVE_CFG[k].cost}
 function payMana(k){pl.mana=Math.max(0,pl.mana-ACTIVE_CFG[k].cost);pl.manaDelay=SL.mana.delay}
@@ -2277,7 +2274,6 @@ function swordTechniqueHit(e,a){if(e.dead)return;if(a.kind==='h'&&sk('iceblade')
 }
 function swordOnKill(e){}
 function swordEarth(a,active=false){const L=sk('earthcut');if(!active||!L)return;const hit=new Set();for(let r=12;r<=48+8*L;r+=6){const x=pl.x+a.dx*r,y=pl.y+a.dy*r;if(boxSolid(x,y,2,2))break;if(r%12===0)addVfx(A.fx.spikes,.35,x,y,0,.65,'bill');for(const e of [...S.enemies])if(!e.dead&&!hit.has(e)&&Math.hypot(e.x-x,e.y-y)<10+e.r){hit.add(e);damageEnemy(e,(8+4*L)*(1+.07*(S.lvl-1))*skillMul(),a.dx,a.dy,.3)}}}
-function swordShadowStep(){if(!sk('shadowstep')||!(S.shadowReady>0)||pl.sta<attackCost('l')+SL.stepCost)return;let target=null,dist=1e9;for(const e of S.enemies){const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(e.dead||e.rise>0||d>80||d<25||(dx*pl.fx+dy*pl.fy)/d<.5||!sight(pl.x,pl.y,e.x,e.y))continue;if(d<dist){target=e;dist=d}}if(!target)return;S.shadowReady=0;pl.sta-=SL.stepCost;const dx=(target.x-pl.x)/dist,dy=(target.y-pl.y)/dist,n=Math.min(18+6*sk('shadowstep'),Math.max(0,dist-contactGap(target)-2));for(let i=0;i<n;i+=2)moveBox(pl,dx*Math.min(2,n-i),dy*Math.min(2,n-i),4,3);swordSparks(pl.x,pl.y,'#b193dc',8)}
 // Stone guardian: a walking golem that draws ordinary enemies to itself for up to 10 s. It has its own life,
 // deals no damage, never heals. Bosses (bottom health bar) follow it for at most SL.guard.bossTaunt seconds per summon.
 function summonSwordGuardian(active=false){const L=Math.min(3,sk('stoneguard'));if(!active||!L)return;removeGuardian();let x=pl.x+pl.fx*14,y=pl.y+pl.fy*14;if(boxSolid(x,y,6,4)){x=pl.x;y=pl.y}const mesh=new THREE.Mesh(geo32,A.golem.idle[0].n);mesh.position.set(x/16,0,y/16);mesh.scale.set(1,SQ,1);scene.add(mesh);
@@ -2803,9 +2799,9 @@ function cardSub(k,l,d){if(d.pact)return 'Pakt: przewaga z ceną';const n=brSum(
 function cardDesc(k,d){let t=d.d;if(!d.pact&&!brOn(d.br)&&brSum(d.br)+1>=SET_N)t+=' Zestaw '+BR[d.br].n+': '+BR[d.br].set;return t}
 function styleLine(){return ['def','off','wav'].map(b=>BR[b].n+' '+Math.min(SET_N,brSum(b))+'/'+SET_N).join(' · ')}
 // przed → po: jedna liczba zamiast opisu
-const FXL={garda:['Koszt bloku',L=>Math.round(100*(1-.1*L))+'%'],oko:['Okno parowania',L=>(SL.parry+.02*L).toFixed(2).replace('.',',')+' s'],riposta:['Mnożnik riposty',L=>'×'+(SL.riposte+.4*L).toFixed(1).replace('.',',')],odzysk:['Zwrot staminy po parowaniu',L=>10*L],
-  ostrze:['Koszt lekkiego ciosu',L=>Math.round(100*(1-.08*L))+'%'],dobicie:['Obrażenia wobec ogłuszonych',L=>'+'+12*L+'%'],rytm:['Trzeci cios combo',L=>'+'+18*L+'%'],taniec:['Koszt uniku',L=>Math.round(100*(1-.12*L))+'%'],
-  fala:['Obrażenia fal',L=>'+'+25*L+'%'],zasieg:['Zasięg fal',L=>'+'+18*L+'%'],echo:['Fale po parowaniu',L=>L<1?1:L===1?2:3],zryw:['Fala co … trafień',L=>L<1?'—':6-L]};
+const FXL={garda:['Koszt bloku',L=>Math.round(100*(1-.1*L))+'%'],riposta:['Mnożnik riposty',L=>'×'+(SL.riposte+.4*L).toFixed(1).replace('.',',')],odzysk:['Zwrot staminy po parowaniu',L=>10*L],
+  ostrze:['Koszt lekkiego ciosu',L=>Math.round(100*(1-.08*L))+'%'],rytm:['Trzeci cios combo',L=>'+'+18*L+'%'],taniec:['Koszt uniku',L=>Math.round(100*(1-.12*L))+'%'],
+  fala:['Obrażenia fal',L=>'+'+Math.round(FALA_B[L]*100)+'%'],zasieg:['Zasięg fal',L=>'+'+18*L+'%'],echo:['Fale po parowaniu',L=>L<1?1:L===1?2:3],zryw:['Fala co … trafień',L=>L<1?'—':ZRYW_N[L]]};
 const FXPACT={krew:['+35% obrażeń','−25% życia'],szklo:['+50% obrażeń','wrogowie +30% obrażeń'],zelazo:['+40% staminy','−15% obrażeń'],cisza:['+50% regeneracji staminy','−20% życia']};
 function fxPair(k,l){const T=STY[k];if(T&&!T.pact&&FXL[k]){const f=FXL[k];return[f[0],f[1](l),f[1](l+1)]}
   if(k==='_vit')return['Maks. życie',Math.round(pl.max),Math.round(pl.max+15)];if(k==='_dex')return['Maks. stamina',Math.round(pl.staMax),Math.round(pl.staMax+15)];if(k==='_int')return['Maks. mana',Math.round(pl.manaMax),Math.round(pl.manaMax+15)];
@@ -2879,7 +2875,7 @@ function updPlayer(dt){
   if(pl.visualGuard)pl.visualGuard.t=Math.max(0,pl.visualGuard.t-dt);pl.inv=Math.max(0,pl.inv-dt);pl.swingT=Math.max(0,pl.swingT-dt);pl.hurtT=Math.max(0,pl.hurtT-dt);pl.parryT=Math.max(0,(pl.parryT||0)-dt);pl.gHitT=Math.max(0,(pl.gHitT||0)-dt);
   if(pl.roll>0){pl.roll-=dt;pl.rollT+=dt;moveBox(pl,pl.rvx*dt,pl.rvy*dt,4,3,true);return}
   pl.rollCd-=dt;
-  if(rollPress){if(pl.sta+1e-8>=SL.roll*(1-.12*sk('taniec'))&&!(pl.broken>0)&&!(pl.atk&&pl.atk.stage!=='rec')&&pl.rollCd<=0){{pl.sta=Math.max(0,pl.sta-SL.roll*(1-.12*sk('taniec')));pl.dance=sk('taniec')?.8:0;if(sk('shadowstep'))S.shadowReady=1.5;if(sk('fireblade')>=3){S.swordTrails.push({x:pl.x,y:pl.y,t:1.2,hit:new Set()});}pl.staDelay=SL.delay;pl.atk=null;pl.block=false;pl.swingT=0}let dx=pl.fx,dy=pl.fy;if(ml>.1){dx=mx/ml;dy=my/ml}S.actions.dodge++;pl.roll=.3;pl.rollT=0;pl.rvx=dx*215;pl.rvy=dy*215;pl.s=dx>=0?1:-1;pl.inv=Math.max(pl.inv,.34);pl.rollCd=.28;pl.swingT=0;play('roll',0);return}
+  if(rollPress){if(pl.sta+1e-8>=SL.roll*(1-.12*sk('taniec'))&&!(pl.broken>0)&&!(pl.atk&&pl.atk.stage!=='rec')&&pl.rollCd<=0){{pl.sta=Math.max(0,pl.sta-SL.roll*(1-.12*sk('taniec')));pl.dance=sk('taniec')?.8:0;if(sk('fireblade')>=3){S.swordTrails.push({x:pl.x,y:pl.y,t:1.2,hit:new Set()});}pl.staDelay=SL.delay;pl.atk=null;pl.block=false;pl.swingT=0}let dx=pl.fx,dy=pl.fy;if(ml>.1){dx=mx/ml;dy=my/ml}S.actions.dodge++;pl.roll=.3;pl.rollT=0;pl.rvx=dx*215;pl.rvy=dy*215;pl.s=dx>=0?1:-1;pl.inv=Math.max(pl.inv,.34);pl.rollCd=.28;pl.swingT=0;play('roll',0);return}
     if(pl.atk?.kind!=='whirl'&&pl.sta<SL.roll*(1-.12*sk('taniec'))){S.stamFlash=.45;play('empty',.25)}}
   const slow=SLOWT[tileAt(Math.floor(pl.x/TS),Math.floor(pl.y/TS))]||1;
   const hold=(S.snare>0?.3:1)*(S.slowT>0?.6:1)*(pl.atk?.kind==='whirl'&&pl.atk.stage==='act'?WHIRL.speed:pl.atk||pl.broken>0?0:pl.block?.45:pl.charging?.5:1);
@@ -3548,7 +3544,7 @@ function manPage(id){
     for(const b of ['def','off','wav'])h+=`<h2 class="mh br-${b}">${br[b]}</h2><div class="mset"><b>Bonus zestawu (${SET_N}):</b> ${BR[b].set}</div>`+Object.keys(STY).filter(k=>STY[k].br===b).map(k=>`<div class="mrow">${mI(k)}<div class="mn"><b>${STY[k].name}</b><small>maks. ${STY[k].max}</small></div><span>${STY[k].d}</span></div>`).join('');
     h+='<h2 class="mh">Pakty (przewaga z ceną)</h2>'+mP('Od 4. poziomu nocy mogą trafić się <b>pakty</b>: duży bonus okupiony wadą. Możesz mieć najwyżej dwa.')+Object.keys(STY).filter(k=>STY[k].pact).map(k=>`<div class="mrow">${mI(k)}<b>${STY[k].name}</b><span>${STY[k].d}</span></div>`).join('');
     h+='<h2 class="mh">Zaklęcia ostrza</h2>'+mP('Pierwsze zaklęcie jest <b>główne</b> (do 10 poziomów). Drugie, zgodne zaklęcie jest <b>wspierające</b> (do 3 poziomów, słabszy status, bez finiszera i bez mnożnika miecza). Łącznie najwyżej dwa zaklęcia ostrza. <b>Ogień i lód wykluczają się</b> w każdej kolejności, ale tylko w zaklęciach ostrza: umiejętności aktywne (Odłamek szronu, Kula ognia) możesz łączyć dowolnie. Trzy znaki głównego ostrza wykańczają zwykłego wroga.')+['venom','fireblade','iceblade','bloodblade'].map(k=>mSkill(k)).join('');
-    h+='<h2 class="mh">Techniki miecza i magia wspierająca</h2>'+mP('Trzy sloty aktywne: Q / E / F, na padzie LT + X / Y / B, na dotyku trzy ikony. Rozmowa: Enter lub Y. Wyposażenie zmieniasz w pauzie poza walką. Magiczne skille ze slotów płacą <b>maną</b> (niebieski pasek pod staminą). <b>Wir Ostrza</b> płaci 40 staminy: obrót 1,2 s, ruch 60%, bez bloku, parowania i uniku podczas obrotu; nietykalność tylko przez pierwsze 0,25 s i powrót 0,25 s bez ataku. Odłamek szronu: 18 many, 8 s. Kula ognia: 24 many, 9 s, wybucha (100% w cel, 50% obok). Kaskada cięć: 20 many, seria 3 cięć. Kolce i Odrzut Mocy: 24 many. Obrońca: 34 many, 30 s; golem ściąga na siebie wrogów. Siła i Inteligencja wzmacniają wszystkie umiejętności aktywne. Mana odnawia się powoli sama, a każde trafienie mieczem oddaje 1 punkt. Odnowienia nie resetują się przy przekładaniu skilli. Pozostałe techniki miecza nie zajmują slotów. Ciężki cios naładujesz przytrzymując J, lewy przycisk myszy, X lub RT; na ekranie dotykowym przytrzymaj Szybki atak.')+NEW_SWORD_SK.map(k=>mSkill(k)).join('');return h}
+    h+='<h2 class="mh">Techniki miecza i magia wspierająca</h2>'+mP('Trzy sloty aktywne: Q / E / F, na padzie LT + X / Y / B, na dotyku trzy ikony. Rozmowa: Enter lub Y. Wyposażenie zmieniasz w pauzie poza walką. Magiczne skille ze slotów płacą <b>maną</b> (niebieski pasek pod staminą). <b>Wir Ostrza</b> płaci 35 staminy: obrót 1,2 s, ruch 60%, bez bloku, parowania i uniku podczas obrotu; nietykalność tylko przez pierwsze 0,25 s i powrót 0,25 s bez ataku. Odłamek szronu: 18 many, 8 s. Kula ognia: 24 many, 9 s, wybucha (100% w cel, 50% obok). Kaskada cięć: 25 many, seria 3 cięć. Kolce i Odrzut Mocy: 24 many. Obrońca: 34 many, 30 s; golem ściąga na siebie wrogów. Siła i Inteligencja wzmacniają wszystkie umiejętności aktywne. Mana odnawia się powoli sama, a każde trafienie mieczem oddaje 1 punkt. Odnowienia nie resetują się przy przekładaniu skilli. Pozostałe techniki miecza nie zajmują slotów. Ciężki cios naładujesz przytrzymując J, lewy przycisk myszy, X lub RT; na ekranie dotykowym przytrzymaj Szybki atak.')+NEW_SWORD_SK.map(k=>mSkill(k)).join('');return h}
   if(id==='prog'){return mBox('Poziom postaci','To <b>stały postęp</b>, niezależny od pojedynczej nocy. Po każdej nocy (nawet przegranej) dostajesz doświadczenie postaci. Potrzebne jest <b>'+PNEED(1)+' dla pierwszego poziomu</b>, a każdy kolejny o '+(PNEED(2)-PNEED(1))+' więcej. Maksymalny poziom to <b>'+PMAX+'</b>. Pasek widzisz na ekranie głównym i w „Nim zapadnie noc”.')
    +mBox('Perki: wybierasz do 3',mP('Przed każdą nocą ekran <b>„Nim zapadnie noc”</b> pozwala wybrać do <b>trzech perków</b>. Każdy daje <b>zaletę i wadę</b>, a dodatkowo zwiększa doświadczenie postaci zdobyte w tej nocy. Nowe perki odblokowujesz poziomami postaci. Co wybrałeś, zapamiętuje się na kolejne noce.')
     +'<div class="mtab">'+PERKS.map(p=>`<div class="mrow"><div class="mn"><b>${p.n}</b><small>poziom ${p.lv}</small></div><span><span class="pl">${p.pl}</span> · <span class="mi">${perkMinus(p)}</span> · bonus doświadczenia +${Math.round(p.bx*100)}%</span></div>`).join('')+'</div>')
