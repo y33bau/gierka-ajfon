@@ -495,7 +495,7 @@ function planOtherGround(ch){if(W.groundPlan)return W.groundPlan;if(W.seed===und
 
 // Lines form complete, symmetric compositions; their direction comes from neighbours, never RNG.
 function groundPatterns(ch,p){const bits=new Uint8Array(MW*MH),rail=new Uint8Array(MW*MH),point=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH?y*MW+x:-1;
-  const free=i=>i>=0&&!SOLID.has(map[i]),put=(x,y)=>{const i=point(x,y);if(free(i))bits[i]=1};
+  const free=i=>i>=0&&(!SOLID.has(map[i])||map[i]===31),put=(x,y)=>{const i=point(x,y);if(free(i))bits[i]=1};
   const frame=(a,b,c,d)=>{a=Math.round(MP(a));b=Math.round(MP(b));c=Math.round(MP(c));d=Math.round(MP(d));for(let x=a;x<=c;x++){put(x,b);put(x,d)}for(let y=b;y<=d;y++){put(a,y);put(c,y)}};
   if(ch===2){frame(5,10,32,37);for(let x=Math.round(MP(5));x<=Math.round(MP(32));x++)put(x,Math.round(MP(24)));}
   if(ch===3){frame(25,26,38,33);frame(23,7,40,12);for(let y=Math.round(MP(24));y<=Math.round(MP(53));y++)put(Math.round(MP(31.5)),y);for(let y=Math.round(MP(6));y<=Math.round(MP(13));y++)put(Math.round(MP(31.5)),y);}
@@ -504,7 +504,7 @@ function groundPatterns(ch,p){const bits=new Uint8Array(MW*MH),rail=new Uint8Arr
   const col=m=>m===5||m===1||m===4?1:m===10||m===2||m===8?0:m===3?3:m===6?4:m===12?5:m===9?6:2;
   if(ch===2){const mark=(x,y)=>{const i=point(x,y);if(free(i)&&W.region(x,y)==='mine')rail[i]=1};for(let x=Math.round(MP(43));x<=Math.round(MP(59));x++)mark(x,Math.round(MP(48)));for(let y=Math.round(MP(44));y<=Math.round(MP(50));y++)mark(Math.round(MP(50)),y);}
   p.pattern=new Uint8Array(MW*MH);p.patternColumns=new Uint8Array(MW*MH).fill(255);p.lineMasks=new Uint8Array(MW*MH);p.railMasks=new Uint8Array(MW*MH);
-  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const i=point(x,y);if(bits[i]){const m=mask(bits,x,y);p.pattern[i]=1;p.lineMasks[i]=m;p.patternColumns[i]=ch===5?0:col(m);p.rows[i]=1;p.road[i]=Math.max(2,p.road[i])}if(rail[i]){const m=mask(rail,x,y);p.pattern[i]=2;p.railMasks[i]=m;p.patternColumns[i]=col(m);p.rows[i]=7;p.road[i]=2}}
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const i=point(x,y);if(bits[i]){const m=mask(bits,x,y);p.pattern[i]=1;p.lineMasks[i]=m;p.patternColumns[i]=0;p.rows[i]=1;p.road[i]=Math.max(2,p.road[i])}if(rail[i]){const m=mask(rail,x,y);p.pattern[i]=2;p.railMasks[i]=m;p.patternColumns[i]=col(m);p.rows[i]=7;p.road[i]=2}}
   return p;
 }
 
@@ -520,8 +520,8 @@ function planGround(ch){if(ch!==1)return groundPatterns(ch,planOtherGround(ch));
     else if(X>=42&&X<=61&&Y>=14&&Y<=24){rows[i]=6;zone[i]=5}
     else if(edge<8||Math.sin(x*.055)+Math.cos(y*.07)>.3){rows[i]=2;zone[i]=1}
     else{rows[i]=6;zone[i]=2}
-    const vertical=Math.abs(x-MP(31.5))<1.8+.25*Math.sin(y*.12),horizontal=Math.abs(y-MP(28.5))<1.65+.25*Math.sin(x*.1);
-    const plaza=Math.hypot((x-MP(31))/11,(y-MP(28))/9)<1;
+    const vertical=Math.abs(x-MP(31.5))<1.45,horizontal=Math.abs(y-MP(28.5))<1.45;
+    const plaza=Math.abs(x-MP(30))<=4.5&&Math.abs(y-MP(27.5))<=3.5;
     if(!interior(i)&&(vertical||horizontal||plaza)){road[i]=3;rows[i]=4;zone[i]=6;direction[i]=vertical?1:0}
   }
   // All destinations come from existing interactions/doors; BFS finds an approach to the road.
@@ -536,7 +536,7 @@ function planGround(ch){if(ch!==1)return groundPatterns(ch,planOtherGround(ch));
     if(end<0)throw Error('Ground route missing: '+t.name);
     const route=[];for(let i=end;i>=0;i=parent[i])route.push(i);
     for(let n=0;n<route.length;n++){const i=route[n],x=i%MW,y=i/MW|0,next=route[n+1]??i,dir=Math.abs(next-i)===MW?1:0;
-      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(dx*dx+dy*dy>(t.rank===2?1.1:0))continue;const k=at(x+dx,y+dy);if(!free(k))continue;road[k]=Math.max(road[k],t.rank);direction[k]=dir;if(!interior(k)){rows[k]=t.rank===2?4:6;zone[k]=6}}}
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(dx*dx+dy*dy>(t.rank===2?1.1:0))continue;const k=at(x+dx,y+dy);if(!free(k))continue;road[k]=Math.max(road[k],t.rank);direction[k]=dir;if(!interior(k)&&rows[k]!==4){rows[k]=t.rank===2?4:6;zone[k]=6}}}
     paths.push({name:t.name,approach:start,distance:best,tiles:route});
   }
   // Earth separates meadow from ash, house floors and paving. This is a visual transition band.
@@ -555,6 +555,7 @@ function planGround(ch){if(ch!==1)return groundPatterns(ch,planOtherGround(ch));
     for(let y=0;y<=MH-8;y++)for(let x=0;x<=MW-8;x++){const ids=[];for(let dy=0;dy<8;dy++)for(let dx=0;dx<8;dx++){const i=at(x+dx,y+dy);if(free(i)&&!road[i])ids.push(i)}if(new Set(ids.map(i=>rows[i])).size>3)for(const i of ids)if(rows[i]===1)rows[i]=6}
     const seen=new Set();for(let i=0;i<size;i++){if(!free(i)||road[i]||seen.has(i))continue;const q=[i],material=rows[i];seen.add(i);for(let n=0;n<q.length;n++){const j=q[n];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=at(j%MW+dx,(j/MW|0)+dy);if(free(k)&&!road[k]&&rows[k]===material&&!seen.has(k)){seen.add(k);q.push(k)}}}if(q.length<6&&material!==3)for(const k of q){rows[k]=6;if(material===6)road[k]=1}}
   }
+  if(W.crypt){const stairs=W.PROPS.find(p=>p.k==='crypt_stairs'),cx=Math.floor(stairs?stairs.x:W.crypt.x/TS),cy=Math.floor(stairs?stairs.y:W.crypt.y/TS);for(let y=cy-5;y<cy;y++)for(let x=cx-4;x<=cx+4;x++){const i=at(x,y);if(free(i)&&!interior(i)&&rows[i]===4){rows[i]=6;road[i]=0}}for(let y=cy;y<=cy+4;y++)for(let x=cx-3;x<=cx+3;x++){const i=at(x,y);if(free(i)&&!interior(i)){rows[i]=4;road[i]=2;zone[i]=6}}}
   W.groundPlan={rows,road,zone,direction,paths,exceptions:[3],allowed:['1:1','1:6','2:2','2:6','3:3','3:6','3:4','4:4','4:6','6:6']};return W.groundPlan;
 }
 
@@ -562,20 +563,25 @@ function groundHash(x,y){let n=Math.imul(x+31,374761393)^Math.imul(y+73,66826526
 function naturalGround(img,row){const rows={br_ground:[0,1,2,4,6,7],dm_floor:[0,2],zl_ground:[0,2,3,5,7],cz_ground:[0,1,2,3,6],cy_ground:[0,5]};return(rows[img.nbKey]||[]).includes(row)}
 function groundPadded(img){if(!img.nbPadded){const c=canvas(512,512),g=c.getContext('2d');for(let y=0;y<8;y++)for(let x=0;x<8;x++){const X=x*64,Y=y*64;g.drawImage(img,X,Y,64,64,X+4,Y+4,56,56);for(const [sx,sy,sw,sh,dx,dy,dw,dh] of [[0,0,1,64,0,4,4,56],[63,0,1,64,60,4,4,56],[0,0,64,1,4,0,56,4],[0,63,64,1,4,60,56,4],[0,0,1,1,0,0,4,4],[63,0,1,1,60,0,4,4],[0,63,1,1,0,60,4,4],[63,63,1,1,60,60,4,4]])g.drawImage(img,X+sx,Y+sy,sw,sh,X+dx,Y+dy,dw,dh)}img.nbPadded=c}return img.nbPadded}
 function groundCoarse(img){if(!img.nbCoarse){const c=canvas(128,128);c.getContext('2d').drawImage(img,0,0,128,128);img.nbCoarse=c}return img.nbCoarse}
-function groundTile(g,img,col,row,tx,ty){const n=groundHash(tx,ty),plan=W.groundPlan,j=ty*MW+tx;if(plan&&plan.rows[j]!==255){row=plan.rows[j];col=n%100<55?0:1+n%5}const natural=naturalGround(img,row)&&!(plan&&(CH===1&&[3,4].includes(row)||CH===4&&[1,7].includes(row)||CH!==1&&CH!==4)),variant=natural?n&7:0;const shore=col>=4&&((img.nbKey==='br_ground'||img.nbKey==='dm_floor')&&row===5||img.nbKey==='zl_ground'&&row===4||img.nbKey==='cz_ground'&&(row===4||row===5));let flags=natural||shore||img.nbKey==='cz_ground'&&row===7?1:0;
-  if(plan&&plan.rows[j]!==255){flags|=65;if(CH===3&&row===1){const code=(x,y)=>{const k=y*MW+x;return k>=0&&k<map.length&&(map[k]===51||map[k]===31&&W.under[k]===51)};col=code(tx,ty-1)||code(tx,ty+1)?1:0}if(CH===4&&row===1)col=W.region(tx,ty)==='camp'?1:n%100<55?1:2+n%4;if(CH===5&&row===2)col=0;if(CH===5&&row===4)col=0;}
+function groundTile(g,img,col,row,tx,ty){const n=groundHash(tx,ty),plan=W.groundPlan,j=ty*MW+tx;let materialCell=j;
+  // A prop's collision tile has the same floor as its surroundings, not a separate old atlas patch.
+  if(plan&&plan.rows[j]===255&&map[j]===31){let best=Infinity;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const x=tx+dx,y=ty+dy,k=y*MW+x;if(x<0||y<0||x>=MW||y>=MH||plan.rows[k]===255)continue;const score=dx*dx+dy*dy+((map[k]===31?W.under[k]:map[k])===W.under[j]?0:8);if(score<best){best=score;materialCell=k}}}
+  const planned=plan&&plan.rows[materialCell]!==255;
+  if(planned){row=plan.rows[materialCell];col=n%100<55?0:1+n%5}const natural=naturalGround(img,row)&&!(plan&&(CH===1&&[3,4].includes(row)||CH===4&&[1,7].includes(row)||CH!==1&&CH!==4)),variant=natural?n&7:0;const shore=col>=4&&((img.nbKey==='br_ground'||img.nbKey==='dm_floor')&&row===5||img.nbKey==='zl_ground'&&row===4||img.nbKey==='cz_ground'&&(row===4||row===5));let flags=natural||shore||img.nbKey==='cz_ground'&&row===7?1:0;
+  if(planned){flags|=65;if(CH===3&&row===1){const code=(x,y)=>{const k=y*MW+x;return k>=0&&k<map.length&&(map[k]===51||map[k]===31&&W.under[k]===51)};col=code(tx,ty-1)||code(tx,ty+1)?1:0}if(CH===4&&row===1)col=W.region(tx,ty)==='camp'?1:n%100<55?1:2+n%4;if(CH===5&&row===2)col=0;if(CH===5&&row===4)col=0;}
+  if(CH===3&&row===1&&!(plan&&plan.pattern&&plan.pattern[j]===1)){row=0;col=0;flags|=65;}
   if(img.nbKey==='cy_ground'&&row===1)col=[0,1,2,5,6,7][n%6];
   if(img.nbKey==='cy_ground'&&row===3){col=0;const carpet=(x,y)=>{let t=tileAt(x,y);if(t===31)t=W.under[y*MW+x];return t===73};if(!carpet(tx-1,ty))flags|=2;if(!carpet(tx+1,ty))flags|=4;if(!carpet(tx,ty-1))flags|=8;if(!carpet(tx,ty+1))flags|=16;flags|=32}
-  let data=g.canvas.nbGround;if(!data)data=g.canvas.nbGround={image:img,cells:new Uint8Array(MW*MH*4)};const i=(ty*MW+tx)*4;let orientation=variant;if(plan&&plan.patternColumns&&plan.patternColumns[j]!==255){col=plan.patternColumns[j];flags&=~65;orientation=CH===5?plan.lineMasks[j]*8:0;}data.cells.set([col+1,row,orientation,flags],i);
+  let data=g.canvas.nbGround;if(!data)data=g.canvas.nbGround={image:img,cells:new Uint8Array(MW*MH*4)};const i=(ty*MW+tx)*4;let orientation=variant;if(plan&&plan.patternColumns&&plan.patternColumns[j]!==255){col=plan.patternColumns[j];flags&=~65;orientation=plan.pattern[j]===1?plan.lineMasks[j]*8:0;if(plan.pattern[j]===1)row=0;}data.cells.set([col+1,row,orientation,flags],i);
   g.save();g.translate(tx*16+8,ty*16+8);g.rotate((variant&3)*Math.PI/2);if(variant&4)g.scale(-1,1);g.drawImage(groundCoarse(img),col*16,row*16,16,16,-8,-8,16,16);g.restore();
 }
 // Keep one small atlas and tile index map instead of allocating a 6656 x 5824 texture per chapter.
 // CC0 floors: full-resolution repeating textures; IDs change appearance only.
-const CC0_FLOORS={1:{names:['dirt2','cracks','charcoal'],tint:[1,.97,.92]},2:{names:['ground1','blackrock','charcoal'],tint:[.84,.88,.96]},3:{names:['zl_place','zl_street'],tint:[1,.96,.88]},4:{names:['mud','dirt3','leaves','darkrock'],tint:[.9,.96,.88]},5:{names:['ground2','blackrock','ground1'],tint:[.68,.69,.74]},9:{names:['ground2','ground1'],tint:[.73,.75,.81]}};
+const CC0_FLOORS={1:{names:['dirt2','cracks','charcoal','ground1'],tint:[1,.97,.92]},2:{names:['ground1','blackrock','charcoal'],tint:[.84,.88,.96]},3:{names:['zl_place','zl_street'],tint:[1,.96,.88]},4:{names:['mud','dirt3','leaves','darkrock'],tint:[.9,.96,.88]},5:{names:['ground2','blackrock','ground1'],tint:[.68,.69,.74]},9:{names:['ground2','ground1'],tint:[.73,.75,.81]}};
 function cc0FloorCells(info,ch){const cells=info.cells.slice(),plan=W.groundPlan;if(!plan)return cells;
  const burns=W.PROPS.filter(p=>p.fire||/debris_fire|burnt_hay|furnace|brazier/.test(p.k||''));
  for(let i=0;i<MW*MH;i++){const a=i*4,row=cells[a+1],flags=cells[a+3],x=i%MW,y=i/MW|0;if(!cells[a]||!(flags&64))continue;let id=-1;
-  if(ch===1&&![3,4,5].includes(row)){id=row===1?1:0;if(burns.some(p=>Math.hypot(p.x-x-.5,p.y-y-.5)<2.1))id=2;}
+  if(ch===1&&![3,5].includes(row)){id=row===4?3:row===1?1:0;if(row!==4&&burns.some(p=>Math.hypot(p.x-x-.5,p.y-y-.5)<2.1))id=2;}
   if(ch===2&&![1,5,7].includes(row)){id=row===2&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>SOLID.has(tileAt(x+dx,y+dy)))?1:0;if(burns.some(p=>Math.hypot(p.x-x-.5,p.y-y-.5)<2))id=2;}
   if(ch===3&&![1,4].includes(row))id=plan.road[i]||row===3?1:0;
   if(ch===4&&![4,5,7].includes(row)){const r=W.region(x,y);id=r==='camp'?0:row===1?1:(r==='hill'||r==='stones')?3:r==='forest'?2:0;}
@@ -603,7 +609,7 @@ function groundMaterial(m){const info=m.map&&m.map.userData&&m.map.userData.grou
   const groundGrad=renderer.capabilities.isWebGL2||renderer.extensions.has('EXT_shader_texture_lod');
   m.extensions={...(m.extensions||{}),derivatives:true,shaderTextureLOD:groundGrad};
   if(!groundGrad)for(const tex of [m.groundAtlas,m.groundCoarse]){tex.generateMipmaps=false;tex.minFilter=THREE.LinearFilter;tex.anisotropy=1;tex.needsUpdate=true;}m.groundLayout=new THREE.DataTexture(cc0Cells,MW,MH,THREE.RGBAFormat);m.groundLayout.magFilter=m.groundLayout.minFilter=THREE.NearestFilter;m.groundLayout.needsUpdate=true;
-  m.groundTones=Array.from({length:8},(_,row)=>{const c=groundCoarse(info.image),d=c.getContext('2d').getImageData(0,row*16,128,16).data,v=new THREE.Vector3();for(let i=0;i<d.length;i+=4){v.x+=d[i];v.y+=d[i+1];v.z+=d[i+2]}return v.multiplyScalar(1/(2048*255))});m.groundLite={value:coarse||SETT.quality==='low'?1:0};m.onBeforeCompile=sh=>{for(let i=0;i<cc0Count;i++)sh.uniforms['nbCC'+i]={value:m['cc0Texture'+i]};sh.uniforms.nbCCTint={value:new THREE.Vector3(...(cc0?cc0.tint:[1,1,1]))};sh.uniforms.nbArchitecture={value:groundChapter===5?1:0};sh.uniforms.nbLite=m.groundLite;sh.uniforms.nbTones={value:m.groundTones};sh.uniforms.nbAtlas={value:m.groundAtlas};sh.uniforms.nbCoarse={value:m.groundCoarse};sh.uniforms.nbLayout={value:m.groundLayout};sh.uniforms.nbGrid={value:new THREE.Vector2(MW,MH)};
+  m.groundTones=Array.from({length:8},(_,row)=>{const c=groundCoarse(info.image),d=c.getContext('2d').getImageData(0,row*16,128,16).data,v=new THREE.Vector3();for(let i=0;i<d.length;i+=4){v.x+=d[i];v.y+=d[i+1];v.z+=d[i+2]}return v.multiplyScalar(1/(2048*255))});m.groundLite={value:coarse||SETT.quality==='low'?1:0};m.onBeforeCompile=sh=>{for(let i=0;i<cc0Count;i++)sh.uniforms['nbCC'+i]={value:m['cc0Texture'+i]};sh.uniforms.nbCCTint={value:new THREE.Vector3(...(cc0?cc0.tint:[1,1,1]))};sh.uniforms.nbArchitecture={value:[2,3,5].includes(groundChapter)?1:0};sh.uniforms.nbLite=m.groundLite;sh.uniforms.nbTones={value:m.groundTones};sh.uniforms.nbAtlas={value:m.groundAtlas};sh.uniforms.nbCoarse={value:m.groundCoarse};sh.uniforms.nbLayout={value:m.groundLayout};sh.uniforms.nbGrid={value:new THREE.Vector2(MW,MH)};
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
 ${groundGrad?'#define NB_STABLE_GRAD 1':''}
 uniform vec3 nbTones[8];uniform float nbLite;uniform float nbArchitecture;
@@ -636,7 +642,10 @@ detail=nbNeighbor(detail,nbTile,nbLocal,vec2(-1.,0.),nbLocal.x,cell);detail=nbNe
 if(nbLite>=.5&&cell.b>=128.){vec2 ed=min(nbLocal,1.-nbLocal);vec2 dir=ed.x<ed.y?vec2(nbLocal.x<.5?-1.:1.,0.):vec2(0.,nbLocal.y<.5?-1.:1.);detail=nbNeighbor(detail,nbTile,nbLocal,dir,min(ed.x,ed.y),cell);}
 vec3 ratio=cell.b>=128.?clamp(sampledDiffuseColor.rgb*2.,vec3(.05),vec3(1.3)):clamp(sampledDiffuseColor.rgb/max(coarse,vec3(.025)),vec3(.7),vec3(1.15));vec3 result=detail*ratio;float decal=smoothstep(.18,.5,length(sampledDiffuseColor.rgb-coarse));if(cell.b<128.)result=mix(result,sampledDiffuseColor.rgb,decal);
 if(nbFlag(cell.a,32.)>.5){float edge=1.;if(nbFlag(cell.a,2.)>.5)edge=min(edge,nbLocal.x);if(nbFlag(cell.a,4.)>.5)edge=min(edge,1.-nbLocal.x);if(nbFlag(cell.a,8.)>.5)edge=min(edge,nbLocal.y);if(nbFlag(cell.a,16.)>.5)edge=min(edge,1.-nbLocal.y);float trim=smoothstep(.02,.035,edge)*(1.-smoothstep(.075,.09,edge));result=mix(result,vec3(.56,.35,.105)*(.86+.14*sin((nbPos.x+nbPos.y)*80.)),trim);}
-if(nbArchitecture>.5&&cell.b>=8.&&cell.b<128.){float mask=floor(cell.b/8.);vec4 v=vec4(4.,1.,0.,0.),h=vec4(5.,1.,0.,0.);bool vertical=(nbFlag(mask,1.)>.5&&nbLocal.y<=.5)||(nbFlag(mask,4.)>.5&&nbLocal.y>=.5),horizontal=(nbFlag(mask,8.)>.5&&nbLocal.x<=.5)||(nbFlag(mask,2.)>.5&&nbLocal.x>=.5);if(vertical)result=mix(result,nbRead(nbAtlas,v,nbLocal)*ratio,1.-smoothstep(.07,.12,abs(nbLocal.x-.5)));if(horizontal)result=mix(result,nbRead(nbAtlas,h,nbLocal)*ratio,1.-smoothstep(.07,.12,abs(nbLocal.y-.5)));}
+if(nbArchitecture>.5&&cell.b>=8.&&cell.b<128.){float mask=floor(cell.b/8.);vec2 q=nbLocal-.5;float d=2.;
+if(nbFlag(mask,1.)>.5)d=min(d,length(vec2(q.x,max(q.y,0.))));if(nbFlag(mask,4.)>.5)d=min(d,length(vec2(q.x,min(q.y,0.))));
+if(nbFlag(mask,8.)>.5)d=min(d,length(vec2(max(q.x,0.),q.y)));if(nbFlag(mask,2.)>.5)d=min(d,length(vec2(min(q.x,0.),q.y)));
+vec3 base=nbCCRead(0.,nbWorld)*nbCCTint*ratio;float band=1.-smoothstep(.19,.23,d);result=mix(base,base*.94,band);float line=1.-smoothstep(.018,.032,abs(d-.14));result=mix(result,vec3(.65,.45,.21)*(.92+.08*sin((nbWorld.x+nbWorld.y)*30.)),line);}
 sampledDiffuseColor.rgb=result;}
 sampledDiffuseColor=mapTexelToLinear(sampledDiffuseColor);diffuseColor*=sampledDiffuseColor;
 #endif`)};m.customProgramCacheKey=()=> 'nightbrand-ground-cc0-v2-'+groundChapter+'-'+compactSamplers;return m}
@@ -671,11 +680,11 @@ const tcut=(img,c,row)=>{const size=16*(img.nbDensity||1),cv=canvas(size,size);a
 const stackTex=(img,rows)=>{const size=16*(img.nbDensity||1),c=canvas(size,size*rows.length),g=c.getContext('2d');rows.forEach(([col,row],i)=>atlasDraw(g,img,col*16,row*16,16,16,0,i*size,size,size));return surfaceTex(c,true)};
 function mkProp(frames,x,y,rc){const geo=rc[3]===64?geoT:rc[2]===64?geo64w:geo32;const m=new THREE.Mesh(geo,frames[0].n);m.customDistanceMaterial=frames[0].d;m.userData.propAsset=true;m.castShadow=true;m.position.set(x,0,y);m.scale.set(1,SQ,1);ROOT.add(m);return m}
 // Shared sheets keep identical proportions in the village, city, forge and crypt.
-const HUMAN_PROP_SCALE={dead_tree:.9,impaled_head:.65,grave_cross:.6,tombstone:.6,well:.65,shrine:.75,gallows:.95,
-  debris_fire:.55,order_bonfire:.75,wheel:.48,barrel:.48,marga_cart:.8,crow_post:.75,covered_corpses:.6,order_banner:.8,burnt_hay:.5,dead_horse:.8,
-  king_statue:.8,anvil:.48,mine_cart:.65,pickaxe_rack:.6,healing_shrine:.75,chains:.6,fallen_pillar:.7,dwarf_bones:.35,bellows:.55,furnace:.85,sarcophagus:.7,rune_lantern:.65,black_powder:.48,clan_banner:.8,
-  queen_fountain:.8,street_lantern:.85,noble_door:.9,saint_king:.8,cathedral_gate:1,beggar_bodies:.55,plague_cart:.75,noble_carriage:.85,gibbet:.9,pyre:.8,rot_bloom:.45,royal_banner:.8,offering_bowl:.3,broken_bell:.55,doorway_bones:.35,
-  cz_fire:.65,cz_idol:.85,cz_skullpole:.7,cz_shrine:.75,cz_wagon:.8,cz_cauldron:.45,cz_firewood:.4,cz_gallows:.95,cz_sacpole:.75,cz_beehive:.5,cz_wheel:.65,cz_wisp:.45,cz_crow:.35,cz_walk:.85,cz_tent:.9,cz_pelts:.45,cz_bones:.3};
+const HUMAN_PROP_SCALE={dead_tree:1.02,impaled_head:.65,grave_cross:.7,tombstone:.7,well:.65,shrine:.75,gallows:.95,
+  debris_fire:.55,order_bonfire:.75,wheel:.48,barrel:.48,marga_cart:.9,crow_post:.75,covered_corpses:.6,order_banner:.8,burnt_hay:.5,dead_horse:.8,
+  king_statue:.88,anvil:.48,mine_cart:.72,pickaxe_rack:.6,healing_shrine:.75,chains:.6,fallen_pillar:.7,dwarf_bones:.35,bellows:.55,furnace:.85,sarcophagus:.7,rune_lantern:.65,black_powder:.48,clan_banner:.8,
+  queen_fountain:.76,street_lantern:.85,noble_door:.9,saint_king:.74,cathedral_gate:1,beggar_bodies:.55,plague_cart:.75,noble_carriage:.85,gibbet:.9,pyre:.8,rot_bloom:.45,royal_banner:.8,offering_bowl:.3,broken_bell:.55,doorway_bones:.35,
+  cz_fire:.65,cz_idol:.85,cz_skullpole:.7,cz_shrine:.75,cz_wagon:.9,cz_cauldron:.45,cz_firewood:.4,cz_gallows:.95,cz_sacpole:.75,cz_beehive:.5,cz_wheel:.65,cz_wisp:.45,cz_crow:.35,cz_walk:.85,cz_tent:1.02,cz_pelts:.45,cz_bones:.3};
 function fitWorldProps(w,ch){if(ch===5)return;const assigned=new Set();
   for(const p of w.PROPS){const s=HUMAN_PROP_SCALE[p.k];if(s===undefined)continue;const o=p.obj||w.propObjs.find(o=>Math.abs(o.mesh.position.x-p.x)<.001&&Math.abs(o.mesh.position.z-p.y)<.001);if(!o)continue;
     o.mesh.scale.set(s,s*SQ,s);p.obj=o;assigned.add(o);if(['wheel','burnt_hay','covered_corpses','dwarf_bones','beggar_bodies','doorway_bones','cz_pelts','cz_bones'].includes(p.k))o.mesh.castShadow=false}
@@ -701,7 +710,49 @@ function settleProp(m){const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox
 function settleWorldProps(w){const assets=new Set(w.propObjs.map(o=>o.mesh)),suspended=new Set();for(const p of w.PROPS){if(p.obj)assets.add(p.obj.mesh);if(/wisp|crow|raven|torch|chains|banner|sacpole/.test(p.k)||p.anim==='wisp'){const o=p.obj||w.propObjs.find(o=>Math.abs(o.mesh.position.x-p.x)<.001&&Math.abs(o.mesh.position.z-p.y)<.001);if(o)suspended.add(o.mesh)}}
   w.group.traverse(m=>{if((!assets.has(m)&&!m.userData.propAsset)||!m.isMesh||m.isInstancedMesh||suspended.has(m)||!m.geometry||m.geometry.type!=='PlaneGeometry'||!m.material||Array.isArray(m.material)||!m.material.map||m.material.groundAtlas||Math.abs(m.rotation.x)>.2||Math.abs(m.rotation.z)>.2)return;settleProp(m)});
 }
-function finishWorldArt(w){preparePowerFires(w);settleWorldProps(w);const flat=new Set(['dwarf_bones','covered_corpses','beggar_bodies','doorway_bones','wheel','burnt_hay','cz_bones','cz_pelts','cz_walk','cz_wisp','cz_crow','mushrooms','ferns','brambles','reeds','scroll','book','pages','keys','seal','purse','shackles','skull']);
+// Presentation only: deterministic dressing of non-blocking, non-interactive debris.
+function composeWorldProps(w){
+ const movable=new Set(['dwarf_bones','doorway_bones','cz_bones','cz_pelts','burnt_hay','wheel']);
+ const anchors=w.PROPS.filter(p=>/sarcophagus|cart|wagon|tent|barrel|fallen_pillar|bookcase|desk/.test(p.k)&&!p.fire&&p.shrine===undefined);
+ const occupied=w.PROPS.map(p=>({x:p.x,y:p.y}));
+ // A few small companions stay inside existing blocked trunk cells: no new obstacles or routes.
+ if(w.ch===1){let added=0;for(const p of w.PROPS){if(p.k!=='dead_tree'||!p.obj||added>=6||groundHash(Math.floor(p.x),Math.floor(p.y))%5!==0)continue;const x=p.x+.27,y=p.y-.3,i=Math.floor(y)*MW+Math.floor(x);if(tileAt(Math.floor(x),Math.floor(y))!==31||w.clearways?.has(i))continue;const m=p.obj.mesh.clone();m.scale.multiplyScalar(.62);m.position.x=x;m.position.z=y;m.castShadow=false;m.userData={propAsset:true,artOnly:true};w.group.add(m);added++}}
+
+ for(const p of w.PROPS){const m=p.obj?.mesh||w.propObjs.find(o=>Math.abs(o.mesh.position.x-p.x)<.001&&Math.abs(o.mesh.position.z-p.y)<.001)?.mesh;
+  if(!m||!movable.has(p.k)||p.fire||p.anim||p.shrine!==undefined||tileAt(Math.floor(p.x),Math.floor(p.y-.2))===31)continue;
+  const anchor=anchors.filter(a=>a!==p&&Math.hypot(a.x-p.x,a.y-p.y)<5).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0];if(!anchor)continue;
+  const offsets=[[-1.2,.2],[1.2,.2],[-.9,1.1],[.9,1.1]];for(const [dx,dy]of offsets){const x=anchor.x+dx,y=anchor.y+dy,ix=Math.floor(x),iy=Math.floor(y),i=iy*MW+ix;
+   if(ix<1||iy<1||ix>=MW-1||iy>=MH-1||SOLID.has(tileAt(ix,iy))||VOID.has(tileAt(ix,iy))||w.clearways?.has(i)||w.groundPlan?.road[i]||occupied.some(a=>Math.hypot(a.x-x,a.y-y)<.75)||w.npcs.some(n=>Math.hypot(n.x/TS-x,n.y/TS-y)<2.5)||w.shrines.some(n=>Math.hypot(n.x/TS-x,n.y/TS-y)<2.5))continue;
+   m.position.x=x;m.position.z=y;m.userData.artOffset={x:x-p.x,y:y-p.y};occupied.push({x,y});break;
+  }
+ }
+}
+// Authored visual dressing uses existing HD atlases; gameplay anchors and grids remain untouched.
+function dressSettlementsHD(w){
+ if(w.ch===1){
+  const specs={birch:[192,0,64,64],spruce:[0,0,64,64],dead_oak:[128,0,64,64],ferns:[64,320,64,64],brambles:[64,256,64,64],mossy_boulder:[0,192,64,64]};const frames={};
+  for(const [k,r]of Object.entries(specs)){frames[k]=procFrame(IMGS.cz_trees,...r,'prop');cutCircle(frames[k].n)}
+  // Replace selected existing trunks, preserving their blocking position and ground contact.
+  const treeGeo=new THREE.PlaneGeometry(4,4).translate(0,1.875,0);
+  for(const p of w.PROPS){if(p.k!=='dead_tree'||!p.obj)continue;const h=groundHash(Math.floor(p.x),Math.floor(p.y)),k=['dead_oak','birch','spruce'][h%3],m=p.obj.mesh;m.geometry=treeGeo;m.material=frames[k].n;m.customDistanceMaterial=frames[k].d;m.scale.set(.82,.82*SQ,.82);p.obj.frames=[frames[k]];m.castShadow=true;}
+  // Low garden/ruin clusters leave the plaza, doors and interaction approaches clear.
+  const sites=[[25,23],[35,23],[25,32],[37,32],[43,18],[58,19],[45,24],[57,24],[18,28],[42,34],[8,34],[53,39]];
+  const geo=new THREE.PlaneGeometry(4,4).translate(0,1.875,0);const used=[];
+  for(let n=0;n<sites.length;n++){const [gx,gy]=sites[n];for(let j=0;j<3;j++){const x=MP(gx)+[0,.75,-.65][j],y=MP(gy)+[0,.45,.6][j],ix=Math.floor(x),iy=Math.floor(y),i=iy*MW+ix;
+   if(SOLID.has(tileAt(ix,iy))||VOID.has(tileAt(ix,iy))||w.clearways?.has(i)||w.groundPlan.road[i]||w.npcs.some(a=>Math.hypot(a.x/TS-x,a.y/TS-y)<3)||w.PROPS.some(a=>Math.hypot(a.x-x,a.y-y)<1)||used.some(a=>Math.hypot(a.x-x,a.y-y)<.6))continue;
+   const k=j===0?'brambles':'ferns',fr=frames[k],m=new THREE.Mesh(geo,fr.n),z=j===0?.24:.18;m.position.set(x,0,y);m.scale.set(z,z*SQ,z);m.userData.propAsset=true;m.castShadow=false;w.group.add(m);used.push({x,y});
+  }}
+ }
+ if(w.ch===2){
+  const fr=[0,1,2,3].map(i=>procFrame(IMGS.br_props,...[[64,64],[96,64],[0,96],[32,96]][i],32,32,'prop'));
+  const sites=[[46,13],[53,16],[47,35]],geo=new THREE.PlaneGeometry(2,2).translate(0,.875,0);
+  for(const [gx,gy]of sites)for(const [dx,dy,z]of [[0,0,.65],[1.1,.45,.43],[-.9,.65,.36]]){const x=MP(gx)+dx,y=MP(gy)+dy,ix=Math.floor(x),iy=Math.floor(y),i=iy*MW+ix;
+   if(SOLID.has(tileAt(ix,iy))||VOID.has(tileAt(ix,iy))||w.clearways?.has(i)||w.groundPlan.road[i]||w.PROPS.some(p=>Math.hypot(p.x-x,p.y-y)<1)||w.npcs.some(n=>Math.hypot(n.x/TS-x,n.y/TS-y)<3))continue;
+   const m=new THREE.Mesh(geo,fr[0].n);m.position.set(x,0,y);m.scale.set(z,z*SQ,z);m.userData.propAsset=true;m.castShadow=false;w.group.add(m);w.propObjs.push({mesh:m,frames:fr,fps:6,ph:groundHash(ix,iy)%10,kind:'static',artOnly:true});
+  }
+ }
+}
+function finishWorldArt(w){preparePowerFires(w);composeWorldProps(w);dressSettlementsHD(w);settleWorldProps(w);const flat=new Set(['dwarf_bones','covered_corpses','beggar_bodies','doorway_bones','wheel','burnt_hay','cz_bones','cz_pelts','cz_walk','cz_wisp','cz_crow','mushrooms','ferns','brambles','reeds','scroll','book','pages','keys','seal','purse','shackles','skull']);
   const props=w.PROPS.filter(p=>!flat.has(p.k)&&!VOID.has(tileAt(Math.floor(p.x),Math.floor(p.y-.2))));
   w.groundShadows=instanced(groundFxGeo,groundShadowMat,props,p=>{const m=p.obj&&p.obj.mesh,s=p.k==='sacred_oak'?2.2:p.tree?.8:m?Math.min(2,Math.max(.3,m.geometry.parameters.width*Math.abs(m.scale.x)*.5)):.65;return M4.compose(V.set(p.x,.024,p.y-.1),Q.identity(),SC.set(s,1,s*.5))},false,false);
   const lights=w.LSRC.filter(l=>['fire','shrine','rune','npc'].includes(l.kind)&&l.base>0&&[-1,0,1].every(dy=>[-1,0,1].every(dx=>!VOID.has(tileAt(Math.floor(l.x)+dx,Math.floor(l.z)+dy))))).slice(0,32);
@@ -823,7 +874,7 @@ function buildBrzeznica(I){
   const tile=(c,row,tx,ty)=>groundTile(fg,F,c,row,tx,ty);
   const ROW={40:0,41:1,42:2,43:3,44:4,46:6,47:7,48:3,21:2};
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){let t=tileAt(tx,ty);if(t===31)t=W.under[ty*MW+tx]||42;if(t===45)continue;
-    tile((r()*8)|0,ROW[t]??2,tx,ty);if(t===21){fg.fillStyle='rgba(3,3,6,.6)';fg.fillRect(tx*16,ty*16,16,16)}if(t===47){fg.fillStyle='rgba(18,6,8,.45)';fg.fillRect(tx*16,ty*16,16,16)}}
+    tile((r()*8)|0,ROW[t]??2,tx,ty);if(t===21){fg.fillStyle='rgba(3,3,6,.6)';fg.fillRect(tx*16,ty*16,16,16)}}
   // Natural boundaries blend continuously in the atlas material.
   floorAO(fg,new Set([31]));
   // Low-density story marks, with a soft circular mask instead of rectangular blood tiles.
@@ -990,8 +1041,10 @@ function buildCzarnobor(I){planGround(4);
   const geos={},G2=(w,h)=>{const k=w+'x'+h;if(!geos[k]){const g=new THREE.PlaneGeometry(w/16,h/16).translate(0,h/32-2/16,0),n=g.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,.8,.6);geos[k]=g}return geos[k]};
   const FR={};for(const k in OBJ){const o=OBJ[k];FR[k]=procFrame(T,o[0],o[1],o[2],o[3],'prop');cutCircle(FR[k].n);if(/spruce|pine|birch|oak|hanging_tree/.test(k))foliageWind(FR[k])}
   const byK={};for(const p of PROPS)if(OBJ[p.k])(byK[p.k]=byK[p.k]||[]).push(p);
+  let saplings=0;for(const p of PROPS){if(!p.tree||!['spruce','birch'].includes(p.k)||saplings>=8||groundHash(Math.floor(p.x),Math.floor(p.y))%7!==0)continue;const x=p.x+.26,y=p.y-.3,i=Math.floor(y)*MW+Math.floor(x);if(tileAt(Math.floor(x),Math.floor(y))!==31||W.clearways.has(i))continue;(byK[p.k]||(byK[p.k]=[])).push({...p,x,y,artSmall:true});saplings++}
+
   for(const k in byK){const o=OBJ[k],s=o[4],low=k==='ferns'||k==='reeds'||k==='mushrooms'||k==='brambles';
-    const im=instanced(G2(o[2],o[3]),FR[k].n,byK[k],p=>M4.compose(V.set(p.x,0,p.y),Q.identity(),SC.set(p.flip?-s:s,s*SQ,s)),!low,false);im.customDistanceMaterial=FR[k].d;im.frustumCulled=false}
+    const im=instanced(G2(o[2],o[3]),FR[k].n,byK[k],p=>M4.compose(V.set(p.x,0,p.y),Q.identity(),SC.set((p.flip?-1:1)*s*(p.artSmall?.62:1)*(p.tree?(.94+.06*Math.sin(p.x*.71+p.y*.39)):1),s*SQ*(p.artSmall?.62:1)*(k==='tall_pine'?.85:p.tree?(.94+.06*Math.sin(p.x*.71+p.y*.39)):1),s)),!low,false);im.customDistanceMaterial=FR[k].d;im.frustumCulled=false}
   // standing stones are separate meshes, they light up one by one
   for(const p of PROPS)if(p.stone!==undefined){const s=OBJ.standing_stone_dark[4],m=new THREE.Mesh(G2(64,64),FR.standing_stone_dark.n);m.customDistanceMaterial=FR.standing_stone_dark.d;m.castShadow=true;m.position.set(p.x,0,p.y);m.scale.set(s,s*SQ,s);ROOT.add(m);
     propObjs.push({mesh:m,frames:[FR.standing_stone_dark,FR.standing_stone_lit],fps:0,ph:0,kind:'stone',si:p.stone})}
@@ -1057,7 +1110,7 @@ function buildCytadela(I){planGround(5);
     const putObj=(k,x,y,flip)=>{const o=OBJ[k],s=o[4],m=new THREE.Mesh(G2(o[2],o[3]),FR[k].n);m.customDistanceMaterial=FR[k].d;m.userData.propAsset=true;m.castShadow=true;m.position.set(x,0,y);m.scale.set(flip?-s:s,s*SQ,s);ROOT.add(m);return m};
     pillars.forEach(([x,y],i)=>putObj((x*3+y)%2?'pillar_a':'pillar_b',x+.5,y+.92,false));
     for(const [x,y] of braziers){const fr=[FR.brazier_0,FR.brazier_1],m=putObj('brazier_0',x+.5,y+.92,false);propObjs.push({mesh:m,frames:fr,fps:5,ph:Math.random()*3})}
-    for(const p of PROPS)if(OBJ[p.k]){const m=putObj(p.k,p.x,p.y,false);p.obj={mesh:m}}
+    for(const p of PROPS)if(OBJ[p.k]){const artKey=p.k==='bench_a'?'bench_b':p.k;const m=putObj(artKey,p.x,p.y,false);p.obj={mesh:m}}
   }
   // K4 small props, 32 px cells; the healing shrine still comes from the Lower City sheet
   const RK={torch_0:[0,0],torch_1:[32,0],torch_2:[64,0],torch_3:[96,0],scroll:[0,32],book:[32,32],inkwell:[64,32],seal:[96,32],chains_0:[0,64],chains_1:[32,64],shackles:[64,64],skull:[96,64],

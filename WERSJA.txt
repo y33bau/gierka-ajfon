@@ -1,3 +1,9 @@
+FENIX nightbrand-codex-20261028-156 — spójne place/drogi, brak brązowych łatek, bezstratne HD obiektów i NPC.
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70.
+
+FENIX nightbrand-codex-20261028-153 — proporcje i porządek dekoracji; ciągłe podłoże pod obiektami.
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70.
+
 FENIX nightbrand-codex-20261028-150 — posadzki CC0 I–V i krypty; pełne 512/1024 px, bezstratny WebP.
 SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70.
 
