@@ -1,3 +1,15 @@
+FENIX nightbrand-codex-20261028-136 — oba zamachy -10% względem cache135; krycie 72%.
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70 (loader bez zmian).
+
+FENIX nightbrand-codex-20261028-135 — 29.10.2026: zamach lekki +30%, ciężki +35%, krycie smug 72%.
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70 (loader bez zmian).
+
+Nightbrand — FENIX
+Cache: nightbrand-codex-20261028-134
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70
+29.10.2026 — efekty trafień, bloku/parowania i smugi głównego żywiołu; wspólna skala zamachu. Bez zmian mechaniki.
+
+--- Historia ---
 29.10.2026 — FENIX: kolejne +20% napisu/paska poziomu i Przebiegu gry w menu. nightbrand-codex-20261028-132; SHA-256 index.html 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70. Lokalnie, bez publikacji.
 
 29.10.2026 — FENIX: napis i pasek poziomu w menu +14%; nieco większy Przebieg gry, zachowana wspólna oś. nightbrand-codex-20261028-130; SHA-256 index.html 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70. Lokalnie, bez publikacji.

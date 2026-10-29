@@ -1699,7 +1699,8 @@ function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc
     if(!e.dead){const st=a.kind==='h'?P.stun:P.stun[a.combo];if(big){breakPoise(e,a.kind==='h'?45:a.combo===2?20:12)}else{slashStagger(e,st,a.kind==='h'||crit)}}}
   ftCrit=false;ftHeavy=false;ftMelee=false;
   if(hits>0&&!(S.manaHitCd>0)&&SL.mana.onHit>0){gainMana(SL.mana.onHit);S.manaHitCd=SL.mana.hitGap}
-  const c=Math.cos(ang),s=Math.sin(ang);addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,R/16*(a.kind==='h'?.9:.7),'bill',-screenAng(c,s));
+  const c=Math.cos(ang),s=Math.sin(ang),trail=COMBAT_TRAIL[encLevel()[0]],visualSize=swordVisualSize(a.kind);
+  if(!trail||!emitCombatEffect(trail,pl.x+c*R*.12,pl.y+s*R*.12,visualSize,-screenAng(c,s)))addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize,'bill',-screenAng(c,s));
   {const en=ENCH.filter(k=>S.sk[k]);if(en.length)for(let i=0;i<16;i++){const t=ang+rnd(-arc,arc),rr=rnd(10,R),k=en[i%en.length];S.parts.push({k:'e',x:pl.x+Math.cos(t)*rr,y:pl.y+Math.sin(t)*rr,z:rnd(8,18),vx:0,vy:0,vz:rnd(4,12),c:Math.random()<.6?ENC[k].col:ENC[k].col2,life:rnd(.2,.45)})}}
   if(crit){pl.riposte=0;launchWave(a,ang,waveDmg);const ec=sk('echo');if(ec>=1){launchWave(a,ang-.28,waveDmg*(ec>=3?1.2:1),1);if(ec>=2)launchWave(a,ang+.28,waveDmg*(ec>=3?1.2:1),1)}if(hits)ftInfo('Cios krytyczny!')}
   else if(hits&&a.kind==='l'&&sk('zryw')){S.hitN=(S.hitN||0)+1;if(S.hitN>=6-sk('zryw')){S.hitN=0;launchWave(a,ang,waveDmg)}}
@@ -1844,7 +1845,7 @@ function golemTick(dt){const g=S.swordGuardian;if(!g)return;g.t-=dt;g.inv=Math.m
   if(d>stop){const st=Math.min(d-stop,SL.guard.spd*dt),ox=g.x,oy=g.y;moveBox(g,dx/d*st,dy/d*st,5,3);g.moving=Math.hypot(g.x-ox,g.y-oy)>st*.3;if(g.moving)g.walk+=dt}
   if(Math.abs(dx)>1)g.s=dx>0?1:-1;
   g.mesh.position.set(g.x/16,0,g.y/16);g.mesh.scale.set(g.s,SQ,1);setFrame(g.mesh,g.moving?at(A.golem.walk,g.walk,7):at(A.golem.idle,clock,2))}
-function clearSwordTransient(){if(!S)return;S.activeWind=null;S.bloodPrimed=0;if(pl?.atk?.kind==='skill')pl.atk=null;if(pl?.atk?.kind==='shot')pl.atk=null;S.swordTrails=[];removeGuardian();for(const p of S.swordShots||[])if(p.visual)p.visual.t=p.visual.dur;S.swordShots=[];S.shotWind=null;S.bloodTarget=null;S.bloodMarkT=0;S.shadowReady=0;S.bloodCharge=0;S.retaliate=0}
+function clearSwordTransient(){clearCombatEffects();if(!S)return;S.activeWind=null;S.bloodPrimed=0;if(pl?.atk?.kind==='skill')pl.atk=null;if(pl?.atk?.kind==='shot')pl.atk=null;S.swordTrails=[];removeGuardian();for(const p of S.swordShots||[])if(p.visual)p.visual.t=p.visual.dur;S.swordShots=[];S.shotWind=null;S.bloodTarget=null;S.bloodMarkT=0;S.shadowReady=0;S.bloodCharge=0;S.retaliate=0}
 function swordTick(dt){activeSlotsTick(dt);for(let i=S.swordTrails.length-1;i>=0;i--){const z=S.swordTrails[i];z.t-=dt;if(z.t<=0){S.swordTrails.splice(i,1);continue}if(Math.random()<dt*16)swordSparks(z.x,z.y,'#ff8a38',1);for(const e of S.enemies)if(!e.dead&&!z.hit.has(e)&&Math.hypot(e.x-z.x,e.y-z.y)<12+e.r){z.hit.add(e);e.burn=Math.max(e.burn||0,1);e.burnD=Math.max(e.burnD||0,2)}}for(const k of ['shotCd','earthCd','guardCd','shadowReady','retaliate','bloodCharge','bloodMarkT'])S[k]=Math.max(0,(S[k]||0)-dt);if(!S.bloodMarkT)S.bloodTarget=null;
  if(S.shotWind){if(pl.dead||pl.roll>0||pl.broken>0){S.shotWind=null;if(pl.atk?.kind==='shot')pl.atk=null}else{S.shotWind.t-=dt;if(S.shotWind.t<=0){swordShotLaunch(S.shotWind);S.shotWind=null;pl.atk={kind:'shot',stage:'rec',t:.18}}}}
  golemTick(dt);
@@ -1919,12 +1920,32 @@ let ftCrit=false,ftHeavy=false,ftMelee=false;
 function steelEnemy(e){return ['knight','warden','rotknight','wight','guard','executioner','bookgolem','collector'].includes(e.type)||e.type==='boss'&&CH===5}
 function recoilAmount(v){if(!SETT.shake||!v||v.t<=0)return 0;const p=1-v.t/v.life;return(1-p)*(1-p)*Math.cos(p*Math.PI*1.5)}
 // Cosmetic particles use their own deterministic variation, without consuming gameplay randomness.
+// Fixed visual-only pool: shared atlas, no RNG or gameplay state changes.
+const combatEffects=[],COMBAT_FX_LIMIT=16,COMBAT_TRAIL={fireblade:'fire',iceblade:'ice',venom:'poison',bloodblade:'blood'};
+function initCombatEffects(){if(combatEffects.length)return;const texture=texFrom(IMGS.combat_fx);for(let i=0;i<COMBAT_FX_LIMIT;i++){
+ const mesh=new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1),new THREE.MeshBasicMaterial({map:texture,transparent:true,alphaTest:.08,depthWrite:false,depthTest:true,side:THREE.DoubleSide,fog:false}));
+ mesh.visible=false;mesh.renderOrder=-2;mesh.frustumCulled=false;scene.add(mesh);combatEffects.push({mesh,active:false,t:0,frame:-1,x:0,y:0,size:1,rot:0,kind:'light',low:false});}}
+function clearCombatEffects(){for(const f of combatEffects){f.active=false;f.mesh.visible=false}}
+function swordVisualSize(kind){return (kind==='h'?SL.heavy.range*.95*1.35*.9:SL.light.range*.8*1.30*.9)/16}
+function emitCombatEffect(kind,x,y,size,rot=0){const cfg=COMBAT_FX.effects[kind];if(!cfg)return false;let f=null;for(const slot of combatEffects)if(!slot.active){f=slot;break}if(!f)return true; // Drop visual only when the fixed pool is full.
+ f.active=true;f.kind=kind;f.x=x;f.y=y;f.size=size;f.rot=rot;f.t=0;f.frame=-1;f.low=SETT.quality==='low';f.mesh.visible=true;return true;}
+function syncCombatEffects(dt){for(const f of combatEffects){if(!f.active)continue;const cfg=COMBAT_FX.effects[f.kind],trail=cfg.source==='03_element_slash_trails.png',duration=f.low?Math.min(.22,cfg.duration):cfg.duration;
+ f.t+=dt;if(f.t>=duration){f.active=false;f.mesh.visible=false;continue}const phase=f.t/duration,frame=f.low?(phase<.5?0:2):Math.min(3,Math.floor(phase*4)),m=f.mesh,size=f.size*(f.low?.85:1);
+ // Hide this decoration near a warning; never dim/recolor the enemy warning itself.
+ let warning=false;for(const e of S.enemies)if(!e.dead&&Math.hypot(e.x-f.x,e.y-f.y)<e.r+size*18&&attackCue(e)){warning=true;break}m.visible=!warning;
+ if(frame!==f.frame){f.frame=frame;const a=cfg.frames[frame],u0=(a.x+.5)/COMBAT_FX.width,u1=(a.x+a.width-.5)/COMBAT_FX.width,v0=1-(a.y+a.height-.5)/COMBAT_FX.height,v1=1-(a.y+.5)/COMBAT_FX.height,uv=m.geometry.attributes.uv;
+ uv.setXY(0,u0,v1);uv.setXY(1,u1,v1);uv.setXY(2,u0,v0);uv.setXY(3,u1,v0);uv.needsUpdate=true;
+ const pos=m.geometry.attributes.position,px=cfg.pivot[0],py=cfg.pivot[1];pos.setXYZ(0,-px,py,0);pos.setXYZ(1,1-px,py,0);pos.setXYZ(2,-px,py-1,0);pos.setXYZ(3,1-px,py-1,0);pos.needsUpdate=true;}
+ m.position.set(f.x/16,trail?.25:.45,f.y/16);m.quaternion.copy(cam.quaternion);m.rotateZ(f.rot);m.scale.set(size,size,1);
+ m.material.opacity=(trail?.72:f.kind==='parry'?.48:.64)*(SETT.flash?1:.38)*Math.min(1,(1-phase)*3);
+}}
+
 function contactSparks(x,y,nx,ny,kind,count){const angle=Math.atan2(ny,nx),soft=!SETT.flash,n=SETT.quality==='low'?Math.min(count,5):count;
   for(let i=0;i<n;i++){const q=(Math.sin((i+1)*78.233+clock*12.9898)*43758.5453)%1,f=q-Math.floor(q),a=angle+(f-.5)*2.1,sp=26+f*(kind==='parry'?66:42);S.parts.push({k:'e',x,y,z:10+f*4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*.6,vz:12+f*25,c:kind==='flesh'?(i%2?'#ba7354':'#96513f'):soft?(i%2?'#b9b1a0':'#8c969c'):kind==='parry'?(i%2?'#ffe9bb':'#d3e0eb'):(i%2?'#c9c3aa':'#b8c6d0'),life:.09+f*.09})}}
 function guardFeedback(kind,nx,ny,projectile){let dx=-nx,dy=-ny,d=Math.hypot(dx,dy);if(d<.001){dx=pl.fx;dy=pl.fy;d=1}dx/=d;dy/=d;const attacker=S.attacker,reach=attacker?Math.min(10,Math.hypot(attacker.x-pl.x,attacker.y-pl.y)*.5):9,x=projectile?projectile.x:pl.x+dx*reach,y=projectile?projectile.y:pl.y+dy*reach;
-  contactSparks(x,y,dx,dy,kind,kind==='parry'?9:6);pl.visualGuard={t:.16,life:.16,dx:nx,dy:ny};play(kind,kind==='parry'?.03:.05)}
+  if(!emitCombatEffect(kind==='parry'?'parry':'block',x,y,kind==='parry'?1.15:.85))contactSparks(x,y,dx,dy,kind,kind==='parry'?9:6);pl.visualGuard={t:.16,life:.16,dx:nx,dy:ny};play(kind,kind==='parry'?.03:.05)}
 function hitSpark(e,nx,ny){const length=Math.hypot(nx,ny)||1,dx=nx/length,dy=ny/length,armour=steelEnemy(e),amplitude=BIG.has(e.type)?.35:e.type==='collector'?.55:ftHeavy?1.3:ftCrit?1.1:.75;
-  contactSparks(e.x-dx*Math.min(e.r*.55,5),e.y-dy*Math.min(e.r*.55,5),dx,dy,armour?'steel':'flesh',ftCrit?8:ftHeavy?6:4);
+  if(!emitCombatEffect(ftHeavy?'heavy':'light',e.x-dx*Math.min(e.r*.55,5),e.y-dy*Math.min(e.r*.55,5),ftHeavy?1.35:.9))contactSparks(e.x-dx*Math.min(e.r*.55,5),e.y-dy*Math.min(e.r*.55,5),dx,dy,armour?'steel':'flesh',ftCrit?8:ftHeavy?6:4);
   e.visualHit={t:.15,life:.15,dx,dy,amplitude};}
 function damageEnemy(e,dmg,nx,ny,kb=1,src){if(e.dead||e.trans>0||e.inv>0)return false;if(dmg>=.5&&e.type!=='jerzak'&&Math.hypot(e.x-pl.x,e.y-pl.y)<190)ftx(dmg,e.x,e.y,ftEntH(e),ftCrit?'c':'d',e);if(e.type==='jerzak'){if(!e.selfKill){e.selfKill=1.1;e.flash=.15;say('Jerzak spanikował i z całej siły uderzył sam siebie.');play('boing',0)}return true}S.dealt=(S.dealt||0)+dmg;e.hp-=dmg;e.flash=ftCrit?.17:ftHeavy?.12:.08;if(ftMelee&&dmg>=.5)hitSpark(e,nx,ny);if(e.type==='collector'&&!(e.hurtCd>0)&&dmg>=20){e.hurtA=.3;e.hurtCd=2.5}const k=(BIG.has(e.type)?.05:e.type==='collector'?.15:(e.type==='warden'||e.type==='knight'||e.type==='rotknight'||e.type==='wight'||e.type==='bies'||e.type==='boginka')?.35:1)*110*kb;if(e.frozen<=0){e.vx+=nx*k;e.vy+=ny*k}
   if(Math.random()<.6)blood(e.x,e.y,2,nx||rnd(-1,1),ny||rnd(-1,1));play(ftCrit?'hitC':ftHeavy?'hitH':ftMelee&&steelEnemy(e)?'hitSteel':'hit',.05);if(e.hp<=0){if(e.type==='strzyga'&&!e.phase){e.phase=1;e.hp=e.max*.6;e.trans=1.8;e.mode=null;e.lh=0;shake(.6,.8);S.flash=.7;blood(e.x,e.y,80,0,1,3);play('bossGrowl',0);for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2;S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(10,40),vx:Math.cos(a)*rnd(40,120),vy:Math.sin(a)*rnd(20,60),vz:rnd(10,40),c:Math.random()<.6?'#141014':P.blood,life:rnd(.8,1.6)})}say('Pierwsze serce Strzygi pęka. Ale ona ma dwie dusze...')}else killEnemy(e,nx,ny)}return true}
@@ -2589,7 +2610,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
   if(S){tx=pl.x/16;tz=pl.y/16}else{idleA+=dt*.08;const I=W.idle;tx=I[0]+Math.sin(idleA)*I[2];tz=I[1]+Math.cos(idleA*.7)*I[3]}
   camTarget.x+=(tx-camTarget.x)*Math.min(1,dt*8);camTarget.z+=(tz-camTarget.z)*Math.min(1,dt*8);if(!S||S.t<.1){camTarget.x=tx;camTarget.z=tz}
   let sx=0,sz=0;if(SETT.shake&&S&&S.shakeT>0){const pxw=2*DIST*Math.tan(12*Math.PI/180)/RT_H;S.shkT=(S.shkT||0)-dt;if(S.shkT<=0||!S.shk){S.shkT=.04;S.shk=[Math.round(rnd(-1,1)*S.shakeM/pxw)*pxw,Math.round(rnd(-1,1)*S.shakeM/pxw)*pxw/Math.sin(PITCH)]}sx=S.shk[0];sz=S.shk[1]}
-  cam.position.set(camTarget.x+sx,Math.sin(PITCH)*DIST,camTarget.z+Math.cos(PITCH)*DIST+sz);cam.lookAt(camTarget.x+sx,.8,camTarget.z+sz);syncSwordGlow();
+  cam.position.set(camTarget.x+sx,Math.sin(PITCH)*DIST,camTarget.z+Math.cos(PITCH)*DIST+sz);cam.lookAt(camTarget.x+sx,.8,camTarget.z+sz);syncSwordGlow();syncCombatEffects(dt);
   const z0=S&&S.zones[0];if(z0){W.zoneLight.x=z0.x/16;W.zoneLight.z=z0.y/16}
   for(const L of LSRC){let k=L.base;
     if(L.kind==='fire')k*=.85+Math.sin(clock*13+L.ph)*.08+Math.random()*.12;else if(L.kind==='lava'||L.kind==='rot')k*=.9+Math.sin(clock*1.7+L.ph)*.1;else if(L.kind==='rune')k*=.75+.25*Math.sin(clock*2+L.ph);
@@ -3258,7 +3279,7 @@ applyAccess();
 // load sprite sheets, then start the loop
 const names=Object.keys(SPRITE_DATA).filter(n=>!n.endsWith('_fallback')),imgs={};let loadedImages=0;const loadStatus=document.createElement('p');loadStatus.id='loadStatus';loadStatus.className='figcap';loadStatus.setAttribute('role','status');loadStatus.textContent='Wczytywanie grafik: 0%';$('title').appendChild(loadStatus);
 Promise.all(names.map(n=>new Promise((res,rej)=>{const im=new Image();im.nbDensity=SPRITE_RES[n]||1;im.nbKey=n;im.onload=()=>{imgs[n]=im;loadStatus.textContent='Wczytywanie grafik: '+Math.round(++loadedImages/names.length*100)+'%';res()};im.onerror=()=>{const backup=SPRITE_DATA[n+'_fallback'];if(backup&&!im.nbFallback){im.nbFallback=true;SPRITE_DATA[n]=backup;im.src=backup}else rej(new Error('Nie można wczytać obrazu: '+n))};im.src=SPRITE_DATA[n]}))).then(()=>{
-  A=buildAnims(imgs);IMGS=imgs;decals(imgs);
+  A=buildAnims(imgs);IMGS=imgs;initCombatEffects();decals(imgs);
   // a dead NPC no longer glows
   for(const k of ['elder','wit','izolda','ottokar'])if(A[k]&&A[k][3])A[k][3].n.emissive.setHex(0x000000);
   const TINT={madman:0xe0a890,hound:0xb89078,rotknight:0xa8b880,monk:0xffa060,izolda:0xc4b4ec,ottokar:0xf0d090,aurel:0xa8c8f0};
