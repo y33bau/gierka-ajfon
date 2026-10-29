@@ -950,6 +950,15 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 /* XP bar on title: xpe/xpf have an opaque black backing. Alpha mask (xpmask.webp) cuts the outer black; groove and fill stay. */
 #orient#orient#orient #title .xpbar.big{mix-blend-mode:normal;-webkit-mask:var(--nb-xpmask) center/100% 100% no-repeat;mask:var(--nb-xpmask) center/100% 100% no-repeat}
 
+/* Prep: "Wyrusz" alone, centered and prominent; "Wróć" smaller below. Same DOM order, pad/keyboard unchanged. */
+#orient#orient#orient #prep .btnrow{flex-direction:column;align-items:center;justify-content:center;gap:clamp(6px,1.2vh,12px);margin:clamp(8px,1.6vh,16px) 0 clamp(10px,2vh,20px);width:100%}
+#orient#orient#orient #prep #prepGo{box-sizing:border-box;width:min(86vw,380px);min-height:clamp(54px,9vh,80px);margin:0;padding:4px 24px 6px;text-align:center;font-size:clamp(22px,1.2vw + 14px,34px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;white-space:normal;line-height:1.1;color:#fff0cc;text-shadow:0 0 12px rgba(255,138,40,.6),0 2px 2px #000;animation:nbGoGlow 2.4s ease-in-out infinite}
+#orient#orient#orient #prep #prepGo:hover,#orient#orient#orient #prep #prepGo:focus-visible{color:#fff;filter:drop-shadow(0 0 18px rgba(255,120,30,.75)) brightness(1.12)}
+#orient#orient#orient #prep #prepGo:disabled{animation:none;font-size:clamp(15px,.6vw + 11px,20px);letter-spacing:.02em;text-transform:none}
+#orient#orient#orient #prep #prepBack{box-sizing:border-box;width:min(50vw,170px);min-height:44px;margin:0;padding:2px 16px 4px;text-align:center;font-size:clamp(15px,.4vw + 12px,19px);opacity:.88}
+@keyframes nbGoGlow{0%,100%{filter:drop-shadow(0 0 8px rgba(214,84,22,.35))}50%{filter:drop-shadow(0 0 16px rgba(255,120,30,.7))}}
+@media(prefers-reduced-motion:reduce){#orient#orient#orient #prep #prepGo{animation:none}}
+
 
 /* Level choice: compact list in portrait, three calm cards in landscape. */
 #screen #lvl{align-items:center;justify-content:flex-start!important;padding:max(12px,2vh) 4%;background:radial-gradient(ellipse at 50% 40%,rgba(35,25,24,.9),rgba(5,4,7,.96));}

@@ -1752,6 +1752,9 @@ const postMat=new THREE.ShaderMaterial({uniforms:{tD:{value:rt.texture},res:{val
 filmUniforms=postMat.uniforms;
 const postScene=new THREE.Scene(),postCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),postMat));
 
+/* TomMusic + Owlish Media — prepared by tools/prepare-owlish-sfx.cjs */
+const SFX_SAMPLES={"Sword Attack 1":"assets/25154cec1ed959935cc1b7a8a728c1eaedda87b75c01d750e033c9e7942a63de.mp3","Sword Attack 2":"assets/dd687aa757cf626758c5231780b3b6b14617e17dc974f201e4f05821fa89ce11.mp3","Sword Attack 3":"assets/b65e2c866ab005e5455708b5c65253f3d4addf8f3b39b1bc75c11acb96da8295.mp3","Sword Impact Hit 1":"assets/85b382b1e9e1011f48ace28e2996ec789944578d72ed98cb5664831eb2b88cfc.mp3","Sword Impact Hit 2":"assets/99fdcc4ff695385d5642a2ba21d32bf124ea506cad122e4607f083f596190161.mp3","Sword Blocked 1":"assets/e622475e143f097d12a81437161184b257b58738c1ecf8131430501b4968efcb.mp3","Sword Blocked 2":"assets/db5daf90206e562eddc378c03925e7a0c9f62cb167f513345604481b7372ea00.mp3","Sword Parry 1":"assets/20be0a0ff94830c967fd967cbef3f0f42369a85632545dce03f90e43358ef15c.mp3","Sword Parry 2":"assets/5be0c2d0366031e36c01bf088eeebe3c62a49f6577a32ef61f7ce3fb12e6411d.mp3","Sword Impact Hit 3":"assets/c4358ecfbb63e19ffc9a61934123dbb613e24c02c3c9e25cfe6bc26469658c57.mp3","Dirt Chain Jump":"assets/1f740ea4a2de2aa7e0d53e296dbf7eb6dfd5cd2fc3e6849edb3eb2339b541e3c.mp3","Ice Throw 1":"assets/e14f335d41980db34c42719ee972f0e8a7100e7c5f88e5ab07baca59f5483956.mp3","Ice Throw 2":"assets/f1c792a79c1e5245e900adb71001de7b9681de35ef474a9409635d434b216a61.mp3","Rock Meteor Throw 1":"assets/074a22ca7bd4ec33c3f0fd412bec2d09724e08294295464de6ca975f3303fbbf.mp3","Fireball 1":"assets/8591cef4b00ca43a4baa2b34915e09f05473793b068c5786844d0b8400946c55.mp3","Fireball 2":"assets/1b8b57939e3a6a006bd2f5421f1ee5ff61437cfc64c79be2d955f728c78ac79f.mp3","Rock Wall 1":"assets/66eeb48e9b22f4ed221070a55446d6eea2235737878a066d7f33e5e6b0382b64.mp3","Rock Meteor Throw 2":"assets/f7ed7a1243d84eaa0cb5a4afa2c17f1499bef9f18294b32a53abd6ac85124223.mp3","Rock Wall 2":"assets/5b5e27f9d88ad6d82f9a01beebfeaac4f4b8e9478e85362231e17cb2ae61c781.mp3","Owlish/UI/UI_024.wav":"assets/b6d95998833fbf557e2896fd21a9881aba5d03ae758b96499c4a8e9770e93bea.mp3","Owlish/UI/UI_040.wav":"assets/efd4460645b0f4aa0ce4421726853195cc29aebebd981be0bc87f407b08063a0.mp3","Owlish/80-CC0-RPG-SFX/item_coins_01.ogg":"assets/7c0938ddc084b863cf4c1b5d2bc0b4cb3b7c1252705333469c52acf23df28b25.mp3","Owlish/80-CC0-RPG-SFX/item_coins_02.ogg":"assets/c6ce80b685807745c19e100abc428d96799669c2ee5e82afb22442eb474e30d6.mp3","Owlish/80-CC0-RPG-SFX/item_coins_03.ogg":"assets/76697290695e486e73d2e16608c2c703c950f49913f0b70af0f2d30deb340cfb.mp3","Owlish/80-CC0-RPG-SFX/item_gem_02.ogg":"assets/b4504e126640beabb6f6fa9e825c664db0b67a3389198925cc60ed7b3d780f1b.mp3","Owlish/80-CC0-RPG-SFX/item_gem_03.ogg":"assets/4d58e079c800b8f019180630e6595d5347d25b5a3a6fcd0ad41757b38b410bad.mp3","Owlish/UI/UI_017.wav":"assets/e008d3b796ef3f64cd3892520ab2af6cf9a829d64c53316fa2f087830d082e9a.mp3","Owlish/80-CC0-RPG-SFX/spell_01.ogg":"assets/26e7c4ab03d723a7b93fc05041ff46ce08a4aab92be4718f29909d9e3039b1fa.mp3","Owlish/UI/UI_001.wav":"assets/4a508e780137c94b695071f4527826092e0dec569e4ffb871e0f2f8bc5441d27.mp3","Owlish/80-CC0-RPG-SFX/creature_monster_03.ogg":"assets/da163cc77b3a3be6e23d5644db25654abba99ce8fa58f7ed6c2dad8394e8b924.mp3","Owlish/80-CC0-RPG-SFX/creature_monster_04.ogg":"assets/5447e5d33412b09cdb407abbfd8565402b18a3af841d2fb440c787c29395b0d8.mp3","Owlish/80-CC0-RPG-SFX/creature_roar_01.ogg":"assets/a524633f6ea42a3fe61e4fc1e60e78049e8f8fec24c2a74387d348ca34a6ea2c.mp3","Owlish/80-CC0-RPG-SFX/creature_roar_02.ogg":"assets/88500a58b5394b373fbf51b93d4bef99e0191bd184a9b29cae3cc93e90eab665.mp3","Owlish/80-CC0-RPG-SFX/creature_roar_03.ogg":"assets/f67bf5040c25da3be64458be7bd2d84b31b33d43abd1853417809bad04d4d99d.mp3","Owlish/80-CC0-RPG-SFX/creature_hurt_01.ogg":"assets/ffe6dcb49b564d161675e70afa1891f9333dda1e9896d1c34cffd3670bcf7509.mp3","Owlish/80-CC0-RPG-SFX/creature_die_01.ogg":"assets/9b82818f5461d6107df42de39fc695a1b0fb09f2c6337c9eb9728778b01592bc.mp3","Owlish/Impacts/hit.wav":"assets/c5c97a4e4f8270a1d2af480fd85f9e82109acce2b014bcc71dc5732d21357d02.mp3","Owlish/Ambience/earthquake.wav":"assets/3000cdc76be4c6f3c08d1c34bf5e310feaa5366d5eac83170ba2d6eecaec44cc.mp3"};
+const SFX_SAMPLE_MAP={"bladeLight":["Sword Attack 1","Sword Attack 2"],"bladeHeavy":["Sword Attack 3"],"hitSteel":["Sword Impact Hit 1","Sword Impact Hit 2"],"block":["Sword Blocked 1","Sword Blocked 2"],"parry":["Sword Parry 1","Sword Parry 2"],"swing":["Sword Attack 3"],"katana":["Sword Attack 2"],"hit":["Sword Impact Hit 1","Sword Impact Hit 2"],"hitH":["Sword Impact Hit 3"],"hitC":["Sword Impact Hit 3"],"kill":["Owlish/80-CC0-RPG-SFX/creature_die_01.ogg"],"roll":["Dirt Chain Jump"],"frost":["Ice Throw 1","Ice Throw 2"],"quake":["Rock Meteor Throw 1"],"fire":["Fireball 1","Fireball 2"],"golem":["Rock Wall 1"],"slam":["Rock Meteor Throw 2"],"rise":["Rock Wall 2"],"ui":["Owlish/UI/UI_024.wav"],"empty":["Owlish/UI/UI_040.wav"],"coin":["Owlish/80-CC0-RPG-SFX/item_coins_01.ogg","Owlish/80-CC0-RPG-SFX/item_coins_02.ogg","Owlish/80-CC0-RPG-SFX/item_coins_03.ogg"],"pick":["Owlish/80-CC0-RPG-SFX/item_gem_02.ogg","Owlish/80-CC0-RPG-SFX/item_gem_03.ogg"],"level":["Owlish/UI/UI_017.wav"],"heal":["Owlish/80-CC0-RPG-SFX/spell_01.ogg"],"bless":["Owlish/UI/UI_001.wav"],"growl":["Owlish/80-CC0-RPG-SFX/creature_monster_03.ogg","Owlish/80-CC0-RPG-SFX/creature_monster_04.ogg"],"bossGrowl":["Owlish/80-CC0-RPG-SFX/creature_roar_01.ogg","Owlish/80-CC0-RPG-SFX/creature_roar_02.ogg","Owlish/80-CC0-RPG-SFX/creature_roar_03.ogg"],"warnR":["Owlish/80-CC0-RPG-SFX/creature_hurt_01.ogg"],"hurt":["Owlish/Impacts/hit.wav"],"rumble":["Owlish/Ambience/earthquake.wav"]};
 /* ============ AUDIO ============ */
 const SETT={sfx:1,fts:100,dmg:true,save:{},bri:1,quality:matchMedia('(pointer:coarse)').matches?'low':'high',shake:!matchMedia('(prefers-reduced-motion: reduce)').matches,flash:!matchMedia('(prefers-reduced-motion: reduce)').matches,contrast:false,oneHand:false,touchScale:1,touchLeft:false};
 function isRecord(x){return !!x&&typeof x==='object'&&!Array.isArray(x)}
@@ -1761,7 +1764,7 @@ try{const v=JSON.parse(localStorage.getItem('pn_access')||'{}');if(isRecord(v)){
 try{const a=localStorage.getItem('pn_sfx');if(a!==null&&!isNaN(+a))SETT.sfx=Math.max(0,Math.min(1,+a));const b=localStorage.getItem('pn_fts');if(b!==null&&!isNaN(+b))SETT.fts=Math.max(70,Math.min(140,+b));SETT.dmg=localStorage.getItem('pn_dmg')!=='0';SETT.save=cleanRecords(JSON.parse(localStorage.getItem('pn_save')||'{}'))}catch(e){}
 let AC=null,master=null,NB=null,sfxG=null;
 function initAudio(){if(AC)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.5;master.connect(AC.destination);sfxG=AC.createGain();sfxG.gain.value=SETT.sfx;sfxG.connect(master);
-  NB=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;sfxInitRv();
+  NB=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;sfxInitRv();loadSfxSamples();
   // tło ambientowe (dron + deszcz) usunięte w v66: gra teraz tylko muzyka
   setAmbience()}catch(e){AC=null}}
 let rainGain=null;function setAmbience(){if(rainGain)rainGain.gain.value=CH===1?.022:0}
@@ -1816,6 +1819,42 @@ const SFX={
  cry:()=>{for(let i=0;i<3;i++)voice(640,470,.4,.04,'triangle',2000,.5,6,10,i*.5)}};
 const lastS={};let clock=0;
 function play(n,gap=.04){if(!AC)return;if(clock-(lastS[n]||-9)<gap)return;lastS[n]=clock;SFX[n]()}
+
+
+// Próbki ładowane raz; do chwili gotowości lub przy błędzie pozostaje synteza.
+const sfxBuffers=new Map(),sfxVoices=new Set(),sfxNext={};
+let sfxLoadPromise=null;
+function loadSfxSamples(){if(sfxLoadPromise||!AC)return sfxLoadPromise;
+ sfxLoadPromise=Promise.all(Object.entries(SFX_SAMPLES).map(async([name,url])=>{try{
+ const r=await fetch(url);if(!r.ok)throw Error(r.status);
+ const b=await AC.decodeAudioData(await r.arrayBuffer());sfxBuffers.set(name,b);
+ }catch(e){console.warn('SFX: nie udało się wczytać '+name,e)}}));return sfxLoadPromise}
+
+// Głośność, minimalny odstęp (czas audio), limit nakładania, priorytet.
+// Muzyka omija ten tor. Ważne sygnały mogą wyprzeć cichy efekt zbierania.
+const SFX_MIX={ui:[.6,.06,2,3],empty:[.55,.18,1,3],coin:[.45,.10,2,0],pick:[.25,.08,2,0],
+ level:[.85,.5,1,3],heal:[.55,.4,2,2],bless:[.65,.3,2,2],growl:[.4,.65,2,0],
+ bossGrowl:[.85,.22,2,3],warnR:[.65,.18,2,3],kill:[.4,.12,3,0],hurt:[.85,.12,2,3],
+ rumble:[.5,.6,1,1],rise:[.5,.2,2,1]};
+const sfxPlayedAt={};
+for(const [event,names] of Object.entries(SFX_SAMPLE_MAP)){
+ const fallback=SFX[event];SFX[event]=()=>{
+ if(!AC||SETT.sfx<=0)return;
+ // Wspólne zdarzenie kill obsługuje też gracza: bez głosu potwora przy jego śmierci.
+ const selected=event==='kill'&&typeof pl!=='undefined'&&pl?.dead?SFX_SAMPLE_MAP.hurt:names;
+ const ready=selected.filter(n=>sfxBuffers.has(n));if(!ready.length){fallback();return}
+ const [volume,gap,limit,priority]=SFX_MIX[event]||[.8,.035,4,1],now=AC.currentTime;
+ if(now-(sfxPlayedAt[event]??-99)<gap)return;
+ const voices=[...sfxVoices];if(voices.filter(v=>v.sfxEvent===event).length>=limit)return;
+ if(voices.length>=20){const old=voices.find(v=>v.sfxPriority<priority);if(!old)return;
+ old.sfxGain.gain.setTargetAtTime(0,now,.003);old.stop(now+.015);sfxVoices.delete(old)}
+ sfxPlayedAt[event]=now;
+ const index=(sfxNext[event]||0)%ready.length;sfxNext[event]=index+1;
+ const source=AC.createBufferSource(),gain=AC.createGain();source.buffer=sfxBuffers.get(ready[index]);
+ gain.gain.value=volume;source.sfxEvent=event;source.sfxPriority=priority;source.sfxGain=gain;
+ source.connect(gain);gain.connect(sfxG||master);sfxVoices.add(source);
+ source.onended=()=>{sfxVoices.delete(source);source.disconnect();gain.disconnect()};source.start();
+ }}
 
 /* ============ GAME STATE ============ */
 const SK={
@@ -1924,7 +1963,7 @@ function ftTick(dt){FLT.tm+=dt;const r=$('screen').getBoundingClientRect();
 const ENAME={guard:'Strażnik',scribe:'Skryba',executioner:'Kat',debtor:'Dłużnik',wraith:'Upiór rachunków',bookgolem:'Golem ksiąg',condemned:'Skazaniec',courtraven:'Kruk sądowy',paperrat:'Szczur papierowy',madman:'Szaleniec',hound:'Ogar',rotknight:'Zgniły rycerz',monk:'Mnich',possessed:'Opętany',knight:'Rycerz',dwarf:'Krasnolud',ghoul:'Ghul',warden:'Strażnik',wolf:'Wilk',bandit:'Bandyta',xbow:'Kusznik',drowner:'Utopiec',strzygon:'Strzygoń',wight:'Upiór',zmora:'Zmora',bies:'Bies'};
 // Display-only attribution: explicit hit source, independent of the melee/parry context.
 const DEATH_CAUSES={night:'Noc',powder:'Wybuch prochu',fire:'Ogień',poison:'Trucizna',bleed:'Krwawienie'};
-const DEATH_ENEMIES={bat:'Nietoperz',wisp:'Błędny ognik',boss:'Zrost',beast:'Morhad, Bestia Tysiąca Rzezi',jerzak:'Jerzak, Kosmate Jądro Otchłani',boginka:'Boginka z Topieliska',leszy:'Leszy, Pan Kniei',strzyga:'Strzyga Matka, Królowa Kurhanów'};
+const DEATH_ENEMIES={bat:'Nietoperz',wisp:'Błędny ognik',boss:'Zrost',beast:'Morhad, Bestia Tysiąca Rzezi',jerzak:'OBDYP, Kosmate Jądro Otchłani',boginka:'Boginka z Topieliska',leszy:'Leszy, Pan Kniei',strzyga:'Strzyga Matka, Królowa Kurhanów'};
 function deathCauseName(source){if(typeof source==='string')return DEATH_CAUSES[source]||'Noc';if(!source?.type)return 'Noc';const ch=source.chapter??CH;if(source.type==='collector')return ch===5?'Arcysędzia Rachmistrz':'Poborca Zakonu';if(source.type==='boss'&&ch===5)return 'Wierzyciel';return ENAME[source.type]||DEATH_ENEMIES[source.type]||'Noc'}
 
 const HB=new Map();
@@ -2335,7 +2374,7 @@ function guardFeedback(kind,nx,ny,projectile){let dx=-nx,dy=-ny,d=Math.hypot(dx,
 function hitSpark(e,nx,ny){const length=Math.hypot(nx,ny)||1,dx=nx/length,dy=ny/length,armour=steelEnemy(e),amplitude=BIG.has(e.type)?.35:e.type==='collector'?.55:ftHeavy?1.3:ftCrit?1.1:.75;
   if(!emitCombatEffect(ftHeavy?'heavy':'light',e.x-dx*Math.min(e.r*.55,5),e.y-dy*Math.min(e.r*.55,5),ftHeavy?1.35:.9))contactSparks(e.x-dx*Math.min(e.r*.55,5),e.y-dy*Math.min(e.r*.55,5),dx,dy,armour?'steel':'flesh',ftCrit?8:ftHeavy?6:4);
   e.visualHit={t:.15,life:.15,dx,dy,amplitude};}
-function damageEnemy(e,dmg,nx,ny,kb=1,src){if(e.dead||e.trans>0||e.inv>0)return false;if(dmg>=.5&&e.type!=='jerzak'&&Math.hypot(e.x-pl.x,e.y-pl.y)<190)ftx(dmg,e.x,e.y,ftEntH(e),ftCrit?'c':'d',e);if(e.type==='jerzak'){if(!e.selfKill){e.selfKill=1.1;e.flash=.15;say('Jerzak spanikował i z całej siły uderzył sam siebie.');play('boing',0)}return true}S.dealt=(S.dealt||0)+dmg;e.hp-=dmg;e.flash=ftCrit?.17:ftHeavy?.12:.08;if(ftMelee&&dmg>=.5)hitSpark(e,nx,ny);if(e.type==='collector'&&!(e.hurtCd>0)&&dmg>=20){e.hurtA=.3;e.hurtCd=2.5}const k=(BIG.has(e.type)?.05:e.type==='collector'?.15:(e.type==='warden'||e.type==='knight'||e.type==='rotknight'||e.type==='wight'||e.type==='bies'||e.type==='boginka')?.35:1)*110*kb;if(e.frozen<=0){e.vx+=nx*k;e.vy+=ny*k}
+function damageEnemy(e,dmg,nx,ny,kb=1,src){if(e.dead||e.trans>0||e.inv>0)return false;if(dmg>=.5&&e.type!=='jerzak'&&Math.hypot(e.x-pl.x,e.y-pl.y)<190)ftx(dmg,e.x,e.y,ftEntH(e),ftCrit?'c':'d',e);if(e.type==='jerzak'){if(!e.selfKill){e.selfKill=1.1;e.flash=.15;say('OBDYP spanikował i z całej siły uderzył sam siebie.');play('boing',0)}return true}S.dealt=(S.dealt||0)+dmg;e.hp-=dmg;e.flash=ftCrit?.17:ftHeavy?.12:.08;if(ftMelee&&dmg>=.5)hitSpark(e,nx,ny);if(e.type==='collector'&&!(e.hurtCd>0)&&dmg>=20){e.hurtA=.3;e.hurtCd=2.5}const k=(BIG.has(e.type)?.05:e.type==='collector'?.15:(e.type==='warden'||e.type==='knight'||e.type==='rotknight'||e.type==='wight'||e.type==='bies'||e.type==='boginka')?.35:1)*110*kb;if(e.frozen<=0){e.vx+=nx*k;e.vy+=ny*k}
   if(Math.random()<.6)blood(e.x,e.y,2,nx||rnd(-1,1),ny||rnd(-1,1));play(ftCrit?'hitC':ftHeavy?'hitH':ftMelee&&steelEnemy(e)?'hitSteel':'hit',.05);if(e.hp<=0){if(e.type==='strzyga'&&!e.phase){e.phase=1;e.hp=e.max*.6;e.trans=1.8;e.mode=null;e.lh=0;shake(.6,.8);S.flash=.7;blood(e.x,e.y,80,0,1,3);play('bossGrowl',0);for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2;S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(10,40),vx:Math.cos(a)*rnd(40,120),vy:Math.sin(a)*rnd(20,60),vz:rnd(10,40),c:Math.random()<.6?'#141014':P.blood,life:rnd(.8,1.6)})}say('Pierwsze serce Strzygi pęka. Ale ona ma dwie dusze...')}else killEnemy(e,nx,ny)}return true}
 // serduszko: wypada z 15% szansą z zabitego wroga, leczy 10% maks. życia (piksel-art rysowany w kodzie)
 const HEART_MAT=(()=>{const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
@@ -2361,7 +2400,7 @@ function killEnemy(e,nx,ny){swordOnKill(e);e.dead=true;S.kills++;if(e.mini)S.eli
   if(e.type==='boginka'){say('Boginka zapada się w błoto. Zostaje po niej garść monet topielców.');for(let i=0;i<25;i++)dropPick('c',e.x+rnd(-22,22),e.y+rnd(-14,14));for(let i=0;i<5;i++)dropPick('w',e.x+rnd(-16,16),e.y+rnd(-10,10),3)}
   if(e.type==='collector'){S.collector=null;S.stage='p2';const total=Math.floor(e.stolen||0)+20,n=Math.min(40,total);say(`${CH===5?'Arcysędzia Rachmistrz pada':'Poborca pada'}. Złoto wraca do ciebie: ${total} monet.`);shake(.4,.5);
     for(let i=0;i<n;i++){dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16));Object.assign(S.picks[S.picks.length-1],{v:Math.floor(total/n)+(i<total%n?1:0),returned:true})}for(let i=0;i<8;i++)dropPick('w',e.x+rnd(-20,20),e.y+rnd(-12,12),3)}
-  if(jz){say('Jerzak poległ z własnej ręki. Cześć jego pamięci.');shake(.3,.4);for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,sp=rnd(30,110);S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(6,16),vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*.6,vz:rnd(20,60),c:Math.random()<.6?'#2a1a14':'#c98a7a',life:rnd(1,2)})}
+  if(jz){say('OBDYP poległ z własnej ręki. Cześć jego pamięci.');shake(.3,.4);for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,sp=rnd(30,110);S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(6,16),vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*.6,vz:rnd(20,60),c:Math.random()<.6?'#2a1a14':'#c98a7a',life:rnd(1,2)})}
     for(let i=0;i<30;i++)dropPick('c',e.x+rnd(-26,26),e.y+rnd(-16,16));for(let i=0;i<6;i++)dropPick('w',e.x+rnd(-18,18),e.y+rnd(-12,12),2)}
   if(!ghost)blood(e.x,e.y,big?140:e.type==='warden'?4:e.type==='bat'?5:16,nx||0,ny||1,big?3:1.5);play('kill',.06);
   if(e.type==='rotknight'||e.type==='madman'){dg.fillStyle='rgba(194,74,32,.55)';dg.fillRect(Math.round(e.x)-5,Math.round(e.y)-1,10,3);decalDirty=true}
@@ -2625,8 +2664,8 @@ function events(){
       else if(p.k==='rot_bloom'&&!(cd>S.t)&&d<18){S.trapCd.set(p,S.t+8);S.slowT=1.5;hurtPlayer(6,0,1,'poison');play('fire',.3);
         for(let i=0;i<24;i++){const a=Math.random()*Math.PI*2;S.parts.push({k:'m',x:p.x*16,y:p.y*16,z:rnd(2,10),vx:Math.cos(a)*rnd(20,60),vy:Math.sin(a)*rnd(10,30),vz:rnd(4,16),c:Math.random()<.5?'#e07a30':'#c24a20',life:rnd(.6,1.2)})}
         ftInfo('Zarodniki')}}}
-  // Jerzak shows up only in the Lower City (chapter II)
-  ev('jz',CH===2&&S.t>10,()=>{const p=ringSpot(110,150)||ringSpot(80,200)||[pl.x+100,pl.y];spawnEnemy('jerzak',p[0],p[1],{rise:1});play('boing',0);say('Z ciemności wytacza się Jerzak, Kosmate Jądro Otchłani!')});
+  // OBDYP shows up only in the Lower City (chapter II)
+  ev('jz',CH===2&&S.t>10,()=>{const p=ringSpot(110,150)||ringSpot(80,200)||[pl.x+100,pl.y];spawnEnemy('jerzak',p[0],p[1],{rise:1});play('boing',0);say('Z ciemności wytacza się OBDYP, Kosmate Jądro Otchłani!')});
   if(CH===1){const N=S.npc;
     ev('a',S.t>.5,()=>say('Noc zapada nad spaloną Brzeźnicą.'));
     ev('b',S.t>5,()=>say('Zbieraj ogniki z poległych. Przetrwaj do świtu.'));
@@ -3135,7 +3174,7 @@ function hud(){renderActiveHud();if(!S)return;drawMini(1/60);const left=Math.max
   const key=`${pl.hp|0}|${pl.max}|${S.xp}|${S.need}|${S.lvl}|${m}:${s}|${S.kills}|${S.coins}|${boss?boss.hp|0:-1}|${S.stage}|${boss&&boss.stolen||0}|${S.merchant?S.merchant.wait|0:0}|${S.dg?(S.dg.done?2:1):0}`;
   if(key!==lastHud){lastHud=key;$('hp').style.width=$('hpg').style.width=(Math.max(0,pl.hp)/pl.max*100)+'%';$('hpbar').classList.toggle('low',pl.hp<pl.max*.3);$('xp').style.width=Math.min(100,S.xp/S.need*100)+'%';$('lvlTag').innerHTML=`<i class="ic ic-wisp"></i>Poziom ${S.lvl}`;
     const mmss=`${m}:${String(s).padStart(2,'0')}`,tic=S.stage==='p1'||S.stage==='break'?'hourglass':S.stage==='p2'?'sun':'bossskull';$('time').innerHTML=`<i class="ic ic-${S.dg?'bossskull':tic}"></i>`+(S.dg?(S.dg.done?'Krypta oczyszczona':'Krypta pod cmentarzem'):S.stage==='p1'?`Do północy ${mmss}`:S.stage==='break'?`Przerwa · kram Margi${S.merchant&&S.merchant.state==='here'?' '+Math.ceil(S.merchant.wait)+' s':''}`:S.stage==='collector'?(CH===4&&A.leszy?'Leszy, Pan Kniei!':CH===5?'Arcysędzia Rachmistrz!':'Poborca Zakonu!'):S.stage==='final'?(CH===3?'Pokonaj Morhada':CH===4&&A.strzyga?'Pokonaj Strzygę':CH===5?'Pokonaj Wierzyciela':'Pokonaj Zrosta'):`${CH===2?'Do otwarcia wrót':'Do świtu'} ${mmss}`);$('kills').innerHTML=`<i class="ic ic-skull"></i>Zabici: ${S.kills}`;$('coins').textContent=S.coins;
-    $('boss').hidden=!boss;if(boss){$('bossName').innerHTML='<i class="ic ic-bossskull"></i>'+(boss.type==='jerzak'?'Jerzak, Kosmate Jądro Otchłani':boss.type==='collector'?`${CH===5?'Arcysędzia Rachmistrz':'Poborca Zakonu'} · zabrał ${boss.stolen} monet`:boss.type==='beast'?'Morhad, Bestia Tysiąca Rzezi':boss.type==='leszy'?'Leszy, Pan Kniei':boss.type==='strzyga'?(boss.phase===2?'Strzyga Matka · druga dusza':'Strzyga Matka, Królowa Kurhanów'):boss.type==='boginka'?'Boginka z Topieliska':CH===5?'Wierzyciel':'Zrost');$('bossHp').style.width=Math.max(0,boss.hp/boss.max*100)+'%'}}
+    $('boss').hidden=!boss;if(boss){$('bossName').innerHTML='<i class="ic ic-bossskull"></i>'+(boss.type==='jerzak'?'OBDYP, Kosmate Jądro Otchłani':boss.type==='collector'?`${CH===5?'Arcysędzia Rachmistrz':'Poborca Zakonu'} · zabrał ${boss.stolen} monet`:boss.type==='beast'?'Morhad, Bestia Tysiąca Rzezi':boss.type==='leszy'?'Leszy, Pan Kniei':boss.type==='strzyga'?(boss.phase===2?'Strzyga Matka · druga dusza':'Strzyga Matka, Królowa Kurhanów'):boss.type==='boginka'?'Boginka z Topieliska':CH===5?'Wierzyciel':'Zrost');$('bossHp').style.width=Math.max(0,boss.hp/boss.max*100)+'%'}}
   const st=$('stam'),nseg=1;if(st.childElementCount!==nseg){st.innerHTML=('<div class="seg fb st"><span class="trk"><i></i></span><b class=\"l\"></b><b class=\"m\"></b><b class=\"r\"></b></div>').repeat(nseg)}
   st.style.width=Math.min(100,pl.staMax/1.8)+'%';
   for(let i=0;i<nseg;i++){const seg=st.children[i],v=Math.max(0,pl.sta/pl.staMax);seg.firstChild.firstChild.style.width=(v*100)+'%';seg.classList.toggle('full',v>=1)}
