@@ -56,6 +56,11 @@ body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:h
 #boss .fb{margin-top:.1em}
 #msg{position:absolute;left:0;right:0;top:22%;padding:0 1em;text-align:center;font-size:1.55em;line-height:1.2;text-wrap:balance;text-shadow:0 2px 0 #000,0 0 14px #000;opacity:0;transition:opacity .7s;pointer-events:none}
 #msg.on{opacity:1}
+/* Pion: komunikaty fabularne i bossów jako przewijany pasek (jedna linijka, bez zatrzymywania gry) */
+#msg.tick{top:24%;padding:.35em 0;white-space:nowrap;text-wrap:nowrap;overflow:hidden;text-align:left;font-size:1.25em;line-height:1.25;background:linear-gradient(90deg,transparent,rgba(8,6,8,.8) 6%,rgba(8,6,8,.8) 94%,transparent)}
+#msg.tick span{display:inline-block;padding-left:100%;animation:msgTick var(--tickT,10s) linear forwards}
+#msg.tickhold span{animation-play-state:paused}
+@keyframes msgTick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
 #hbs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .hb{position:absolute;transform:translate(-50%,-100%);text-align:center;font-family:"Pirata One","Grenze Gotisch",Georgia,serif;line-height:1}
 .hb b{display:block;font-weight:400;font-size:.72em;color:#f2e6c9;letter-spacing:.04em;-webkit-text-stroke:.2em #140708;paint-order:stroke fill;margin-bottom:.1em;white-space:nowrap}

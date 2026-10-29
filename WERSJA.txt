@@ -1,3 +1,6 @@
+FENIX nightbrand-codex-20261028-177 — wersja pionowa (telefon): bez samouczka i podpowiedzi, komunikaty fabularne i bossów jako przewijany pasek, rozmowy z postaciami bez zatrzymywania gry (Wit i Wolch nadal w oknie); wersja pozioma bez zmian (Claude). Opublikowano na GitHub.
+SHA-256 index.html: fbbf8b340696a3475f88cb0ecf255b8cb07e5108d71edf90473ef7ea29ec82b0.
+SHA-256 sw.js: 2689038fffba515ff55471191c6a0eca4e66aa81e171a99c9ce4f0238f58f5d2.
 FENIX nightbrand-codex-20261028-174 — umiejętności aktywne (7) i cechy (4): Kaskada cięć, Kula ognia, większy Odłamek szronu, Inteligencja; usunięte Jadowy kolec i Piętno krwi (Claude). Połączone z cache 173 chata. Opublikowano na GitHub.
 SHA-256 index.html: fbbf8b340696a3475f88cb0ecf255b8cb07e5108d71edf90473ef7ea29ec82b0.
 SHA-256 sw.js: b20953fc30058f940c8a4eb92a9a1b353ee90acf819272c1c29a6a9326070d2a.
