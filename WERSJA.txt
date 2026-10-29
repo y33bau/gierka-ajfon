@@ -1,3 +1,9 @@
+FENIX nightbrand-codex-20261028-159 — szybszy start, etap 2: core i kolejka grafik rozdziałów II–V.
+SHA-256 index.html: 5f0b3f1ce613a78579db81d3ae154d60cacedbba8ad3c6af793ec91f1bf7cae1.
+
+FENIX nightbrand-codex-20261028-157 — szybszy start, etap 1: muzyka i ilustracje rozdziałów pobierane na żądanie.
+SHA-256 index.html: 26b114dda220b758c687dd77893ae1f560d04c8aa83eb743dc499e823af4004a.
+
 FENIX nightbrand-codex-20261028-156 — spójne place/drogi, brak brązowych łatek, bezstratne HD obiektów i NPC.
 SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70.
 

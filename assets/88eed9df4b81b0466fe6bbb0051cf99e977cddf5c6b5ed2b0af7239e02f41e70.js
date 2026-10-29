@@ -1,4 +1,244 @@
 
+// Shared atlas dependencies: CC0_FLOORS, buildDungeon/build* and buildAnims. Intro remains on demand.
+const SPRITE_GROUPS={
+  "combat_fx": [
+    "core"
+  ],
+  "whirl_fx": [
+    "core"
+  ],
+  "cc0_dirt2": [
+    "core"
+  ],
+  "cc0_dirt3": [
+    "r4"
+  ],
+  "cc0_ground1": [
+    "core",
+    "r2",
+    "r5"
+  ],
+  "cc0_ground2": [
+    "core",
+    "r5"
+  ],
+  "cc0_zl_place": [
+    "r3"
+  ],
+  "cc0_zl_street": [
+    "r3"
+  ],
+  "cc0_cracks": [
+    "core"
+  ],
+  "cc0_charcoal": [
+    "core",
+    "r2"
+  ],
+  "cc0_blackrock": [
+    "r2",
+    "r5"
+  ],
+  "cc0_mud": [
+    "r4"
+  ],
+  "cc0_leaves": [
+    "r4"
+  ],
+  "cc0_darkrock": [
+    "r4"
+  ],
+  "protagonist_a": [
+    "core"
+  ],
+  "protagonist_b": [
+    "core"
+  ],
+  "village_undead": [
+    "core"
+  ],
+  "order_deep_dead": [
+    "core"
+  ],
+  "boss_zrost": [
+    "core"
+  ],
+  "ally_npcs": [
+    "core"
+  ],
+  "effects_pickups": [
+    "core"
+  ],
+  "jerzak": [
+    "core"
+  ],
+  "collector": [
+    "core"
+  ],
+  "npc_new": [
+    "core"
+  ],
+  "dm_floor": [
+    "core",
+    "r2"
+  ],
+  "dm_walls": [
+    "core",
+    "r2"
+  ],
+  "dm_props": [
+    "core",
+    "r2"
+  ],
+  "decals": [
+    "core"
+  ],
+  "trans": [
+    "core"
+  ],
+  "br_ground": [
+    "core"
+  ],
+  "br_walls": [
+    "core"
+  ],
+  "br_props": [
+    "core"
+  ],
+  "zl_ground": [
+    "r3"
+  ],
+  "zl_walls": [
+    "r3"
+  ],
+  "zl_props": [
+    "r3"
+  ],
+  "zl_en_a": [
+    "r3"
+  ],
+  "zl_en_b": [
+    "r3"
+  ],
+  "morhad": [
+    "r3"
+  ],
+  "morhad_b": [
+    "r3"
+  ],
+  "cy_ground": [
+    "r5"
+  ],
+  "cy_big": [
+    "r5"
+  ],
+  "cy_props": [
+    "r5"
+  ],
+  "cy_walls": [
+    "r5"
+  ],
+  "cy_en_a": [
+    "r5"
+  ],
+  "cy_en_b": [
+    "r5"
+  ],
+  "cy_en_c": [
+    "r5"
+  ],
+  "cy_npc": [
+    "r5"
+  ],
+  "rachm": [
+    "r5"
+  ],
+  "wierz1": [
+    "r5"
+  ],
+  "wierz2": [
+    "r5"
+  ],
+  "cz_ground": [
+    "r4"
+  ],
+  "cz_walls": [
+    "r4"
+  ],
+  "cz_trees": [
+    "core",
+    "r4"
+  ],
+  "cz_props": [
+    "r4"
+  ],
+  "cz_en_a": [
+    "r4"
+  ],
+  "cz_en_b": [
+    "r4"
+  ],
+  "cz_en_c": [
+    "r4"
+  ],
+  "cz_npc": [
+    "r4"
+  ],
+  "leszy": [
+    "r4"
+  ],
+  "strzyga": [
+    "r4"
+  ],
+  "strzyga_b": [
+    "r4"
+  ],
+  "hero_d": [
+    "core"
+  ],
+  "hero_db": [
+    "core"
+  ],
+  "hero_dc": [
+    "core"
+  ],
+  "hero_dd": [
+    "core"
+  ],
+  "hero_def": [
+    "core"
+  ],
+  "intro1": [
+    "core"
+  ],
+  "intro1_fallback": [
+    "core"
+  ],
+  "intro2": [
+    "r2"
+  ],
+  "intro2_fallback": [
+    "r2"
+  ],
+  "intro3": [
+    "r3"
+  ],
+  "intro3_fallback": [
+    "r3"
+  ],
+  "intro4": [
+    "r4"
+  ],
+  "intro4_fallback": [
+    "r4"
+  ],
+  "intro5": [
+    "r5"
+  ],
+  "intro5_fallback": [
+    "r5"
+  ]
+};
 (()=>{
 const $=id=>document.getElementById(id);
 if(!window.THREE){$('screen').insertAdjacentHTML('beforeend','<div id="err">Nie udało się wczytać biblioteki 3D. Odśwież stronę.</div>');return}
@@ -1307,7 +1547,7 @@ function initWorld(ch){setGrid(ch);if((ch===4||ch===5)&&WORLD_SEEDS[ch]===undefi
   w.zoneLight=lsrc(0xff6a1a,0,7,0,1,0,'zone');w.merchantLight=lsrc(0xffb060,1.4,6,0,1.1,0,'merchant');
   WORLDS[ch]=w;
 }
-function ensureWorld(ch){if(WORLDS[ch])return;if(ch===4&&!IMGS.cz_ground||ch===5&&!IMGS.cy_ground)throw Error('Brak grafik rozdziału '+ch);initWorld(ch);useWorld(ch);ROOT=W.group;try{[null,buildBrzeznica,buildDolne,buildStolica,buildCzarnobor,buildCytadela][ch](IMGS);fitWorldProps(W,ch);finishWorldArt(W);for(const n of W.npcs){const fr=A[n.art],m=new THREE.Mesh(geo32,fr[0].n);if(fr[0].d){m.customDistanceMaterial=fr[0].d;m.castShadow=true}ROOT.add(m);W.npcMeshes[n.id]=m}buildMini()}finally{ROOT=scene}}
+function ensureWorld(ch){if(!groupReady(ch))return loadGroup(ch).then(()=>ensureWorld(ch));if(WORLDS[ch])return;if(ch===4&&!IMGS.cz_ground||ch===5&&!IMGS.cy_ground)throw Error('Brak grafik rozdziału '+ch);initWorld(ch);useWorld(ch);ROOT=W.group;try{[null,buildBrzeznica,buildDolne,buildStolica,buildCzarnobor,buildCytadela][ch](IMGS);fitWorldProps(W,ch);finishWorldArt(W);for(const n of W.npcs){const fr=A[n.art],m=new THREE.Mesh(geo32,fr[0].n);if(fr[0].d){m.customDistanceMaterial=fr[0].d;m.castShadow=true}ROOT.add(m);W.npcMeshes[n.id]=m}buildMini()}finally{ROOT=scene}}
 function useWorld(ch){CH=ch;W=WORLDS[ch];setGrid(ch);if(A&&A.collectorC5){if(!A.collectorC0)A.collectorC0=A.collector;A.collector=ch===5?A.collectorC5:A.collectorC0}
   if(A&&A.bossC5){if(!A.boss0)A.boss0=A.boss;A.boss=ch===5?A.bossC5:A.boss0}
   ({map,PROPS,LSRC,propObjs,walls,cliffs,pillars,lavas,braziers,waters,region}=W);START=W.start;SHRINES=W.shrines;
@@ -1368,14 +1608,16 @@ function procFrame(img,x,y,size,h,kind,lift=0){
 }
 
 let A=null,IMGS=null;
-function buildAnims(imgs){
-  const bz=beastSheet(),bs=(c,r)=>procFrame(bz,c*64,r*64,64,64);
+function buildAnims(imgs,group="all"){
+  const has=g=>group==="all"||group===g;
+  const bz=has("r3")&&!imgs.morhad?beastSheet():null,bs=(c,r)=>procFrame(bz,c*64,r*64,64,64);
   // sheets redrawn at 64x64 (same layout, cells twice as big) are detected by their width and drawn at the same size in the world
   const HI=new Set(['protagonist_a','protagonist_b','village_undead','order_deep_dead','ally_npcs','effects_pickups','jerzak','collector','zl_en_a','zl_en_b','npc_new','cz_en_a','cz_en_b','cz_en_c','cz_npc','cy_en_a','cy_en_b','cy_en_c','cy_npc','hero_d','hero_db','hero_dc','hero_dd','hero_def']);
   const row=(sheet,r,from=0,to=4,kind,size=32)=>{const k=HI.has(sheet)&&imgs[sheet].width/(imgs[sheet].nbDensity||1)>=256?2:1,cs=size*k;const out=[];for(let c=from;c<to;c++)out.push(procFrame(imgs[sheet],c*cs,r*cs,cs,cs,kind,k>1?2:0));return out};
   const ha='protagonist_a',hb='protagonist_b',vu='village_undead',od='order_deep_dead',an='ally_npcs',fx='effects_pickups';
-  const pick=row(fx,5,0,4,'fx');
+  const pick=has('core')?row(fx,5,0,4,'fx'):[];
   const anims={
+    ...(has("core")?{
     hero:{idle_down:row(ha,0),walk_down:row(ha,1),walk_up:row(ha,2),walk_side:row(ha,3),roll:row(ha,4),hurt:row(ha,5,0,2),
       swing_side:row(hb,0),swing_down:row(hb,1),swing_up:row(hb,2),death:row(hb,3).concat(row(hb,4,0,2)),idle_up:row(hb,5,0,2),idle_side:row(hb,5,2,4)},
     // slasher mode: the hero keeps the greatsword drawn (S1: idle and walk in three directions)
@@ -1392,6 +1634,8 @@ function buildAnims(imgs){
     ghoul:{walk:row(vu,2),attack:row(vu,3,0,2),death:row(vu,3,2,4)},
     bat:{walk:row(vu,4),attack:row(vu,4),death:row(vu,5,0,2)},
     jerzak:{idle:row('jerzak',0),walk:row('jerzak',1),panic:row('jerzak',2),attack:row('jerzak',3),death:row('jerzak',4),roll:row('jerzak',5,0,2)},
+    }:{}),
+    ...(has("r3")?{
     ...(imgs.zl_en_a?{
       madman:{walk:row('zl_en_a',0),attack:row('zl_en_a',1,0,2),death:row('zl_en_a',1,2,4),sheet:1},
       hound:{walk:row('zl_en_a',2),attack:row('zl_en_a',3,0,2),death:row('zl_en_a',3,2,4),sheet:1},
@@ -1407,6 +1651,8 @@ function buildAnims(imgs){
     // Morhad: Z6 (walk, wind-up/slam, death) and Z6b (charge, leap/dive, enraged roar), 64 px cells
     beast:imgs.morhad?(()=>{const m=(img,c,r)=>procFrame(imgs[img],c*64,r*64,64,64);return{walk:[m('morhad',0,0),m('morhad',1,0)],attack:[m('morhad',0,1),m('morhad',1,1)],death:[m('morhad',0,2),m('morhad',1,2)],
       charge:[m('morhad_b',0,0),m('morhad_b',1,0)],leap:[m('morhad_b',0,1),m('morhad_b',1,1)],rage:[m('morhad_b',0,2),m('morhad_b',1,2)],sheet:1}})():{walk:[bs(0,0),bs(1,0)],attack:[bs(0,1),bs(1,1)],death:[bs(0,2),bs(1,2)]},
+    }:{}),
+    ...(has("r5")?{
     ...(imgs.cy_npc?{skryba:row('cy_npc',0,0,4,'npc'),straznik:row('cy_npc',1,0,4,'npc'),pieczetnik:row('cy_npc',2,0,4,'npc')}:{skryba:row(an,2,0,4,'npc'),straznik:row(ha,0,0,4,'npc'),pieczetnik:row(an,3,0,4,'npc')}),
     // chapter V mid-boss Rachmistrz replaces the Collector in chapter V (swapped in useWorld)
     ...(imgs.wierz1&&imgs.wierz2?(()=>{const m=(k,c,r)=>procFrame(imgs[k],c*64,r*64,64,64);return{bossC5:{walk:[m('wierz1',0,0),m('wierz1',1,0)],attack:[m('wierz1',0,1),m('wierz1',1,1)],snap:[m('wierz1',0,2)],rise:[m('wierz1',1,2)],walk2:[m('wierz2',0,0),m('wierz2',1,0)],slam2:[m('wierz2',0,1)],cast2:[m('wierz2',1,1)],call2:[m('wierz2',0,2)],death:[m('wierz2',0,2),m('wierz2',1,2)],sheet:1}}})():{}),
@@ -1428,6 +1674,8 @@ function buildAnims(imgs){
       condemned:{walk:row('cy_en_c',4),attack:row('cy_en_c',5,0,2),death:row('cy_en_c',5,2,4),sheet:1}}:{
       paperrat:{walk:row(vu,2),attack:row(vu,3,0,2),death:row(vu,3,2,4)},bookgolem:{walk:row(od,4),attack:row(od,5,0,2),death:row(od,5,2,4)},condemned:{walk:row(vu,0),attack:row(vu,1,0,2),death:row(vu,1,2,4)}}),
     // chapter IV (K5, K6, KC, K7); without the sheets the old enemies stand in
+    }:{}),
+    ...(has("r4")?{
     ...(imgs.cz_en_a?{
       wolf:{walk:row('cz_en_a',0),attack:row('cz_en_a',1,0,2),death:row('cz_en_a',1,2,4),sheet:1},
       bandit:{walk:row('cz_en_a',2),attack:row('cz_en_a',3,0,2),death:row('cz_en_a',3,2,4),sheet:1},
@@ -1452,11 +1700,14 @@ function buildAnims(imgs){
       leszy:{walk:[m('leszy',0,0),m('leszy',1,0)],summon:[m('leszy',0,1)],strike:[m('leszy',1,1)],merge:[m('leszy',0,2)],attack:[m('leszy',1,1),m('leszy',1,1)],death:[m('leszy',0,2),m('leszy',1,2)],sheet:1},
       strzyga:{walk:[m('strzyga',0,0),m('strzyga',1,0)],scream:[m('strzyga',0,1)],slash:[m('strzyga',1,1)],burst:[m('strzyga',0,2)],attack:[m('strzyga',1,1),m('strzyga',1,1)],death:[m('strzyga',0,2),m('strzyga',1,2)],
         ...(imgs.strzyga_b?{crawl:[m('strzyga_b',0,0),m('strzyga_b',1,0)],leap:[m('strzyga_b',0,1)],land:[m('strzyga_b',1,1)],raise:[m('strzyga_b',0,2)],roar:[m('strzyga_b',1,2)]}:{crawl:[m('strzyga',0,0),m('strzyga',1,0)],leap:[m('strzyga',1,1)],land:[m('strzyga',1,1)],raise:[m('strzyga',0,1)],roar:[m('strzyga',0,1)]}),sheet:1}}})():{}),
+    }:{}),
+    ...(has('core')?{
     boss:{walk:row('boss_zrost',0,0,2,null,64),attack:row('boss_zrost',1,0,2,null,64),death:row('boss_zrost',2,0,2,null,64)},
     golem:{walk:row(an,0),slam:row(an,1,0,2),idle:row(an,1,2,4)},
     tharm:row(an,5,0,4,'ghost'),
     fx:{slash:row(fx,0,0,4,'fx'),spin:row(fx,1,0,4,'fx'),nova:row(fx,2,0,4,'fx'),inferno:row(fx,3,0,4,'fx'),spikes:row(fx,4,0,4,'fx')},
     pick:{1:pick[0],2:pick[1],5:pick[2],c:pick[3]}
+    }:{})
   };
   // Return to the same grip and blade length after every attack/deflection.
   const D=anims.heroD;if(D&&D.v2)for(const d of ['side','down','up']){const ready=D['idle_'+d][0];for(const combo of D.light[d])combo[3]=ready;D.heavy[d][3]=ready;if(D.parryDir)D.parryDir[d][3]=D.guard[d==='side'?0:d==='down'?1:2]}
@@ -3063,8 +3314,16 @@ function musStop(f=1.8){MUS.pend=0;if(!MUS.cur)return;const G=MUS.G,mb=MUS.mb,k=
 function musSetVol(v){musVol=v;try{localStorage.setItem('pn_mus',String(v))}catch(e){}if(MUS.mb&&AC)MUS.mb.gain.setTargetAtTime(v*(MUS.scale||1),AC.currentTime,.1);for(const e of document.querySelectorAll('.musSl'))e.value=Math.round(v*100)}
 const INTRO_KICK={1:'Rozdział I · Spalona Brzeźnica',2:'Rozdział II · Dolne Miasto',3:'Rozdział III · Złotogród',4:'Rozdział IV · Czarnobór',5:'Rozdział V · Cytadela Wierzycieli'};
 let INTRO=null;
+// Start loading at chapter selection, while the preparation screen is open.
+const INTRO_IMAGES=new Map();
+function preloadIntro(ch){const key='intro'+ch;if(!STORY||!SPRITE_DATA[key]||INTRO_IMAGES.has(ch))return;const im=new Image();INTRO_IMAGES.set(ch,im);im.onerror=()=>{const backup=SPRITE_DATA[key+'_fallback'];if(backup&&!im.nbFallback){im.nbFallback=true;SPRITE_DATA[key]=backup;im.src=backup;if(INTRO&&INTRO.ch===ch)$('iimg').style.backgroundImage=`url(${backup})`}else INTRO_IMAGES.delete(ch)};im.src=SPRITE_DATA[key]}
+for(let ch=1;ch<=5;ch++)$('start'+ch).addEventListener('click',()=>preloadIntro(ch),true);
+$('againBtn').addEventListener('click',()=>preloadIntro(CH===9?1:CH),true);
+$('nextBtn').addEventListener('click',()=>preloadIntro(Math.min(5,CH+1)),true);
+$('prepGo').addEventListener('click',()=>preloadIntro(PREP.ch),true);
 STORY_INTRO[5]=['Zakon oddał Nocy sumienie. Cytadela Wierzycieli nie stoi na skale, tylko na księgach: każdy dług Krainy, każde spalone dziecko i każda wyrwana moneta zostały tu zapisane, zanim ktokolwiek zdążył krzyknąć.','Mury są z czarnego kamienia, a w witrażach płoną sceny egzekucji. Na dziedzińcu skrzypi szubienica, z której nikt nie zdejmuje ciał. Wiatr przewraca strony rozrzucone po bruku, a na każdej widnieje twoje imię.','W kancelarii skrybowie wciąż piszą, choć atrament dawno zamienił się w krew. Sala Sądowa czeka na kolejną rozprawę, w skarbcu złoto liczy się samo, a w lochach brzęczą kajdany tych, którzy nie zdążyli spłacić.','Arcysędzia Rachmistrz nie podnosi głosu. Czyta wyrok jak rachunek i zawsze ściąga należność do ostatniej monety. Dalej, na końcu tej drogi, stoi tron, a na nim ten, który wpisał twoje piętno jako pierwsze.','Cztery zastawy spłacone, został ostatni. Piętno bije w rytmie dzwonu, a księgi się otwierają. Wierzyciel przyszedł po resztę.'];
 function storyIntro(ch){if(!STORY||!STORY_INTRO[ch]||!S||!SPRITE_DATA['intro'+ch])return;
+  preloadIntro(ch);
   const el=$('intro');$('iimg').style.backgroundImage=`url(${SPRITE_DATA['intro'+ch]})`;$('iimg').style.animation='none';void $('iimg').offsetWidth;$('iimg').style.animation='';
   $('ikick').textContent=INTRO_KICK[ch];$('itxtp').textContent='';el.classList.remove('out');el.hidden=false;$('touch').hidden=true;
   INTRO={ch,lines:STORY_INTRO[ch],i:0,pos:0,full:false,t:0,wait:.5};S.intro=true;}
@@ -3088,7 +3347,7 @@ for(const e of document.querySelectorAll('.musSl')){e.value=Math.round(musVol*10
 function storyBoss(e){if(!STORY||S.dg||e.dgBoss)return;const t=STORY_BOSS[CH+e.type]||STORY_BOSS[e.type];if(t)setTimeout(()=>{if(S&&S.phase==='play'&&!pl.dead)say(t)},3600)}
 let startBusy=false;
 function beginRun(){if(startBusy)return;startBusy=true;const b=$('prepGo'),label=b.innerHTML;b.disabled=true;b.textContent='Przygotowywanie rozdziału…';if(coarse)goFull();requestAnimationFrame(()=>setTimeout(()=>{try{if(!$('prep').hidden)start(PREP.ch)}catch(e){console.error(e);toMenu();say('Nie udało się przygotować rozdziału. Odśwież grę i spróbuj ponownie.')}finally{startBusy=false;b.disabled=false;b.innerHTML=label}},0))}
-function start(ch){if(!A)return;ftClear();hbClear();$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=$('bHeavy').hidden=false;$('btns').classList.add('sl');resetInput();if(coarse)goFull();if(coarse||SETT.quality==='low')for(const k of Object.keys(WORLDS))if(+k!==ch)releaseWorld(+k);ensureWorld(ch);useWorld(ch);initAudio();if(AC&&AC.state==='suspended')acResume();newGame();applyPrep();lastHud='';MUS.base=ch;for(const k of Object.keys(MUS_BUFS))musRelease(k);if(ch===1)musLoadBuf('crypt');if(ch===1&&STORY)musLoadBuf('intro');if(!(ch===1&&AUDIO_DATA.intro))musStart(ch);for(const id of ['title','end','lvl','dialog','prep'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16);if(ch>=1&&ch<=5)storyIntro(ch);if(ch===1&&INTRO&&AUDIO_DATA.intro)musStart('intro')}
+function start(ch){if(!A)return;if(!groupReady(ch))return waitChapter(ch,()=>start(ch));ftClear();hbClear();$('pause').hidden=true;$('bAtk').hidden=$('bBlock').hidden=$('bHeavy').hidden=false;$('btns').classList.add('sl');resetInput();if(coarse)goFull();if(coarse||SETT.quality==='low')for(const k of Object.keys(WORLDS))if(+k!==ch)releaseWorld(+k);ensureWorld(ch);useWorld(ch);initAudio();if(AC&&AC.state==='suspended')acResume();newGame();applyPrep();lastHud='';MUS.base=ch;for(const k of Object.keys(MUS_BUFS))musRelease(k);if(ch===1)musLoadBuf('crypt');if(ch===1&&STORY)musLoadBuf('intro');if(!(ch===1&&AUDIO_DATA.intro))musStart(ch);for(const id of ['title','end','lvl','dialog','prep'])$(id).hidden=true;$('hud').hidden=false;$('touch').hidden=!coarse;camTarget.set(pl.x/16,0,pl.y/16);if(ch>=1&&ch<=5)storyIntro(ch);if(ch===1&&INTRO&&AUDIO_DATA.intro)musStart('intro')}
 // ---- postać: poziom, perki i wyzwania nocy (postęp zapisany pod kluczem 's'; dawne dane Hordy 'a' są ignorowane) ----
 const PERKS=[
  {id:'zaliczka',lv:1,n:'Zaliczka',pl:'+50 monet na start',mi:'wrogów o 25% więcej',bx:.10,fx:k=>{S.coins+=50;k.en*=1.25}},
@@ -3113,7 +3372,7 @@ function loadProg(){try{return cleanProg(JSON.parse(localStorage.getItem('pn_pro
 const PROG=loadProg();function saveProg(){try{localStorage.setItem('pn_prog',JSON.stringify(PROG))}catch(e){warnSaveFailure()}}
 const prog=()=>PROG[PMODE()];
 function charLine(){const q=prog();return `Postać: poziom ${q.lv}${q.lv>=PMAX?' (maks.)':' · '+q.xp+'/'+PNEED(q.lv)+' doświadczenia'}`}
-function openPrep(ch){PREP.ch=ch;const q=prog();PREP.perks=q.sel.filter(id=>PERKS.find(p=>p.id===id&&p.lv<=q.lv)).slice(0,3);PREP.chal=CHALS.some(c=>c.id===q.ch)?q.ch:null;
+function openPrep(ch){if(!groupReady(ch))return waitChapter(ch,()=>openPrep(ch),$('start'+ch));PREP.ch=ch;const q=prog();PREP.perks=q.sel.filter(id=>PERKS.find(p=>p.id===id&&p.lv<=q.lv)).slice(0,3);PREP.chal=CHALS.some(c=>c.id===q.ch)?q.ch:null;
   $('title').hidden=true;$('end').hidden=true;$('prep').hidden=false;renderPrep();setTimeout(()=>{const f=$('prepGo');f.focus();$('prep').scrollTop=0},30)}
 function prepBonus(){let b=0;for(const id of PREP.perks)b+=PERKS.find(p=>p.id===id).bx;const c=CHALS.find(c=>c.id===PREP.chal);return {perk:b,ch:c?c.bx:0}}
 function renderPrep(){const q=prog();$('prepK').textContent=CHN[PREP.ch-1];$('prepLv').textContent=charLine();$('prepBar').style.width=(q.lv>=PMAX?100:100*q.xp/PNEED(q.lv))+'%';
@@ -3142,7 +3401,7 @@ function saveStore(){try{localStorage.setItem('pn_save',JSON.stringify(SETT.save
 const mmss=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
 function recordRun(C,won,t,lvl,kills){const k='s'+C,r=SETT.save[k]||(SETT.save[k]={});
   if(won){r.win=r.win?Math.min(r.win,t):t}r.t=Math.max(r.t||0,t);r.lvl=Math.max(r.lvl||0,lvl);r.kills=Math.max(r.kills||0,kills);saveStore()}
-function renderRecords(){{const q=prog(),n=$('chN');if(n){n.textContent=q.lv;$('chBar').style.setProperty('--p',q.lv>=PMAX?1:q.xp/PNEED(q.lv));$('chXp').textContent=q.lv>=PMAX?'Poziom maksymalny':q.xp+' / '+PNEED(q.lv)+' XP do poziomu '+(q.lv+1)}}for(let i=1;i<=5;i++){const b=$('start'+i);if(!b||b.disabled&&!b.querySelector('small'))continue;if(i===4&&!IMGS?.cz_ground||i===5&&!IMGS?.cy_ground)continue;const r=SETT.save['s'+i],lk=chLocked(i);b.disabled=lk;b.classList.toggle('lk',lk);
+function renderRecords(){{const q=prog(),n=$('chN');if(n){n.textContent=q.lv;$('chBar').style.setProperty('--p',q.lv>=PMAX?1:q.xp/PNEED(q.lv));$('chXp').textContent=q.lv>=PMAX?'Poziom maksymalny':q.xp+' / '+PNEED(q.lv)+' XP do poziomu '+(q.lv+1)}}for(let i=1;i<=5;i++){const b=$('start'+i);if(!b||b.disabled&&!b.querySelector('small'))continue;const r=SETT.save['s'+i],lk=chLocked(i);b.disabled=lk;b.classList.toggle('lk',lk);
     b.innerHTML='<small>Rozdział '+CHR[i-1]+':</small>'+CHN[i-1]+(lk?'<span class="recline">Zablokowany · ukończ rozdział '+CHR[i-2]+' lub włącz Arcade na ekranie tytułowym</span>':r?'<span class="recline'+(r.win?' ok':'')+'">'+(r.win?'✓ ukończony '+mmss(r.win)+' · ':'najdłużej '+mmss(r.t)+' · ')+'poz. '+r.lvl+' · zabici '+r.kills+'</span>':'')}}
 function endGame(won){$('activeSkillHud').hidden=true;clearSwordTransient();if(swordGlow)swordGlow.visible=false;$('notice').hidden=true;S.notice=null;S.noticeQueue=[];S.banner=null;$('msg').classList.remove('on');S.witChoice=false;for(const id of ['lvl','shop','dialog','pause'])$(id).hidden=true;musStop(2.5);const inDg=!!S.dg,C=inDg?1:CH;S.phase='end';$('touch').hidden=true;$('boss').hidden=true;$('prompt').hidden=true;const surv=S.t,m=Math.floor(surv/60),s=Math.floor(surv%60);if(!inDg)recordRun(C,won,surv,S.lvl,S.kills);$('endXp').textContent=grantXp(won,surv);$('chal').hidden=true;
   $('endKicker').textContent=won?`Rozdział ${['I','II','III','IV','V'][C-1]} ukończony`:(C===1?'Noc cię pochłonęła':C===2?'Dolne Miasto cię pochłonęło':C===3?'Złotogród cię pochłonął':C===5?'Cytadela cię pochłonęła':'Czarnobór cię pochłonął');
@@ -3414,19 +3673,32 @@ $('repeatTut').addEventListener('click',()=>{setHints(true);try{localStorage.rem
 const skip=document.createElement('button');skip.id='tutSkip';skip.type='button';skip.textContent='Pomiń podpowiedzi';skip.hidden=true;$('screen').appendChild(skip);skip.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();finishTutorial()});
 applyAccess();
 // load sprite sheets, then start the loop
-const names=Object.keys(SPRITE_DATA).filter(n=>!n.endsWith('_fallback')),imgs={};let loadedImages=0;const loadStatus=document.createElement('p');loadStatus.id='loadStatus';loadStatus.className='figcap';loadStatus.setAttribute('role','status');loadStatus.textContent='Wczytywanie grafik: 0%';$('title').appendChild(loadStatus);
-Promise.all(names.map(n=>new Promise((res,rej)=>{const im=new Image();im.nbDensity=SPRITE_RES[n]||1;im.nbKey=n;im.onload=()=>{imgs[n]=im;loadStatus.textContent='Wczytywanie grafik: '+Math.round(++loadedImages/names.length*100)+'%';res()};im.onerror=()=>{const backup=SPRITE_DATA[n+'_fallback'];if(backup&&!im.nbFallback){im.nbFallback=true;SPRITE_DATA[n]=backup;im.src=backup}else rej(new Error('Nie można wczytać obrazu: '+n))};im.src=SPRITE_DATA[n]}))).then(()=>{
-  A=buildAnims(imgs);IMGS=imgs;initCombatEffects();initWhirlVisuals();decals(imgs);
+const imgs={},GROUP_STATE={},GROUP_ORDER=['core','r2','r3','r4','r5'],IMAGE_PENDING=new Set();let imageWorkers=0;
+function groupFor(ch){return ch>=2&&ch<=5?'r'+ch:'core'}
+function groupReady(ch){return GROUP_STATE[groupFor(ch)]?.ready===true}
+function tintAnims(part){const A=part;
   // a dead NPC no longer glows
   for(const k of ['elder','wit','izolda','ottokar'])if(A[k]&&A[k][3])A[k][3].n.emissive.setHex(0x000000);
   const TINT={madman:0xe0a890,hound:0xb89078,rotknight:0xa8b880,monk:0xffa060,izolda:0xc4b4ec,ottokar:0xf0d090,aurel:0xa8c8f0};
-  if(!A.npcNew)for(const [k,c] of [['chojrak',0xfff4d0],['mila',0xd8b890],['heri',0xb8c4dc]])for(const f of A[k])f.n.color.setHex(c);
-  for(const k in TINT){const a=A[k];if(a.sheet||(Array.isArray(a)&&imgs.zl_en_b))continue;for(const f of Array.isArray(a)?a:Object.values(a).flat())f.n.color.setHex(TINT[k])}
+  if(A.chojrak&&!A.npcNew)for(const [k,c] of [['chojrak',0xfff4d0],['mila',0xd8b890],['heri',0xb8c4dc]])for(const f of A[k])f.n.color.setHex(c);
+  for(const k in TINT){const a=A[k];if(!a)continue;if(a.sheet||(Array.isArray(a)&&imgs.zl_en_b))continue;for(const f of Array.isArray(a)?a:Object.values(a).flat())f.n.color.setHex(TINT[k])}
+
+}
+function groupProgress(g){const st=GROUP_STATE[g];return st.keys.length?st.keys.filter(k=>imgs[k]).length/st.keys.length:1}
+function refreshGroup(g){const st=GROUP_STATE[g];for(const w of st.watchers)w(st.error?'Błąd — kliknij, aby ponowić':'Wczytywanie… '+Math.floor(groupProgress(g)*100)+'%');if(g==='core')window.NB_BOOT?.progress?.(groupProgress(g))}
+function finishGroup(g){const st=GROUP_STATE[g];if(st.ready||st.error||!st.keys.every(k=>imgs[k]))return;if(g!=='core'){const part=buildAnims(imgs,g);tintAnims(part);Object.assign(A,part)}st.ready=true;refreshGroup(g);for(const w of st.waiters.splice(0))w.resolve();if(GROUP_ORDER.every(g=>GROUP_STATE[g].ready))window.NB_GROUPS_READY=true}
+function pumpImages(){while(imageWorkers<2){const g=GROUP_ORDER.find(g=>{const s=GROUP_STATE[g];return s.enabled&&!s.ready&&!s.error&&s.keys.some(k=>!imgs[k]&&!IMAGE_PENDING.has(k))});if(!g)break;const st=GROUP_STATE[g],k=st.keys.find(k=>!imgs[k]&&!IMAGE_PENDING.has(k));st.loading.add(k);IMAGE_PENDING.add(k);imageWorkers++;const im=new Image();im.nbDensity=SPRITE_RES[k]||1;im.nbKey=k;im.onload=()=>{imgs[k]=im;imageWorkers--;st.loading.delete(k);IMAGE_PENDING.delete(k);for(const h of GROUP_ORDER){refreshGroup(h);if(GROUP_STATE[h].enabled)finishGroup(h)}pumpImages()};im.onerror=()=>{const backup=SPRITE_DATA[k+'_fallback'];if(backup&&!im.nbFallback){im.nbFallback=true;SPRITE_DATA[k]=backup;im.src=backup;return}imageWorkers--;st.loading.delete(k);IMAGE_PENDING.delete(k);st.error=true;refreshGroup(g);for(const w of st.waiters.splice(0))w.reject(Error('Nie można wczytać obrazu: '+k));pumpImages()};im.src=SPRITE_DATA[k]}}
+function loadGroup(ch,watch){const g=typeof ch==='string'?ch:groupFor(ch),st=GROUP_STATE[g];if(st.ready)return Promise.resolve();st.error=false;st.enabled=true;if(watch)st.watchers.add(watch);const p=new Promise((resolve,reject)=>st.waiters.push({resolve,reject}));const i=GROUP_ORDER.indexOf(g);if(g!=='core'){GROUP_ORDER.splice(i,1);GROUP_ORDER.splice(1,0,g)}refreshGroup(g);finishGroup(g);pumpImages();return p.finally(()=>{if(watch)st.watchers.delete(watch)})}
+function waitChapter(ch,action,button){if(groupReady(ch))return action();const focused=document.activeElement,b=focused?.matches('#againBtn,#nextBtn,#prepGo')?focused:button||$('prepGo');if(b.nbWait)return b.nbWait;const label=b.innerHTML;b.nbWait=loadGroup(ch,t=>{b.textContent=t}).then(()=>{b.innerHTML=label;return action()},()=>{b.textContent='Błąd — kliknij, aby ponowić'}).finally(()=>{b.nbWait=null});return b.nbWait}
+for(const g of GROUP_ORDER)GROUP_STATE[g]={keys:Object.keys(SPRITE_DATA).filter(k=>!/_fallback$/.test(k)&&!/^intro[1-5]$/.test(k)&&SPRITE_GROUPS[k].includes(g)&& (g==='core'||!SPRITE_GROUPS[k].includes('core'))),loading:new Set(),watchers:new Set(),waiters:[],ready:false,error:false,enabled:false};
+loadGroup('core').then(()=>{
+  A=buildAnims(imgs,'core');IMGS=imgs;tintAnims(A);initCombatEffects();initWhirlVisuals();decals(imgs);
   ensureWorld(1);
-  ROOT=scene;useWorld(1);loadStatus.hidden=true;
+  ROOT=scene;useWorld(1);
   heroMesh=new THREE.Mesh(geo32,A.hero.idle_down[0].n);heroMesh.visible=false;scene.add(heroMesh);
   margaMesh=new THREE.Mesh(geo32,A.marga[0].n);margaMesh.customDistanceMaterial=A.marga[0].d;margaMesh.castShadow=true;margaMesh.visible=false;scene.add(margaMesh);
-  for(const id of ['start1','start2','start3'])$(id).disabled=false;$('start4').disabled=!imgs.cz_ground;$('start5').disabled=!imgs.cy_ground;$('start5').innerHTML='<small>Rozdział V</small>Cytadela Wierzycieli';$('start4').innerHTML='<small>Rozdział IV</small>Czarnobór';$('start1').innerHTML='<small>Rozdział I</small>Spalona Brzeźnica';$('start2').innerHTML='<small>Rozdział II</small>Dolne Miasto';$('start3').innerHTML='<small>Rozdział III</small>Złotogród';renderRecords();window.NB_BOOT?.ready();
+  for(const id of ['start1','start2','start3'])$(id).disabled=false;$('start4').disabled=false;$('start5').disabled=false;$('start5').innerHTML='<small>Rozdział V</small>Cytadela Wierzycieli';$('start4').innerHTML='<small>Rozdział IV</small>Czarnobór';$('start1').innerHTML='<small>Rozdział I</small>Spalona Brzeźnica';$('start2').innerHTML='<small>Rozdział II</small>Dolne Miasto';$('start3').innerHTML='<small>Rozdział III</small>Złotogród';renderRecords();window.NB_BOOT?.ready();
+  for(const g of ['r2','r3','r4','r5'])GROUP_STATE[g].enabled=true;for(const g of ['r2','r3','r4','r5'])finishGroup(g);pumpImages();
 }).catch(err=>{console.error(err);window.NB_BOOT?.fail(err);$('start1').textContent='Nie udało się wczytać grafik'});
 requestAnimationFrame(frame);
 })();
