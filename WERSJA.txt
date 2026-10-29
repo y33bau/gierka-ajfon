@@ -1,3 +1,9 @@
+FENIX nightbrand-codex-20261028-146 — HD-2D: podłoża, ściany i dekoracje I–V oraz krypty (lokalnie).
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70.
+
+FENIX nightbrand-codex-20261028-144 — HD-2D etap 1: podłoża i próbkowanie atlasu.
+SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70.
+
 FENIX nightbrand-codex-20261028-142 — Wir Ostrza: mechanika i grafika Gemini, 29.10.2026.
 SHA-256 index.html: 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70 (loader bez zmian).
 

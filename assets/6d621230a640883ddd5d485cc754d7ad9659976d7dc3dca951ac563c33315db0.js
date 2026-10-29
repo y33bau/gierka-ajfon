@@ -572,31 +572,45 @@ function groundTile(g,img,col,row,tx,ty){const n=groundHash(tx,ty),plan=W.ground
 // Keep one small atlas and tile index map instead of allocating a 6656 x 5824 texture per chapter.
 function groundMaterial(m){const info=m.map&&m.map.userData&&m.map.userData.ground;if(!info)return m;
   m.bumpMap=null;m.bumpScale=0;delete m.userData.surfaceDetail;
-  m.groundAtlas=surfaceTex(groundPadded(info.image));m.groundCoarse=surfaceTex(groundCoarse(info.image));m.groundLayout=new THREE.DataTexture(info.cells,MW,MH,THREE.RGBAFormat);m.groundLayout.magFilter=m.groundLayout.minFilter=THREE.NearestFilter;m.groundLayout.needsUpdate=true;
+  m.groundAtlas=surfaceTex(groundPadded(info.image));m.groundCoarse=surfaceTex(groundCoarse(info.image));
+  // Stable derivatives across tile-index jumps; retain minification without neighbouring-cell bleed.
+  m.groundCoarse.generateMipmaps=false;m.groundCoarse.minFilter=THREE.LinearFilter;m.groundCoarse.anisotropy=1;m.groundCoarse.needsUpdate=true;
+  const groundGrad=renderer.capabilities.isWebGL2||renderer.extensions.has('EXT_shader_texture_lod');
+  m.extensions={...(m.extensions||{}),derivatives:true,shaderTextureLOD:groundGrad};
+  if(!groundGrad)for(const tex of [m.groundAtlas,m.groundCoarse]){tex.generateMipmaps=false;tex.minFilter=THREE.LinearFilter;tex.anisotropy=1;tex.needsUpdate=true;}m.groundLayout=new THREE.DataTexture(info.cells,MW,MH,THREE.RGBAFormat);m.groundLayout.magFilter=m.groundLayout.minFilter=THREE.NearestFilter;m.groundLayout.needsUpdate=true;
   m.groundTones=Array.from({length:8},(_,row)=>{const c=groundCoarse(info.image),d=c.getContext('2d').getImageData(0,row*16,128,16).data,v=new THREE.Vector3();for(let i=0;i<d.length;i+=4){v.x+=d[i];v.y+=d[i+1];v.z+=d[i+2]}return v.multiplyScalar(1/(2048*255))});m.groundLite={value:coarse||SETT.quality==='low'?1:0};m.onBeforeCompile=sh=>{sh.uniforms.nbArchitecture={value:CH===5?1:0};sh.uniforms.nbLite=m.groundLite;sh.uniforms.nbTones={value:m.groundTones};sh.uniforms.nbAtlas={value:m.groundAtlas};sh.uniforms.nbCoarse={value:m.groundCoarse};sh.uniforms.nbLayout={value:m.groundLayout};sh.uniforms.nbGrid={value:new THREE.Vector2(MW,MH)};
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
+${groundGrad?'#define NB_STABLE_GRAD 1':''}
 uniform vec3 nbTones[8];uniform float nbLite;uniform float nbArchitecture;
 vec3 nbTone(float row){vec3 c=nbTones[0];for(int i=1;i<8;i++)if(abs(row-float(i))<.5)c=nbTones[i];return c;}uniform sampler2D nbAtlas;uniform sampler2D nbCoarse;uniform sampler2D nbLayout;uniform vec2 nbGrid;
 vec4 nbCell(vec2 cell){return floor(texture2D(nbLayout,(clamp(cell,vec2(0.),nbGrid-1.)+.5)/nbGrid)*255.+.5);}
 vec2 nbUV(vec4 cell,vec2 uv){float v=mod(cell.b,8.); float rot=mod(v,4.);if(rot<.5){}else if(rot<1.5)uv=vec2(uv.y,1.-uv.x);else if(rot<2.5)uv=1.-uv;else uv=vec2(1.-uv.y,uv.x);if(v>=4.)uv.x=1.-uv.x;uv=(4.+56.*clamp(uv,vec2(.02),vec2(.98)))/64.;return vec2((cell.r-1.+uv.x)/8.,1.-(cell.g+uv.y)/8.);}
-vec2 nbReference(vec4 cell,vec2 uv){vec2 p=nbUV(cell,uv);return vec2((cell.r-1.+(64.*(p.x*8.-cell.r+1.)-4.)/56.)/8.,1.-(cell.g+(64.*((1.-p.y)*8.-cell.g)-4.)/56.)/8.);}
+vec2 nbReference(vec4 cell,vec2 uv){uv=clamp(uv,vec2(.03125),vec2(.96875));vec2 p=nbUV(cell,uv);return vec2((cell.r-1.+(64.*(p.x*8.-cell.r+1.)-4.)/56.)/8.,1.-(cell.g+(64.*((1.-p.y)*8.-cell.g)-4.)/56.)/8.);}
+vec2 nbDx,nbDy;
+vec3 nbRead(sampler2D atlas,vec4 cell,vec2 local){vec2 uv=nbUV(cell,local);
+#ifdef NB_STABLE_GRAD
+vec2 gx=nbUV(cell,vec2(.5)+nbDx)-nbUV(cell,vec2(.5)),gy=nbUV(cell,vec2(.5)+nbDy)-nbUV(cell,vec2(.5));float cap=min(1.,4./max(512.*max(length(gx),length(gy)),.001));return texture2DGradEXT(atlas,uv,gx*cap,gy*cap).rgb;
+#else
+return texture2D(atlas,uv).rgb;
+#endif
+}
 float nbFlag(float flags,float bit){return mod(floor(flags/bit),2.);}
-vec3 nbNeighbor(vec3 color,vec2 pos,vec2 local,vec2 dir,float distanceToEdge,vec4 cell){if(distanceToEdge>(nbFlag(cell.a,64.)>.5?.48:.19)||nbFlag(cell.a,1.)<.5)return color;vec4 other=nbCell(pos+dir);if(other.r<.5||nbFlag(other.a,1.)<.5)return color;float irregular=nbFlag(cell.a,64.)>.5?.30+.12*sin((pos.x+local.x)*3.1+(pos.y+local.y)*2.7)*sin((pos.y+local.y)*4.3):(other.g==cell.g?.10:.16)+.025*sin((pos.x+local.x)*8.3+(pos.y+local.y)*5.7);float amount=(1.-smoothstep(0.,irregular,distanceToEdge))*.5;return mix(color,texture2D(nbAtlas,nbUV(other,local-dir)).rgb,amount);}
+vec3 nbNeighbor(vec3 color,vec2 pos,vec2 local,vec2 dir,float distanceToEdge,vec4 cell){if(distanceToEdge>(nbFlag(cell.a,64.)>.5?.48:.19)||nbFlag(cell.a,1.)<.5)return color;vec4 other=nbCell(pos+dir);if(other.r<.5||nbFlag(other.a,1.)<.5)return color;float irregular=nbFlag(cell.a,64.)>.5?.30+.12*sin((pos.x+local.x)*3.1+(pos.y+local.y)*2.7)*sin((pos.y+local.y)*4.3):(other.g==cell.g?.10:.16)+.025*sin((pos.x+local.x)*8.3+(pos.y+local.y)*5.7);float amount=(1.-smoothstep(0.,irregular,distanceToEdge))*.5;return mix(color,nbRead(nbAtlas,other,local-dir),amount);}
 `);
     sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`#ifdef USE_MAP
-vec4 sampledDiffuseColor=texture2D(map,vUv);vec2 nbPos=vec2(vUv.x,1.-vUv.y)*nbGrid,nbTile=floor(nbPos),nbLocal=fract(nbPos);vec4 cell=nbCell(nbTile);
-if(cell.r>.5){vec2 refUV=nbReference(cell,nbLocal);
+vec4 sampledDiffuseColor=texture2D(map,vUv);vec2 nbPos=vec2(vUv.x,1.-vUv.y)*nbGrid,nbTile=floor(nbPos),nbLocal=fract(nbPos);vec4 cell=nbCell(nbTile);nbDx=dFdx(nbPos);nbDy=dFdy(nbPos);
+if(cell.r>.5){
 if(nbLite<.5&&nbFlag(cell.a,64.)>.5&&cell.g!=3.&&cell.g!=1.){vec2 warp=nbPos+.64*vec2(sin(nbPos.y*1.7+sin(nbPos.x*.8)),sin(nbPos.x*1.5+sin(nbPos.y*.9)));vec4 next=nbCell(floor(warp));if(next.r>.5&&nbFlag(next.a,64.)>.5&&next.g!=cell.g&&next.g!=3.&&next.g!=1.){cell=next;nbTile=floor(warp);nbLocal=fract(warp);}}
-vec2 uv=nbUV(cell,nbLocal);vec3 detail=texture2D(nbAtlas,uv).rgb,coarse=nbTone(cell.g);
-if(nbLite<.5){coarse=texture2D(nbCoarse,refUV).rgb;
+vec2 uv=nbUV(cell,nbLocal);vec3 detail=nbRead(nbAtlas,cell,nbLocal),coarse=texture2D(nbCoarse,nbReference(cell,nbLocal)).rgb;
+if(nbLite<.5){
 detail=nbNeighbor(detail,nbTile,nbLocal,vec2(-1.,0.),nbLocal.x,cell);detail=nbNeighbor(detail,nbTile,nbLocal,vec2(1.,0.),1.-nbLocal.x,cell);detail=nbNeighbor(detail,nbTile,nbLocal,vec2(0.,-1.),nbLocal.y,cell);detail=nbNeighbor(detail,nbTile,nbLocal,vec2(0.,1.),1.-nbLocal.y,cell);
 }
-vec3 ratio=clamp(sampledDiffuseColor.rgb/max(coarse,vec3(.025)),vec3(.08),vec3(1.6));vec3 result=detail*ratio;float decal=smoothstep(.18,.5,length(sampledDiffuseColor.rgb-coarse));result=mix(result,sampledDiffuseColor.rgb,decal);
+vec3 ratio=clamp(sampledDiffuseColor.rgb/max(coarse,vec3(.025)),vec3(.7),vec3(1.15));vec3 result=detail*ratio;float decal=smoothstep(.18,.5,length(sampledDiffuseColor.rgb-coarse));result=mix(result,sampledDiffuseColor.rgb,decal);
 if(nbFlag(cell.a,32.)>.5){float edge=1.;if(nbFlag(cell.a,2.)>.5)edge=min(edge,nbLocal.x);if(nbFlag(cell.a,4.)>.5)edge=min(edge,1.-nbLocal.x);if(nbFlag(cell.a,8.)>.5)edge=min(edge,nbLocal.y);if(nbFlag(cell.a,16.)>.5)edge=min(edge,1.-nbLocal.y);float trim=smoothstep(.02,.035,edge)*(1.-smoothstep(.075,.09,edge));result=mix(result,vec3(.56,.35,.105)*(.86+.14*sin((nbPos.x+nbPos.y)*80.)),trim);}
-if(nbArchitecture>.5&&cell.b>=8.){float mask=floor(cell.b/8.);vec4 v=vec4(4.,1.,0.,0.),h=vec4(5.,1.,0.,0.);bool vertical=(nbFlag(mask,1.)>.5&&nbLocal.y<=.5)||(nbFlag(mask,4.)>.5&&nbLocal.y>=.5),horizontal=(nbFlag(mask,8.)>.5&&nbLocal.x<=.5)||(nbFlag(mask,2.)>.5&&nbLocal.x>=.5);if(vertical)result=mix(result,texture2D(nbAtlas,nbUV(v,nbLocal)).rgb*ratio,1.-smoothstep(.07,.12,abs(nbLocal.x-.5)));if(horizontal)result=mix(result,texture2D(nbAtlas,nbUV(h,nbLocal)).rgb*ratio,1.-smoothstep(.07,.12,abs(nbLocal.y-.5)));}
+if(nbArchitecture>.5&&cell.b>=8.){float mask=floor(cell.b/8.);vec4 v=vec4(4.,1.,0.,0.),h=vec4(5.,1.,0.,0.);bool vertical=(nbFlag(mask,1.)>.5&&nbLocal.y<=.5)||(nbFlag(mask,4.)>.5&&nbLocal.y>=.5),horizontal=(nbFlag(mask,8.)>.5&&nbLocal.x<=.5)||(nbFlag(mask,2.)>.5&&nbLocal.x>=.5);if(vertical)result=mix(result,nbRead(nbAtlas,v,nbLocal)*ratio,1.-smoothstep(.07,.12,abs(nbLocal.x-.5)));if(horizontal)result=mix(result,nbRead(nbAtlas,h,nbLocal)*ratio,1.-smoothstep(.07,.12,abs(nbLocal.y-.5)));}
 sampledDiffuseColor.rgb=result;}
 sampledDiffuseColor=mapTexelToLinear(sampledDiffuseColor);diffuseColor*=sampledDiffuseColor;
-#endif`)};m.customProgramCacheKey=()=> 'nightbrand-ground-atlas-v1';return m}
+#endif`)};m.customProgramCacheKey=()=> 'nightbrand-ground-atlas-v2';return m}
 function groundDetails(g){const plan=W.groundPlan;if(!plan)return;for(const p of W.PROPS){const x=Math.floor(p.x),y=Math.floor(p.y),i=y*MW+x;if(plan.road[i])continue;const fire=p.fire||/furnace|brazier/.test(p.k),blood=/gallows|covered_corpses|beggar_bodies/.test(p.k),bones=/bones|sarcophagus/.test(p.k);if(!fire&&!blood&&!bones)continue;const key=fire?'scorch':blood?'pool':'bones',stamp=canvas(40,40),q=stamp.getContext('2d');q.drawImage(DEC[key][groundHash(x,y)%4],0,0,40,40);q.globalCompositeOperation='destination-in';const mask=q.createRadialGradient(20,20,4,20,20,20);mask.addColorStop(0,'#fff');mask.addColorStop(1,'transparent');q.fillStyle=mask;q.fillRect(0,0,40,40);g.save();g.globalAlpha=blood?.28:.18;g.drawImage(stamp,p.x*16-20,p.y*16-20);g.restore()}
   for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const i=y*MW+x;if(plan.road[i]||plan.rows[i]===255||groundHash(x,y)%67)continue;const wall=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>SOLID.has(map[(y+dy)*MW+x+dx]));if(!wall)continue;g.save();g.globalAlpha=.12;g.drawImage(DEC.crack[groundHash(y,x)%4],x*16-4,y*16-4,24,24);g.restore()}}
 
