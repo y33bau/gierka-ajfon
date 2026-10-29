@@ -1,3 +1,6 @@
+FENIX nightbrand-codex-20261028-169 — poprawka starego wyglądu po aktualizacji: lista plików (manifest) jest zawsze pobierana z serwera, service worker i loader nie biorą jej z pamięci podręcznej (Claude). Opublikowano na GitHub.
+SHA-256 index.html: fbbf8b340696a3475f88cb0ecf255b8cb07e5108d71edf90473ef7ea29ec82b0.
+SHA-256 sw.js: e8376318bffc9a7f71f3dc381fc8e68fa76663bf2bcd85441b267d6f12b57584.
 FENIX nightbrand-codex-20261028-168 — scalenie: efekty dźwiękowe TomMusic i Owlish (38 próbek) oraz nazwa OBDYP (chat, cache 163–167) z ekranem tytułowym, paskiem XP i większym przyciskiem Wyrusz (Claude). Opublikowano na GitHub.
 SHA-256 index.html: b66ffb1b5a95c33906f16d0f84e1cd988f36f254cefe4852c9c44151a6a845c8.
 
