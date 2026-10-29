@@ -1047,6 +1047,11 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 /* Wir Ostrza: only its icon; existing slots/cards keep their layout. */
 .ic-whirl{background-image:var(--nb-ni_whirl)!important;background-size:100% 100%!important;background-position:center!important;image-rendering:pixelated}
 
+/* Author: more visible touch controls and room between active skills. */
+#touch #btns button,#touch #bPause{opacity:.9}
+#touch #btns button:active,#touch #bPause:active{opacity:1}
+#activeSkillHud{gap:16px}
+
 
 /* Level choice: compact list in portrait, three calm cards in landscape. */
 #screen #lvl{align-items:center;justify-content:flex-start!important;padding:max(12px,2vh) 4%;background:radial-gradient(ellipse at 50% 40%,rgba(35,25,24,.9),rgba(5,4,7,.96));}
