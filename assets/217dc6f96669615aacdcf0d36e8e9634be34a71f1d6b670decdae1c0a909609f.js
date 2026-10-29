@@ -2792,10 +2792,10 @@ function renderCards(){$('lvlTitle').textContent=`Poziom ${S.lvl-S.pendLv+1}`;$(
 function rerollCards(){if(!S||!S.choosing)return;const pr=rrPrice();if(pr>0&&S.coins<pr){play('empty',0);return}
   if(pr===0)S.rr--;else{S.coins-=pr;S.rrPaid=(S.rrPaid||0)+1}
   const old=S.choices;let c=null;for(let t=0;t<8;t++){c=rollChoices();if(!c.some(k=>old.includes(k)))break}S.choices=c;play('bless',0);renderCards();setTimeout(()=>{const f=$('card0');f&&f.focus()},20)}
-const LEVEL_CHOICE_DELAY=2500;let levelReadyAt=0,levelReadyTimer=0;
+const LEVEL_CHOICE_DELAY=1000;let levelReadyAt=0,levelReadyTimer=0;
 function pickLevelCard(i){if(performance.now()<levelReadyAt)return;pick(i)}
 function rerollLevelCards(){if(performance.now()<levelReadyAt)return;rerollCards()}
-function armLevelCards(){clearTimeout(levelReadyTimer);levelReadyAt=performance.now()+LEVEL_CHOICE_DELAY;$('lvl').classList.add('choice-wait');$('levelWait').textContent='Przeczytaj opisy — wybór dostępny po 2,5 s';levelReadyTimer=setTimeout(()=>{$('lvl').classList.remove('choice-wait');$('levelWait').textContent=''},LEVEL_CHOICE_DELAY)}
+function armLevelCards(){clearTimeout(levelReadyTimer);levelReadyAt=performance.now()+LEVEL_CHOICE_DELAY;$('lvl').classList.add('choice-wait');$('levelWait').textContent='Przeczytaj opisy — wybór dostępny po 1 s';levelReadyTimer=setTimeout(()=>{$('lvl').classList.remove('choice-wait');$('levelWait').textContent=''},LEVEL_CHOICE_DELAY)}
 function openLevelUp(){resetInput();S.choosing=true;pl.swingT=0;play('level',0);if(!pl.dead)pl.hp=Math.min(pl.max,pl.hp+pl.max*S.pk.lvHeal);// level healing is defined by the selected preparation perks
   S.choices=rollChoices();S.rr=1;renderCards();
   $('lvl').hidden=false;document.querySelector('#lvl .level-build').open=false;armLevelCards();$('touch').hidden=true;setTimeout(()=>{const f=$('card0');f&&f.focus()},30)}
