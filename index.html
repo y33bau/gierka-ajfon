@@ -48,12 +48,15 @@
       </div>
       <div id="intro" hidden><div class="iimg" id="iimg"></div><div class="ivig"></div><div class="itxt"><div class="ikick" id="ikick"></div><p id="itxtp"></p><div class="ihint" id="ihint"></div></div></div>
       <div class="overlay" id="title">
-        <div class="title-desktop-copy">
-        <div class="tcol">
+        <div class="title-left">
         <div class="logo" role="img" aria-label="Nightbrand"></div>
         <div class="chcard" id="charCard"><div class="chtop"><span class="chlab">Poziom postaci</span><span class="chn" id="chN">1</span></div><div class="xpbar big"><i id="chBar"></i></div><div class="chxp" id="chXp"></div>
-        <aside class="storycorner" aria-label="Przebieg gry" title="Fabularny: rozdziały po kolei. Arcade: wszystkie rozdziały."><div class="cornercap">Przebieg gry</div><div class="modesw"><button type="button" class="mlab" id="sFab">Fabularny</button><label class="tgl lever" for="storyTgl" aria-label="Przebieg: lewo Fabularny, prawo Arcade"><input type="checkbox" id="storyTgl"><span class="sl" aria-hidden="true"></span></label><button type="button" class="mlab" id="sArc">Arcade</button></div><p id="storyModeHint"></p></aside>
         </div>
+        <aside class="storycorner" aria-label="Przebieg gry" title="Fabularny: rozdziały po kolei. Arcade: wszystkie rozdziały."><div class="cornercap">Przebieg gry</div><input type="checkbox" id="storyTgl" hidden><div class="modesw" role="radiogroup" aria-label="Przebieg gry"><button type="button" role="radio" aria-checked="true" class="mlab" id="sFab">Fabularny</button><button type="button" role="radio" aria-checked="false" class="mlab" id="sArc">Arcade</button></div><p id="storyModeHint"></p></aside>
+
+</div>
+        <div class="title-desktop-copy">
+        <div class="tcol">
         <div class="title-actions">
         <div class="btnrow"><button class="go" id="start1" disabled>Wczytywanie…</button><button class="go alt" id="start2" disabled>Wczytywanie…</button><button class="go alt" id="start3" disabled>Wczytywanie…</button><button class="go alt" id="start4" disabled>Wczytywanie…</button><button class="go alt" id="start5" disabled>Wczytywanie…</button></div>
         <div class="btnrow lnk two"><button class="go alt" id="manBtn" type="button">Instrukcja Gry</button><button class="go alt" id="optsBtn" type="button">Opcje</button></div>

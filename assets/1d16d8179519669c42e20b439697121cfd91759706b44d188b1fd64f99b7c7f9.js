@@ -3563,7 +3563,7 @@ function navMove(id,d){const root=$(id);if(!root)return false;const items=[...ro
   for(const e of items){if(e===cur)continue;const r=lrect(e),dx=r.left+r.width/2-cx,dy=r.top+r.height/2-cy;const main=d==='d'?dy:d==='u'?-dy:d==='r'?dx:-dx,side=d==='d'||d==='u'?dx:dy;if(main<=2)continue;const sc=main+Math.abs(side)*2.2;if(sc<bs){bs=sc;best=e}}
   if(!best){const i=items.indexOf(cur),step=d==='d'||d==='r'?1:-1;best=items[(i+step+items.length)%items.length]}
   best.focus({preventScroll:true});try{best.scrollIntoView({block:'nearest'})}catch(e){}return true}
-addEventListener('keydown',e=>{const m={arrowdown:'d',arrowup:'u',arrowleft:'l',arrowright:'r'}[e.key.toLowerCase()];if(!m||recoveryActive)return;const id=padMenuId();if(!id||id==='notice')return;const ae=document.activeElement;if(ae&&ae.type==='range'&&(m==='l'||m==='r'))return;if(ae&&(ae.tagName==='SELECT'||ae.tagName==='TEXTAREA'||ae.type==='text'))return;if(navMove(id,m)){e.preventDefault();e.stopImmediatePropagation()}},true);
+addEventListener('keydown',e=>{const m={arrowdown:'d',arrowup:'u',arrowleft:'l',arrowright:'r'}[e.key.toLowerCase()];if(!m||recoveryActive||e.target.closest?.('[role=radiogroup]')&&['l','r'].includes(m))return;const id=padMenuId();if(!id||id==='notice')return;const ae=document.activeElement;if(ae&&ae.type==='range'&&(m==='l'||m==='r'))return;if(ae&&(ae.tagName==='SELECT'||ae.tagName==='TEXTAREA'||ae.type==='text'))return;if(navMove(id,m)){e.preventDefault();e.stopImmediatePropagation()}},true);
 function padNav(id,dt,pr,g){
   const root=$(id);const items=[...root.querySelectorAll('button,input,summary')].filter(e=>!e.disabled&&e.offsetParent!==null);if(!items.length)return;
   const ae=document.activeElement;let i=items.indexOf(ae);if(i<0){const s1=id==='title'?items.indexOf($('start1')):-1;i=s1>=0?s1:0;items[i].focus()}
@@ -3671,6 +3671,12 @@ $('hintsTgl').checked=HINTS_ENABLED;$('hintsTgl').addEventListener('change',e=>s
 addEventListener('keydown',e=>{if(S&&S.notice){e.stopImmediatePropagation();e.preventDefault();if(!e.repeat&&['Enter',' ','e','Escape'].includes(e.key))dismissNotice();return}if(S&&S.witChoice&&['1','2','Enter',' '].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(e.key==='1')chooseWit(true);else if(e.key==='2')chooseWit(false);else if(['witLeave','witKill'].includes(document.activeElement.id))document.activeElement.click()}},true);
 $('repeatTut').addEventListener('click',()=>{setHints(true);try{localStorage.removeItem(tutorialKey())}catch(e){}TUT.sid=null;$('repeatTut').textContent='Samouczek pojawi się w rozdziale I'});
 const skip=document.createElement('button');skip.id='tutSkip';skip.type='button';skip.textContent='Pomiń podpowiedzi';skip.hidden=true;$('screen').appendChild(skip);skip.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();finishTutorial()});
+
+// Accessible title presentation; existing checkbox change handler owns mode/save logic.
+function syncTitleMode(){for(const [id,selected] of [['sFab',!$('storyTgl').checked],['sArc',$('storyTgl').checked]]){const b=$(id);b.setAttribute('aria-checked',String(selected));b.removeAttribute('aria-pressed');b.tabIndex=selected?0:-1}$('storyModeHint').textContent=$('storyTgl').checked?'Wszystkie rozdziały od razu.':'Rozdziały odblokowujesz po kolei.'}
+$('storyTgl').addEventListener('change',syncTitleMode);new MutationObserver(syncTitleMode).observe($('sFab'),{attributes:true,attributeFilter:['class']});syncTitleMode();
+$('sFab').parentElement.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Enter',' '].includes(e.key))return;e.preventDefault();e.stopPropagation();if(e.repeat)return;const b=e.key==='ArrowLeft'?$('sFab'):e.key==='ArrowRight'?$('sArc'):e.target.closest('[role=radio]');if(b){b.click();b.focus()}});
+
 applyAccess();
 // load sprite sheets, then start the loop
 const imgs={},GROUP_STATE={},GROUP_ORDER=['core','r2','r3','r4','r5'],IMAGE_PENDING=new Set();let imageWorkers=0;
