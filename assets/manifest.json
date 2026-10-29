@@ -864,9 +864,9 @@
       "sha256": "5a10148d44ad73e6624b228e1dc39c24bbbb4e9a73c6d0efb96c780b3a4b36cb"
     },
     {
-      "url": "assets/89e6cb89af531eccf0922a2167dffd9c4159c971ae3ea382fc5895c1d08d3340.css",
-      "bytes": 122219,
-      "sha256": "89e6cb89af531eccf0922a2167dffd9c4159c971ae3ea382fc5895c1d08d3340"
+      "url": "assets/5ee3baa9296bfa92be4eb03294da45a93c943facfc8bc9ac0ca7047f77c2660f.css",
+      "bytes": 136207,
+      "sha256": "5ee3baa9296bfa92be4eb03294da45a93c943facfc8bc9ac0ca7047f77c2660f"
     },
     {
       "url": "assets/9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2.js",
@@ -962,7 +962,7 @@
   "styles": [
     "assets/542c7b697c813db0e473c6485948dc3662dd3a9555b37c208cec2a4af8b378f2.css",
     "assets/5a10148d44ad73e6624b228e1dc39c24bbbb4e9a73c6d0efb96c780b3a4b36cb.css",
-    "assets/89e6cb89af531eccf0922a2167dffd9c4159c971ae3ea382fc5895c1d08d3340.css"
+    "assets/5ee3baa9296bfa92be4eb03294da45a93c943facfc8bc9ac0ca7047f77c2660f.css"
   ],
   "scripts": [
     "assets/9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2.js",

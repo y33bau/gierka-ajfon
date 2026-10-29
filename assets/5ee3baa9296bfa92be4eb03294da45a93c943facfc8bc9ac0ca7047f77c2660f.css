@@ -934,6 +934,115 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 }
 @media(max-height:500px) and (orientation:landscape){#orient#orient#orient #title{padding-bottom:clamp(80px,23vh,98px)}}
 @media(min-height:501px) and (orientation:landscape){#orient#orient#orient #title .title-controls .credit{font-size:clamp(13px,.9vw,16px)}}
+/* Symmetric phone banners: reuse one skin; the eighth cell is the existing play-mode control. */
+#orient#orient#orient #title .title-actions .storycorner{box-sizing:border-box;position:fixed!important;left:12px;right:auto;bottom:14px;width:168px;height:72px;margin:0;padding:0;border:4px solid transparent!important;border-image:var(--nb-ui_button) 46 135 fill / 12px 24px stretch!important;background:transparent!important;box-shadow:none}
+#orient#orient#orient #title .title-actions .storycorner #storyModeHint{display:none}
+#orient#orient#orient #title .title-actions .storycorner .cornercap{margin:0;text-align:center;font-size:13px;line-height:1}
+#orient#orient#orient #title .title-actions .storycorner .modesw{margin:0;gap:2px;justify-content:center;align-items:center}
+#orient#orient#orient #title .title-controls{box-sizing:border-box;min-height:84px;padding-left:180px}
+@media(max-height:500px) and (orientation:landscape){
+ #orient#orient#orient #title{padding-bottom:72px}
+ #orient#orient#orient #title .title-actions{height:auto;min-height:277px;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(64px,1fr));gap:7px}
+ #orient#orient#orient #title .title-actions>.btnrow:not(.lnk),#orient#orient#orient #title .title-actions>.btnrow.lnk{display:contents}
+ #orient#orient#orient #title .title-actions .btnrow button.go,#orient#orient#orient #title .title-actions .storycorner{box-sizing:border-box;grid-column:auto!important;grid-row:auto!important;width:100%;height:100%;min-height:64px;margin:0;border-image:var(--nb-ui_button) 46 135 fill / 12px 24px stretch!important;border-width:6px 8px!important;background:transparent!important;align-self:stretch;justify-self:stretch}
+ #orient#orient#orient #title .title-actions .storycorner{position:relative!important;inset:auto;min-width:0;padding:0}
+ #orient#orient#orient #title .title-actions .storycorner .cornercap{position:absolute;left:0;right:0;top:4px;font-size:12px;line-height:1}
+ #orient#orient#orient #title .title-actions .storycorner .modesw{position:absolute;left:4px;right:4px;bottom:1px;height:44px}
+ #orient#orient#orient #title .title-actions .storycorner .mlab{font-size:12px;min-width:0}
+ #orient#orient#orient #title .title-actions .btnrow.lnk button.go{font-size:14px}
+ #orient#orient#orient #title .title-controls{min-height:44px;padding-left:0}
+}
+@media(orientation:portrait){
+ #orient#orient#orient #title{padding-bottom:88px}
+ #orient#orient#orient #title .tcol{grid-template-rows:auto auto auto auto auto}
+ #orient#orient#orient #title .title-actions .btnrow button.go{height:58px;min-height:58px;padding-top:2px!important;padding-bottom:2px!important;border-image:var(--nb-ui_button) 46 135 fill / 12px 24px stretch!important}
+ #orient#orient#orient #title .title-actions .storycorner{position:relative!important;inset:auto;grid-column:1;grid-row:5;justify-self:center;width:min(100%,280px);height:64px;min-height:64px;border-width:6px 8px!important}
+ #orient#orient#orient #title .title-actions .storycorner .cornercap{position:absolute;left:0;right:0;top:4px;font-size:12px}
+ #orient#orient#orient #title .title-actions .storycorner .modesw{position:absolute;left:8px;right:8px;bottom:1px;height:44px}
+ #orient#orient#orient #title .title-controls{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:0;padding:0}
+ #orient#orient#orient #title .title-controls .titleassist{width:100%;flex-direction:row;justify-content:center;gap:8px}
+ #orient#orient#orient #title .title-controls .credit{margin:0 auto}
+}
+@media(orientation:portrait) and (max-height:840px){#orient#orient#orient #title .tcol,#orient#orient#orient #title .title-actions>.btnrow:not(.lnk){gap:6px}}
+@media(orientation:portrait){#orient#orient#orient #title .title-actions .storycorner{height:58px;min-height:58px}#orient#orient#orient #title .title-actions .storycorner .cornercap{top:3px}#orient#orient#orient #title .title-actions .storycorner .modesw{bottom:0}}
+/* Author revision: the mobile title is a uniformly reduced copy of the desktop composition. */
+#orient#orient#orient #title .title-desktop-copy{display:contents}
+@media(max-width:1000px){
+ #orient#orient#orient #title{display:block;padding:0;overflow:hidden;font-size:20.8px}
+ #orient#orient#orient #title .title-desktop-copy{--menu-scale:min(calc(100vw / 1280px),calc(100vh / 720px));display:block;position:absolute;left:50%;top:50%;width:1280px;height:720px;transform:translate(-50%,-50%) scale(var(--menu-scale));transform-origin:center}
+ #orient#orient#orient #title .tcol{position:absolute;left:38.4px;top:58.34px;display:grid;width:1203.2px;max-width:none;margin:0;grid-template-columns:minmax(0,56fr) minmax(0,44fr);grid-template-rows:auto auto;column-gap:25.6px;row-gap:8px;align-items:center;justify-items:center}
+ #orient#orient#orient #title .logo{grid-column:1;grid-row:1;width:100%!important;max-width:100%!important;max-height:489.6px!important;height:auto!important;aspect-ratio:1214/791!important;transform:translateY(43.2px);font-size:20.8px!important}
+ #orient#orient#orient #title .chcard{grid-column:1;grid-row:2;width:457.6px;max-width:100%;margin:0;padding:0;transform:translateY(43.2px)}
+ #orient#orient#orient #title .chcard .chtop{min-height:1.5em}
+ #orient#orient#orient #title .title-actions{display:grid;grid-column:2;grid-row:1/3;width:100%;height:calc(100% + 100.8px);min-height:0;grid-template-columns:1fr;grid-template-rows:repeat(6,minmax(0,1fr));gap:8px;align-self:start}
+ #orient#orient#orient #title .title-actions>.btnrow:not(.lnk){display:grid;grid-column:1;grid-row:1/6;grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr));gap:8px;width:100%;margin:0}
+ #orient#orient#orient #title .title-actions>.btnrow.lnk{display:grid;grid-column:1;grid-row:6;grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:12.8px;width:100%;margin:0}
+ #orient#orient#orient #title .title-actions .btnrow button.go{grid-column:auto!important;grid-row:auto!important;width:100%;height:100%;min-height:52px;box-sizing:border-box;padding:4px 28px!important;border-width:8px!important;font-size:24.32px;line-height:1.08;letter-spacing:0}
+ #orient#orient#orient #title .title-actions .btnrow button.go small{font-size:.78em;display:inline}
+ #orient#orient#orient #title .title-actions .btnrow button.go .recline{font-size:12.8px;line-height:1.15;margin-top:4px}
+ #orient#orient#orient #title .title-actions .btnrow.lnk button.go{font-size:20.48px;height:100%;min-height:52px}
+ #orient#orient#orient #title .title-actions .storycorner{position:absolute!important;inset:auto;left:12px;bottom:14px;width:168px;height:72px;min-height:72px;margin:0;padding:0;border-width:4px!important;grid-column:auto;grid-row:auto}
+ #orient#orient#orient #title .title-actions .storycorner .cornercap{position:static;inset:auto;font-size:13px;line-height:1;margin:0}
+ #orient#orient#orient #title .title-actions .storycorner .modesw{position:static;inset:auto;height:44px;margin:0;gap:2px}
+ #orient#orient#orient #title .storycorner .mlab{font-size:13px;min-height:44px}
+ #orient#orient#orient #title .storycorner .lever{width:44px;height:44px;min-width:44px;min-height:44px}
+ #orient#orient#orient #title .storycorner .lever .sl{width:32px;height:32px}
+ #orient#orient#orient #title .title-controls{position:absolute;left:12px;right:auto;bottom:8px;display:flex;flex-direction:row;align-items:center;justify-content:normal;box-sizing:border-box;width:692px;min-height:84px;padding:0 0 0 180px;gap:12px}
+ #orient#orient#orient #title .title-controls .titleassist{position:static!important;display:flex;flex-direction:row;align-items:center;justify-content:normal;width:auto;max-width:none;gap:8px}
+ #orient#orient#orient #title .titleassist .tgl{width:164px;min-height:44px;font-size:13px;gap:8px}
+ #orient#orient#orient #title .titleassist .tgl>span:last-child{font-size:13px}
+ #orient#orient#orient #title .titleassist .tgl .sl{width:32px;height:32px}
+ #orient#orient#orient #title .title-controls .credit{position:static!important;inset:auto;transform:none;width:max-content;max-width:none;margin:0 0 0 auto;font-size:13px;line-height:1.3}
+}
+@media(max-width:1000px){#orient#orient#orient #title .title-actions .storycorner{position:fixed!important}}
+/* Author: use the outer edges and give the signature its own quiet lower-left strip. */
+#orient#orient#orient #title>.credit{position:absolute!important;left:max(8px,env(safe-area-inset-left));right:auto;bottom:0;top:auto;transform:none;width:max-content;max-width:none;margin:0;padding:2px 5px;font-size:13px;line-height:1.2;letter-spacing:.1em;color:#eee1c7;opacity:.62;background:rgba(5,4,3,.15);border-radius:2px;text-shadow:0 1px 3px #000;pointer-events:none;z-index:5}
+@media(min-width:1001px){#orient#orient#orient #title .logo{transform:translate(-24px,6vh)}#orient#orient#orient #title .title-actions{width:calc(100% + 24px)}#orient#orient#orient #title .title-controls{bottom:16px}#orient#orient#orient #title .title-actions .storycorner{bottom:22px}}
+@media(max-width:1000px){
+ #orient#orient#orient #title .title-desktop-copy{--menu-scale:min(calc(100vw / 1280px),calc((100vh - 30px) / 720px));--menu-side-space:max(0px,calc((100vw / var(--menu-scale) - 1280px) / 2));top:calc((100% - 30px) / 2)}
+ #orient#orient#orient #title .logo{transform:translate(calc(-1 * var(--menu-side-space)),43.2px)}
+ #orient#orient#orient #title .title-actions{width:calc(100% + var(--menu-side-space))}
+ #orient#orient#orient #title>.credit{bottom:max(6px,env(safe-area-inset-bottom));font-size:12px}
+}
+#orient#orient#orient #title .title-actions{justify-self:start}
+@media(min-width:1001px){#orient#orient#orient #title .chcard{transform:translate(-24px,6vh)}}
+@media(max-width:1000px){#orient#orient#orient #title .chcard{transform:translate(calc(-1 * var(--menu-side-space)),43.2px)}}
+/* Author's marked composition: centred level/mode on the left, one checkbox under each lower button. */
+#orient#orient#orient #title #charCard{position:relative}
+#orient#orient#orient #title #charCard .storycorner{box-sizing:border-box;position:absolute!important;inset:auto;left:50%;top:calc(100% + 4px);bottom:auto;right:auto;transform:translateX(-50%);width:280px;max-width:100%;height:64px;min-height:64px;padding:0;margin:0;border:4px solid transparent!important;border-image:var(--nb-ui_button) 46 135 fill / 12px 24px stretch!important;background:transparent!important;box-shadow:none}
+#orient#orient#orient #title #charCard .storycorner .cornercap{position:absolute;left:0;right:0;top:3px;margin:0;text-align:center;font-size:13px;line-height:1}
+#orient#orient#orient #title #charCard .storycorner .modesw{position:absolute;left:4px;right:4px;bottom:0;display:flex;align-items:center;justify-content:center;gap:2px;height:44px;margin:0}
+#orient#orient#orient #title #charCard .storycorner .mlab{font-size:13px;min-height:44px;padding:0 2px}
+#orient#orient#orient #title #charCard .storycorner .lever{width:44px;height:44px;min-height:44px;min-width:44px;margin:0}
+#orient#orient#orient #title #charCard .storycorner .sl{width:32px;height:32px}
+#orient#orient#orient #title #charCard .storycorner #storyModeHint{display:none}
+#orient#orient#orient #title .title-actions{position:relative}
+#orient#orient#orient #title .title-under-actions{position:absolute;top:calc(100% + 6px);left:0;right:0;min-height:44px}
+#orient#orient#orient #title .title-under-actions .titleassist{position:static!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:normal;align-items:center;gap:clamp(8px,1vw,18px);width:100%;max-width:none;margin:0}
+#orient#orient#orient #title .title-under-actions .tgl{box-sizing:border-box;justify-self:center;display:flex;align-items:center;gap:8px;width:164px;min-height:44px;padding:0;margin:0;font-size:13px;white-space:nowrap}
+#orient#orient#orient #title .title-under-actions .tgl>span:last-child{font-size:13px;color:#f0e2c6}
+#orient#orient#orient #title .title-under-actions .sl{width:32px;height:32px;flex:none}
+@media(min-width:1001px){#orient#orient#orient #title .title-actions{height:calc(100% + 14vh - 52px)}}
+@media(max-width:1000px){#orient#orient#orient #title .title-under-actions .titleassist{gap:12.8px}#orient#orient#orient #title .title-actions{height:calc(100% + 100.8px)}}
+/* Slightly larger left-hand information, with the same centre and unchanged game values. */
+#orient#orient#orient #title #charCard .chtop{transform:scale(1.14);transform-origin:center}
+#orient#orient#orient #title #charCard .xpbar.big{transform:scale(1.14);transform-origin:center}
+#orient#orient#orient #title #charCard .storycorner{width:312px;height:70px;min-height:70px}
+#orient#orient#orient #title #charCard .storycorner .cornercap{font-size:15px}
+#orient#orient#orient #title #charCard .storycorner .modesw{height:48px}
+#orient#orient#orient #title #charCard .storycorner .mlab{font-size:15px;min-height:48px}
+#orient#orient#orient #title #charCard .storycorner .lever{width:48px;height:48px;min-width:48px;min-height:48px}
+#orient#orient#orient #title #charCard .storycorner .sl{width:36px;height:36px}
+/* Author: another 20 percent over cache 130; keep the shared centre. */
+#orient#orient#orient #title #charCard .chtop{transform:scale(1.368)}
+#orient#orient#orient #title #charCard .xpbar.big{transform:scale(1.368)}
+#orient#orient#orient #title #charCard .storycorner{width:374.4px;height:84px;min-height:84px}
+#orient#orient#orient #title #charCard .storycorner .cornercap{font-size:18px}
+#orient#orient#orient #title #charCard .storycorner .modesw{height:57.6px}
+#orient#orient#orient #title #charCard .storycorner .mlab{font-size:18px;min-height:57.6px}
+#orient#orient#orient #title #charCard .storycorner .lever{width:57.6px;height:57.6px;min-width:57.6px;min-height:57.6px}
+#orient#orient#orient #title #charCard .storycorner .sl{width:43.2px;height:43.2px}
+@media(min-width:1001px){#orient#orient#orient #title .chcard{transform:translate(-24px,calc(6vh - 18px))}}
 
 
 /* Level choice: compact list in portrait, three calm cards in landscape. */

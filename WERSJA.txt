@@ -1,3 +1,13 @@
+29.10.2026 — FENIX: kolejne +20% napisu/paska poziomu i Przebiegu gry w menu. nightbrand-codex-20261028-132; SHA-256 index.html 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70. Lokalnie, bez publikacji.
+
+29.10.2026 — FENIX: napis i pasek poziomu w menu +14%; nieco większy Przebieg gry, zachowana wspólna oś. nightbrand-codex-20261028-130; SHA-256 index.html 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70. Lokalnie, bez publikacji.
+
+29.10.2026 — FENIX: poziom i Przebieg gry wyśrodkowane pod logo; sterowanie dotykowe pod Instrukcją, Samouczek pod Opcjami. nightbrand-codex-20261028-129; SHA-256 index.html 531537fc62b4fd42a3f1e20a4ed9465bb7e06a1d91c41218f0463867d8cc4a70. Lokalnie, bez publikacji.
+
+29.10.2026 — FENIX: menu rozsunięte ku krawędziom; logo i poziom w lewo, banery w prawo; podpis w lewym dolnym rogu z opacity 0,62. nightbrand-codex-20261028-128; SHA-256 index.html 8d774e55a520e34c18e2268662110de3d3f7b7566313a4085c88438c814ca249. Lokalnie, bez publikacji.
+
+29.10.2026 — FENIX: menu telefonu jako pomniejszona kompozycja desktopowa; logo/poziom po lewej, lista rozdziałów po prawej, kontrolki na dole. nightbrand-codex-20261028-126; SHA-256 index.html e34d13c5143a1b16d272d5931ac46d54cf5097376107af1b3dde47547ca506bb. Lokalnie, bez publikacji.
+
 FENIX — dopracowane proporcje i drobne teksty menu: 13 px na komputerze, 12 px na telefonie; wspólna oś kontrolek i stopki; większe logo w niskim poziomie. nightbrand-codex-20261028-122; SHA-256 index.html bca693d8859ed25060ac883d34dd139d70e2596917bb852629e885696b3135c2. Lokalnie, bez publikacji.
 
 28.10.2026 — FENIX: prawa kolumna menu wydłużona w dół o 14vh na komputerze, równe banery i odstępy. nightbrand-codex-20261028-119; SHA-256 index.html 9dbb1f0117d4ba68b0e0fc4b943fda00ca5a17d40bfe462b158aec042634249c. Lokalnie, bez publikacji.
