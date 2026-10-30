@@ -232,3 +232,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache191: miniradar okragly (rysowany kodem, bez nowych grafik): gracz w centrum, polnoc u gory, metalowa obwodka z naciecami i plakietka N, ping co 3 s, swiecace kropki wrogow (elity i bossowie pulsuja), strzalki na obwodzie dla bossow i kramu Margi poza zasiegiem, zasieg widoku ok. 19 kafli. Poprawka robiona bezposrednio w web/ (zrodlo demo-hd2d/zrodlo/ do synchronizacji). Bez testow gry (kosmetyka), sprawdzono tylko skladnie i probny przebieg funkcji.
 
 30.10.2026 — cache191 (poprawka manifestu): w repo 42 plików .webp było o 5768 B krótszych niż wpis w manifeście (brak bloku C2PA), co blokowało start gry na GitHub Pages („Niepełny plik”). Manifest przeliczony z plików w repo (bytes i sha256).
+
+30.10.2026 — cache192: usunięta prostokątna ramka (#miniF) nachodząca na okrągły radar. Bez testów (kosmetyka).
