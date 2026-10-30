@@ -1111,3 +1111,6 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 #orient#orient#orient #prep #diffSw{width:min(80%,460px);gap:6px}
 #orient#orient#orient #prep #diffSw .mlab{height:clamp(32px,4.8vh,42px);font-size:clamp(12px,.4vw + 9px,16px)}
 #orient#orient#orient #prep #prepGo{width:min(70vw,260px);min-height:clamp(40px,6.5vh,54px);font-size:clamp(17px,.7vw + 10px,24px)}
+
+/* radar okragly (cache191) */
+#mini#mini#mini{width:7.9em!important;height:7.9em!important;right:.7em!important;top:5.7em!important;border-radius:50%!important;outline:none!important;box-shadow:none!important;background:transparent!important;opacity:1!important;image-rendering:auto!important}

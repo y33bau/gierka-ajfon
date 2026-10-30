@@ -228,3 +228,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache189: ekran tytułowy/przygotowania: większy napis „Poziom postaci”, cyfra poziomu bez zmian (wersja gotycka wycofana). Bez testów (kosmetyka).
 
 30.10.2026 — cache190: ekran przygotowania: nazwa mapy znacznie większa i dominuje; Poziom postaci, poziom trudności i przycisk GOTOWY pomniejszone. Bez testów (kosmetyka).
+
+30.10.2026 — cache191: miniradar okragly (rysowany kodem, bez nowych grafik): gracz w centrum, polnoc u gory, metalowa obwodka z naciecami i plakietka N, ping co 3 s, swiecace kropki wrogow (elity i bossowie pulsuja), strzalki na obwodzie dla bossow i kramu Margi poza zasiegiem, zasieg widoku ok. 19 kafli. Poprawka robiona bezposrednio w web/ (zrodlo demo-hd2d/zrodlo/ do synchronizacji). Bez testow gry (kosmetyka), sprawdzono tylko skladnie i probny przebieg funkcji.
