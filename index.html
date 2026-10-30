@@ -72,13 +72,15 @@
         <div class="credit">Created by Y3ebau</div>
       </div>
       <div class="overlay" id="manual" hidden>
+        <button class="backar" id="manBack" type="button">Wróć</button>
         <h1 class="manh" aria-label="Instrukcja Gry"></h1>
         <div class="tabs" role="tablist" id="manTabs"></div>
         <div class="opsep" aria-hidden="true"></div>
         <div class="man" id="manBody"></div>
-        <div class="btnrow"><button class="go" id="manBack" type="button">Wróć</button></div>
+        
       </div>
       <div class="overlay" id="opts" hidden>
+        <button class="backar" id="optsBack" type="button">Wróć</button>
         <div class="kicker">Nightbrand</div>
         <h1 class="opth" aria-label="Opcje"></h1>
         <div class="tabs" role="tablist"><button class="tab on" type="button" data-tab="ctl">Sterowanie</button><button class="tab" type="button" data-tab="aud">Audio</button><button class="tab" type="button" data-tab="set">Ustawienia</button><button class="tab" type="button" data-tab="dat">Dane zapisu</button></div>
@@ -134,7 +136,7 @@
           <p class="figcap" id="saveMsg">Postęp jest zapamiętany w przeglądarce. Zapisz go do pliku, żeby nie przepadł po wyczyszczeniu danych przeglądarki albo przy zmianie urządzenia.</p>
           <button class="go alt" id="clearSave" type="button">Wyczyść zapis postępu</button>
         </div>
-        <div class="btnrow"><button class="go" id="optsBack" type="button">Wróć</button></div>
+        
       </div>
       <div class="overlay" id="conf" hidden>
         <div class="kicker">Uwaga</div>
@@ -152,11 +154,12 @@
         <div class="btnrow"><button class="go" id="resumeBtn">Wróć do gry</button><button class="go alt" id="pauseMenuBtn">Wybór rozdziału</button></div>
       </div>
       <div class="overlay" id="prep" hidden>
-        <h1 class="prepth" aria-label="Przygotowanie">Przygotowanie</h1><h2 class="nimh" aria-label="Nim zapadnie noc">Nim zapadnie noc</h2>
+        <button class="backar" id="prepBack" type="button">Wróć</button>
+        <h1 class="prepth" aria-label="Przygotowanie">Przygotowanie</h1><h2 class="nimh ch1" id="prepNim" aria-label="Spalona Osada"></h2>
         <div class="kicker" id="prepK">Przygotowanie</div>
-        <p class="charline" id="prepLv"></p><div class="xpbar"><i id="prepBar"></i></div>
-        <h3 class="sth prepsth">Poziom trudności</h3><div class="modesw diffsw" id="diffSw"><button type="button" class="mlab" data-d="e">Łatwy</button><button type="button" class="mlab" data-d="n">Normalny</button><button type="button" class="mlab" data-d="h">Trudny</button></div><p class="figcap" id="diffCap"></p>
-        <div class="btnrow"><button class="go" id="prepGo" type="button">Wyrusz</button><button class="go alt" id="prepBack" type="button">Wróć</button></div>
+        <div class="chcard prepcard"><div class="chtop"><span class="chlab">Poziom postaci</span><span class="chn" id="prepN">1</span></div><div class="xpbar big"><i id="prepBar"></i></div><div class="chxp" id="prepLv"></div></div>
+        <h3 class="sth prepsth" aria-label="Poziom trudności"></h3><div class="modesw diffsw" id="diffSw"><button type="button" class="mlab" data-d="e">Łatwy</button><button type="button" class="mlab" data-d="n">Normalny</button><button type="button" class="mlab" data-d="h">Trudny</button></div><p class="figcap" id="diffCap"></p>
+        <div class="btnrow"><button class="go" id="prepGo" type="button">Gotowy</button></div>
         <div class="prepgrid"><div class="prepbox"><h3 id="prepPH">Perki</h3><div id="prepPerks" class="prepbox"></div></div><div class="prepbox"><h3>Wyzwanie nocy</h3><div id="prepCh" class="prepbox"></div></div></div>
       </div>
       <div class="overlay" id="end" hidden>
