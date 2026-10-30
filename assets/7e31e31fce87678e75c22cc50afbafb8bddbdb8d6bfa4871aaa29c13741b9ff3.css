@@ -1137,3 +1137,5 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 #hud .left #chal[hidden]{display:none}
 #hud .left #chal+.buffs{margin-top:.2em}
 .buffs br{display:none}
+.buffs,#hud .left #chal{white-space:nowrap}
+#hud .left #chal{max-width:none}

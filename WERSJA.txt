@@ -260,3 +260,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache203: ekran awansu na komputerze większy (zoom 1,2–1,5 zależnie od wysokości okna; telefon bez zmian). Pad: karty awansu — pad czeka do końca 1 s blokady wyboru (z dźwiękiem odmowy zamiast cichego ignorowania), zawsze ma zaznaczoną kartę, a nieaktualne okno „notice” nie przejmuje już sterowania. Nie sprawdzono na padzie ani telefonie.
 
 30.10.2026 — cache204: wyzwanie nocy (np. „Mistrz riposty”) nie nachodzi już na listę efektów (Odrodzenie, Riposta) — oba teksty układają się jeden pod drugim. Zmiana tylko wyglądu (index.html + CSS). Nie sprawdzono na telefonie.
+
+31.10.2026 — cache204 (uzupełnienie): komunikaty efektów i wyzwania nocy w HUD zawsze w jednej linii (bez zawijania na dwie). Nie sprawdzono na telefonie.
