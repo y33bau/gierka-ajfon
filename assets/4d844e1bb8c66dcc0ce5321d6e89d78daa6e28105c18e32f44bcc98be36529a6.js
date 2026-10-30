@@ -2288,7 +2288,7 @@ function swordCanAct(){return !!(S&&S.phase==='play'&&!S.paused&&!S.notice&&!S.d
 function requestSwordShot(k=sk('frostshot')?'frostshot':sk('embershot')?'embershot':null){if(!swordCanAct())return;if(!k)return;if((S.shotCd||0)>0){play('empty',.2);return}if(!canPayMana(k)){manaFlash();return}const d=aimDir()||[pl.fx,pl.fy];pl.fx=d[0];pl.fy=d[1];payMana(k);S.shotCd=ACTIVE_CFG[k].wait(sk(k));S.shotWind={k,L:sk(k),x:d[0],y:d[1],t:.2};pl.atk={kind:'shot',stage:'wind',t:.2};S.actions.shot=(S.actions.shot||0)+1;play('swing',0)}
 // Odłamek szronu: duży pocisk, przebija kilka celów i spowalnia. Kula ognia: duża, wolniejsza, wybucha na pierwszym trafionym celu.
 function swordShotLaunch(w){const ice=w.k==='frostshot',spd=ice?190:150,range=(ice?120:130)+10*w.L,L=Math.min(3,Math.max(1,w.L));
- S.swordShots.push({x:pl.x+w.x*8,y:pl.y+w.y*8,vx:w.x*spd,vy:w.y*spd,spd,R:ice?SL.shot.iceR:SL.shot.fireHit,t:range/spd,L,ice,fire:!ice,ch:CH,hit:new Set(),n:0,max:ice?SL.shot.targets[L-1]:1});
+ S.swordShots.push({x:pl.x+w.x*8,y:pl.y+w.y*8,vx:w.x*spd,vy:w.y*spd,spd,R:ice?SL.shot.iceR:SL.shot.fireHit,t:range/spd,L,ice,fire:!ice,ch:CH,hit:new Set(),n:0,max:1});
  const p=S.swordShots[S.swordShots.length-1];{const fl=skFrames(ice?'frostf':'firef');if(fl)addVfx(skLoop(fl,p.t,ice?11:10),p.t,p.x,p.y,.55,ice?1.7:1.9,'bill',-screenAng(w.x,w.y));else addVfx(ice?A.fx.nova:A.fx.inferno,p.t,p.x,p.y,.55,ice?1:1.3,'bill',ice?-screenAng(w.x,w.y):0)}p.visual=S.vfx[S.vfx.length-1];
  swordSparks(pl.x+w.x*10,pl.y+w.y*10,ice?'#9ee9ff':'#ffa44b',ice?8:12)}
 function fireballExplode(p,main){const L=p.L,R=SL.shot.fireR[L-1],base=SL.shot.fireDmg[L-1]*(1+.07*(S.lvl-1))*skillMul();
@@ -2335,8 +2335,8 @@ function swordTick(dt){activeSlotsTick(dt);for(let i=S.swordTrails.length-1;i>=0
    if(p.fire){if(touch.length){boom=touch[0];gone=true;break}continue}
    for(const e of touch){p.hit.add(e);const ok=damageEnemy(e,(SL.shot.iceDmg+SL.shot.perL*p.L)*(1+.07*(S.lvl-1))*skillMul(),ux,uy,0);if(!ok)continue;p.n++;if(!e.dead){e.chill=Math.max(e.chill||0,1.5);e.chillMul=Math.min(e.chillMul||1,BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'?.9:1-(.25+.05*p.L))}swordSparks(p.x,p.y,'#a2e9ff',8);if(p.n>=p.max){gone=true;break}}}
   if(p.visual){p.visual.x=p.x;p.visual.y=p.y;if(gone)p.visual.t=p.visual.dur}
-  if(gone&&p.ice&&p.ch===CH)skAdd('frosti',.5,p.x,p.y,.5,1.5,'bill');
-  if(gone&&p.fire&&p.ch===CH)fireballExplode(p,boom);
+  if(gone&&p.t>0&&p.ice&&p.ch===CH)skAdd('frosti',.5,p.x,p.y,.5,1.5,'bill');
+  if(gone&&p.t>0&&p.fire&&p.ch===CH)fireballExplode(p,boom);
   if(!gone)swordSparks(p.x,p.y,p.ice?'#a2e9ff':'#ff9a43',p.ice?3:4);else S.swordShots.splice(i,1)}
 }
 let swordGlow=null;
