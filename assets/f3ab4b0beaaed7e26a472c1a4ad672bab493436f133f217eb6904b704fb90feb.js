@@ -2116,7 +2116,7 @@ function slashStagger(e,seconds,heavy=false){if(e.staggerCd>0&&!heavy)return fal
 function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc,crit=pl.riposte>0;ftCrit=crit;ftHeavy=a.kind==='h';ftMelee=true;
   let dmg=(a.kind==='h'?P.dmg:P.dmg[a.combo])*(1+.07*(S.lvl-1))*(S.str||1)*might()*encDmg(encLevel()[1]);if(crit)dmg*=riMul();if(a.kind==='l'&&a.combo===2)dmg*=1+.18*sk('rytm');if(pl.dance>0){dmg*=1+.25*sk('taniec');pl.dance=0}
   const waveDmg=dmg;if(a.retaliate)dmg*=1+.1*sk('retaliation');const ang=Math.atan2(a.dy,a.dx);let hits=0;
-  for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>R+e.r||!sight(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>arc)continue;
+  for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>R+e.r||!sightSword(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>arc)continue;
     const big=BIG.has(e.type)||e.type==='collector',weak=e.stun>0||e.recov>0||crit;if(damageEnemy(e,dmg,dx/(d||1),dy/(d||1),a.kind==='h'?1.6:a.combo===2?1.2:.7)){hits++;swordTechniqueHit(e,a);supportEnchant(e,a,crit);applyEnchants(e,a,crit);if(weak&&brOn('off'))pl.sta=Math.min(pl.staMax,pl.sta+Math.min(6,Math.max(0,12-(a.refund||0))));if(weak&&brOn('off'))a.refund=(a.refund||0)+6}else continue;
     // stagger: normal enemies are interrupted, big ones only when their poise breaks
     if(!e.dead){const st=a.kind==='h'?P.stun:P.stun[a.combo];if(big){breakPoise(e,a.kind==='h'?45:a.combo===2?20:12)}else{slashStagger(e,st,a.kind==='h'||crit)}}}
@@ -2236,7 +2236,7 @@ function beginCascade(L){const level=Math.min(3,Math.max(1,L)),d=aimDir()||autoA
  S.cascade={L:level,dx:d[0],dy:d[1],t:0,n:0};pl.atk={kind:'skill',stage:'cascade',t:C.start+C.gap*(C.cuts-1)+C.rec};}
 function cascadeCut(c){const C=SL.cascade,ang=Math.atan2(c.dy,c.dx),dmg=C.dmg[c.L-1]*(1+.07*(S.lvl-1))*skillMul(),oldM=ftMelee,oldH=ftHeavy,oldC=ftCrit;
  const side=c.n%2?-1:1,a2=ang+side*.12;moveBox(pl,c.dx*C.lunge,c.dy*C.lunge,4,3);
- ftMelee=true;ftHeavy=false;ftCrit=false;let hits=0;try{for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>C.range+e.r||!sight(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>C.arc)continue;
+ ftMelee=true;ftHeavy=false;ftCrit=false;let hits=0;try{for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>C.range+e.r||!sightSword(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>C.arc)continue;
   if(damageEnemy(e,dmg,dx/(d||1),dy/(d||1),.4))hits++}}finally{ftMelee=oldM;ftHeavy=oldH;ftCrit=oldC}
  const cs=Math.cos(a2),sn=Math.sin(a2);if(skFrames('casc')){if(c.n===0)skAdd('casc',.62,pl.x+cs*C.range*.5,pl.y+sn*C.range*.5,.6,2.0,'bill',-screenAng(cs,sn))}else addVfx(A.fx.slash,.18,pl.x+cs*C.range*.45,pl.y+sn*C.range*.45,.6,swordVisualSize('l')*1.1,'bill',-screenAng(cs,sn));
  pl.swingT=pl.swingDur=.2;if(Math.abs(c.dx)>Math.abs(c.dy)){pl.swingDir=2;pl.swingS=c.dx>0?1:-1}else{pl.swingDir=c.dy>0?0:1;pl.swingS=side}
@@ -2252,7 +2252,7 @@ function beginWhirl(L){const level=Math.min(3,Math.max(1,L)),angle=Math.atan2(pl
  pl.atk={kind:'whirl',stage:'act',L:level,elapsed:0,t:WHIRL.duration,angle,baseAngle:angle,pulse:0,statuses:new Set(),visual,statusOnly:true};play('swing',0);}
 function endWhirl(){const a=pl?.atk;if(a?.kind!=='whirl')return;if(a.visual){releaseWhirlVisual(a.visual,false);a.visual=null}a.statuses.clear();pl.atk=null;pl.swingT=0;pl.queue=false;pl.atkHeld=false;pl.charging=false;}
 function whirlHit(a){const R=WHIRL.radius[a.L-1],dmg=WHIRL.damage[a.L-1]*(1+.07*(S.lvl-1))*(S.str||1)*(S.int||1)*might()*encDmg(encLevel()[1]),oldM=ftMelee,oldH=ftHeavy,oldC=ftCrit;
- ftMelee=true;ftHeavy=false;ftCrit=false;try{for(const e of S.enemies){if(e.dead||e.rise>0||Math.hypot(e.x-pl.x,e.y-pl.y)>R+e.r||!sight(pl.x,pl.y,e.x,e.y))continue;
+ ftMelee=true;ftHeavy=false;ftCrit=false;try{for(const e of S.enemies){if(e.dead||e.rise>0||Math.hypot(e.x-pl.x,e.y-pl.y)>R+e.r||!sightSword(pl.x,pl.y,e.x,e.y))continue;
  const d=Math.hypot(e.x-pl.x,e.y-pl.y)||1;if(!damageEnemy(e,dmg,(e.x-pl.x)/d,(e.y-pl.y)/d,0))continue;
  if(!a.statuses.has(e)){a.statuses.add(e);supportEnchant(e,a,false);applyEnchants(e,a,false);}}}finally{ftMelee=oldM;ftHeavy=oldH;ftCrit=oldC}}
 function whirlTick(dt){const a=pl.atk;if(pl.dead||pl.broken>0){endWhirl();return}pl.block=false;pl.parryT=0;pl.atkHeld=false;pl.charging=false;pl.queue=false;heavyPress=false;
@@ -2689,6 +2689,8 @@ function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=
     else hurtPlayer(enemyDamage(f.bolt?6:7,SL.projDiv),nx,ny,f.source||(f.bolt?'night':'fire'));gone=true}
   if(gone&&f.bolt){if(f.vfe)f.vfe.t=f.vfe.dur;if(f.source&&(f.source.type==='xbow'||f.source.type==='scribe'))skAdd('boltHit',.3,f.x,f.y,.5,.7,'bill');for(let k=0;k<5;k++)S.parts.push({k:'d',x:f.x,y:f.y,z:8,vx:rnd(-30,30),vy:rnd(-15,15),vz:rnd(5,20),c:'#9d9584',life:.3});S.eproj.splice(i,1);continue}
   if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);if(f.vfe)f.vfe.t=f.vfe.dur;S.eproj.splice(i,1)}}}
+// player sword strikes (light/heavy, cascade, whirl) are stopped only by walls/cliffs, not by prop tiles (31) whose collision box is bigger than the sprite (cache 200)
+function sightSword(x0,y0,x1,y1){const n=Math.ceil(Math.hypot(x1-x0,y1-y0)/8);for(let i=1;i<n;i++){const px=x0+(x1-x0)*i/n,py=y0+(y1-y0)*i/n,t=tileAt(Math.floor(px/TS),Math.floor(py/TS));if(t!==31&&SOLID.has(t))return false}return true}
 function sight(x0,y0,x1,y1){const n=Math.ceil(Math.hypot(x1-x0,y1-y0)/8);for(let i=1;i<n;i++)if(solidAt(x0+(x1-x0)*i/n,y0+(y1-y0)*i/n))return false;return true}
 function spawnTick(dt){
   if(pl.dead||S.phase!=='play'||S.opening||S.stage==='break'||S.dg)return;S.spawnT-=dt;if(S.spawnT>0)return;S.spawnT=.5;
