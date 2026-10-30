@@ -216,3 +216,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache183: kontur w kolorze czcionki gry (#d8cfb8, 1 px) na wszystkich napisach z liter (nagłówki Pauza, Opcje, Instrukcja, Przygotowanie, nazwy rozdziałów, ekrany końca). Bez testów (kosmetyka).
 
 30.10.2026 — cache184: ekran przygotowania bez napisu „Przygotowanie”; na jego miejscu większa nazwa wybranej mapy (ta sama czcionka z liter), układ przeskalowany. Bez testów (kosmetyka).
+
+30.10.2026 — cache185: nowe animacje skilli i pocisków z arkuszy Gemini (atlas skill_fx): odłamek szronu (lot + trafienie), kula ognia (lot + wybuch), rozcięcie ziemi, kamienny obrońca, kaskada cięć, Odrzut Mocy, fale (Fala Mocy, Daleka Fala, Zryw Ostrza), wir ostrza (stal), zwykły atak, bełt kusznika (lot + trafienie), pocisk bossa, efekty statusów ostrza (zatrucie, podpalenie, zamrożenie, krwawienie). Stare efekty zostają jako zapas, gdyby atlas się nie wczytał. Bez testów mechanik (zmiana wizualna).

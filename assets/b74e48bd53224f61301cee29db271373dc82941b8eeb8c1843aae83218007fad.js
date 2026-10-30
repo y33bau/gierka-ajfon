@@ -1,6 +1,9 @@
 
 // Shared atlas dependencies: CC0_FLOORS, buildDungeon/build* and buildAnims. Intro remains on demand.
 const SPRITE_GROUPS={
+  "skill_fx": [
+    "core"
+  ],
   "combat_fx": [
     "core"
   ],
@@ -2042,6 +2045,12 @@ function heal(n){if(pl.dead||pl.hp>=pl.max)return 0;const h=Math.min(n,pl.max-pl
 const might=()=>(1+.1*(S.whet||0))*(S.fury>0?1.2:1)*(S.pk?S.pk.dmg:1);
 function spriteMesh(geo){const m=new THREE.Mesh(geo,A.fx.slash[0].n);scene.add(m);return m}
 function addVfx(anim,dur,x,y,h,size,mode,rot=0,flip=1){const m=spriteMesh(geoC);setFrame(m,anim[0]);S.vfx.push({mesh:m,anim,t:0,dur,x,y,h,size,mode,rot,flip});return m}
+// ---- nowe animacje skilli i pocisków (Gemini, 30.10.2026): arkusz skill_fx, 192 px na klatkę ----
+const SKM={"knock": [0, 6], "earth": [1, 6], "stone": [2, 6], "frostf": [3, 4], "frosti": [4, 5], "firef": [5, 4], "firei": [6, 7], "casc": [7, 6], "whirl": [8, 4], "wave1": [9, 4], "wave2": [10, 4], "rush": [11, 5], "slash": [12, 5], "bolt": [13, 3], "boltHit": [14, 3], "boss": [15, 4], "freeze": [16, 4], "burn": [17, 4], "poison": [18, 4], "bleed": [19, 4]},SKFX={};
+function skFrames(k){if(SKFX[k])return SKFX[k];const im=typeof IMGS!=='undefined'&&IMGS&&IMGS.skill_fx,m=SKM[k];if(!im||!m)return null;const out=[];for(let i=0;i<m[1];i++){const c=document.createElement('canvas');c.width=c.height=192;c.getContext('2d').drawImage(im,i*192,m[0]*192,192,192,0,0,192,192);const t=new THREE.CanvasTexture(c);t.magFilter=t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;out.push({n:new THREE.MeshBasicMaterial({map:t,transparent:true,alphaTest:.04,depthWrite:false,side:THREE.DoubleSide,fog:false})})}return SKFX[k]=out}
+function skLoop(fr,dur,fps){const n=Math.max(fr.length,Math.round(dur*fps/fr.length)*fr.length),o=[];for(let i=0;i<n;i++)o.push(fr[i%fr.length]);return o}
+function skAdd(k,dur,x,y,h,size,mode,rot=0){const fr=skFrames(k);if(!fr)return null;addVfx(fr,dur,x,y,h,size,mode||'bill',rot);return S.vfx[S.vfx.length-1]}
+
 
 /* ============ WALKA MIECZEM (Slasher) ============ */
 // The only combat mode (Horde was removed on 28.10.2026). The hero swings by hand (light combo, heavy blow), blocks and parries, every action costs stamina;
@@ -2109,13 +2118,13 @@ function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc
   ftCrit=false;ftHeavy=false;ftMelee=false;
   if(hits>0&&!(S.manaHitCd>0)&&SL.mana.onHit>0){gainMana(SL.mana.onHit);S.manaHitCd=SL.mana.hitGap}
   const c=Math.cos(ang),s=Math.sin(ang),trail=COMBAT_TRAIL[encLevel()[0]],visualSize=swordVisualSize(a.kind);
-  if(!trail||!emitCombatEffect(trail,pl.x+c*R*.12,pl.y+s*R*.12,visualSize,-screenAng(c,s)))addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize,'bill',-screenAng(c,s));
+  if(!trail||!emitCombatEffect(trail,pl.x+c*R*.12,pl.y+s*R*.12,visualSize,-screenAng(c,s))){if(!skAdd('slash',.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize*1.1,'bill',-screenAng(c,s)))addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize,'bill',-screenAng(c,s))}
   {const en=ENCH.filter(k=>S.sk[k]);if(en.length)for(let i=0;i<16;i++){const t=ang+rnd(-arc,arc),rr=rnd(10,R),k=en[i%en.length];S.parts.push({k:'e',x:pl.x+Math.cos(t)*rr,y:pl.y+Math.sin(t)*rr,z:rnd(8,18),vx:0,vy:0,vz:rnd(4,12),c:Math.random()<.6?ENC[k].col:ENC[k].col2,life:rnd(.2,.45)})}}
   if(crit){pl.riposte=0;launchWave(a,ang,waveDmg);const ec=sk('echo');if(ec>=1){launchWave(a,ang-.28,waveDmg*(ec>=3?1.2:1),1);if(ec>=2)launchWave(a,ang+.28,waveDmg*(ec>=3?1.2:1),1)}if(hits)ftInfo((EN?'Critical hit!':'Cios krytyczny!'))}
   else if(hits&&a.kind==='l'&&sk('zryw')){S.hitN=(S.hitN||0)+1;if(S.hitN>=ZRYW_N[sk('zryw')]){S.hitN=0;launchWave(a,ang,waveDmg)}}
   if(hits){S.hitstop=a.kind==='h'?.09:crit?.12:.045;shake(a.kind==='h'?.25:.1,.1);if(crit)play('katana',0)}}
 // fala cięcia: nagroda za parowanie, leci przed siebie i przebija wszystkich wrogów na swojej drodze (raz każdego)
-function launchWave(a,ang,base,quiet){const W0=a.kind==='h'?SL.wave.h:SL.wave.l,zs=sk('zasieg'),W=Object.assign({},W0,{life:W0.life*(1+.18*zs),r:W0.r*(1+.18*zs),size:W0.size*(1+.1*zs),dmg:W0.dmg*(1+FALA_B[sk('fala')])*(brOn('wav')?1.3:1)}),c=Math.cos(ang),s=Math.sin(ang);addVfx(A.fx.slash,W.life,pl.x+c*14,pl.y+s*14,.6,W.size,'bill',-screenAng(c,s));
+function launchWave(a,ang,base,quiet){const W0=a.kind==='h'?SL.wave.h:SL.wave.l,zs=sk('zasieg'),W=Object.assign({},W0,{life:W0.life*(1+.18*zs),r:W0.r*(1+.18*zs),size:W0.size*(1+.1*zs),dmg:W0.dmg*(1+FALA_B[sk('fala')])*(brOn('wav')?1.3:1)}),c=Math.cos(ang),s=Math.sin(ang);{const wk=brOn('wav')?'rush':sk('zasieg')>=1?'wave2':'wave1',wf=skFrames(wk);if(wf)addVfx(wf,W.life,pl.x+c*14,pl.y+s*14,.6,W.size*1.05,'bill',-screenAng(c,s));else addVfx(A.fx.slash,W.life,pl.x+c*14,pl.y+s*14,.6,W.size,'bill',-screenAng(c,s))}
   (S.waves=S.waves||[]).push({f:S.vfx[S.vfx.length-1],x:pl.x+c*14,y:pl.y+s*14,vx:c*W.speed,vy:s*W.speed,t:W.life,r:W.r,dmg:base*W.dmg,hit:new Set()});play('katana',0);shake(.12,.1);padRumble(.4,.7,160);
   if(!quiet)ftInfo((EN?'Slash wave':'Fala cięcia'))}
 function waveTick(dt){if(!S.waves||!S.waves.length)return;for(let i=S.waves.length-1;i>=0;i--){const w=S.waves[i];w.t-=dt;w.x+=w.vx*dt;w.y+=w.vy*dt;if(w.f){w.f.x=w.x;w.f.y=w.y}
@@ -2224,7 +2233,7 @@ function cascadeCut(c){const C=SL.cascade,ang=Math.atan2(c.dy,c.dx),dmg=C.dmg[c.
  const side=c.n%2?-1:1,a2=ang+side*.12;moveBox(pl,c.dx*C.lunge,c.dy*C.lunge,4,3);
  ftMelee=true;ftHeavy=false;ftCrit=false;let hits=0;try{for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy);if(d>C.range+e.r||!sight(pl.x,pl.y,e.x,e.y))continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(d>10&&Math.abs(df)>C.arc)continue;
   if(damageEnemy(e,dmg,dx/(d||1),dy/(d||1),.4))hits++}}finally{ftMelee=oldM;ftHeavy=oldH;ftCrit=oldC}
- const cs=Math.cos(a2),sn=Math.sin(a2);addVfx(A.fx.slash,.18,pl.x+cs*C.range*.45,pl.y+sn*C.range*.45,.6,swordVisualSize('l')*1.1,'bill',-screenAng(cs,sn));
+ const cs=Math.cos(a2),sn=Math.sin(a2);if(skFrames('casc')){if(c.n===0)skAdd('casc',.62,pl.x+cs*C.range*.5,pl.y+sn*C.range*.5,.6,2.0,'bill',-screenAng(cs,sn))}else addVfx(A.fx.slash,.18,pl.x+cs*C.range*.45,pl.y+sn*C.range*.45,.6,swordVisualSize('l')*1.1,'bill',-screenAng(cs,sn));
  pl.swingT=pl.swingDur=.2;if(Math.abs(c.dx)>Math.abs(c.dy)){pl.swingDir=2;pl.swingS=c.dx>0?1:-1}else{pl.swingDir=c.dy>0?0:1;pl.swingS=side}
  play('swing',0);shake(.06,.06);if(hits){S.hitstop=Math.max(S.hitstop||0,.025);if(!(S.manaHitCd>0)&&SL.mana.onHit>0){gainMana(SL.mana.onHit);S.manaHitCd=SL.mana.hitGap}}}
 function cascadeTick(dt){const c=S.cascade;if(!c)return;if(pl.dead||pl.roll>0||pl.broken>0){S.cascade=null;if(pl.atk?.kind==='skill')pl.atk=null;return}
@@ -2253,15 +2262,17 @@ function whirlTick(dt){const a=pl.atk;if(pl.dead||pl.broken>0){endWhirl();return
 const whirlVisualPool=[];
 function initWhirlVisuals(){if(whirlVisualPool.length)return;const texture=texFrom(IMGS.whirl_fx);for(let i=0;i<3;i++){const mesh=new THREE.Mesh(new THREE.PlaneBufferGeometry(1,.625),new THREE.MeshBasicMaterial({map:texture,transparent:true,alphaTest:.06,depthWrite:false,depthTest:true,side:THREE.DoubleSide,fog:false}));mesh.renderOrder=-3;mesh.frustumCulled=false;mesh.visible=false;scene.add(mesh);whirlVisualPool.push({mesh,active:false,kind:'steel',elapsed:0,x:0,y:0,radius:32,frame:-1,level:1})}}
 function setWhirlVisualFrame(f,frame){const key=f.kind+':'+frame;if(f.frame===key)return;f.frame=key;const a=WHIRL_FX.effects[f.kind].frames[frame],uv=f.mesh.geometry.attributes.uv,u0=(a.x+.5)/WHIRL_FX.width,u1=(a.x+a.width-.5)/WHIRL_FX.width,v0=1-(a.y+a.height-.5)/WHIRL_FX.height,v1=1-(a.y+.5)/WHIRL_FX.height;uv.setXY(0,u0,v1);uv.setXY(1,u1,v1);uv.setXY(2,u0,v0);uv.setXY(3,u1,v0);uv.needsUpdate=true}
-function clearWhirlVisuals(){for(const f of whirlVisualPool){f.active=false;f.mesh.visible=false}}
+let skWhirlMesh=null;function skWhirl(){if(!skWhirlMesh){skWhirlMesh=new THREE.Mesh(new THREE.PlaneBufferGeometry(1,1),new THREE.MeshBasicMaterial({transparent:true,alphaTest:.04,depthWrite:false,side:THREE.DoubleSide,fog:false}));skWhirlMesh.renderOrder=-3;skWhirlMesh.frustumCulled=false;skWhirlMesh.visible=false;scene.add(skWhirlMesh)}return skWhirlMesh}
+function clearWhirlVisuals(){if(skWhirlMesh)skWhirlMesh.visible=false;for(const f of whirlVisualPool){f.active=false;f.mesh.visible=false}}
 function beginWhirlVisual(level,angle){clearWhirlVisuals();const f=whirlVisualPool[0],dust=whirlVisualPool[1];for(let i=0;i<2;i++){const z=whirlVisualPool[i];z.active=true;z.elapsed=0;z.x=pl.x;z.y=pl.y;z.radius=WHIRL.radius[level-1];z.level=level;z.frame=-1;z.mesh.visible=false}f.kind=COMBAT_TRAIL[encLevel()[0]]||'steel';dust.kind='start';return f}
 function releaseWhirlVisual(f,finished){f.active=false;f.mesh.visible=false;whirlVisualPool[1].active=false;whirlVisualPool[1].mesh.visible=false;if(finished){const end=whirlVisualPool[2];end.active=true;end.elapsed=0;end.kind='end';end.frame=-1;end.x=pl.x;end.y=pl.y;end.radius=f.radius;end.mesh.visible=false}}
 function syncWhirlVisual(dt=0){const a=pl?.atk;for(let i=0;i<whirlVisualPool.length;i++){const f=whirlVisualPool[i];if(!f.active)continue;
  if(!S||S.phase!=='play'||pl.dead){f.active=false;f.mesh.visible=false;continue}
- const ring=i===0;if(ring){if(a?.kind!=='whirl'||a.stage!=='act'){f.active=false;f.mesh.visible=false;continue}f.elapsed=a.elapsed;f.x=pl.x;f.y=pl.y;f.kind=COMBAT_TRAIL[encLevel()[0]]||'steel'}else{f.elapsed+=dt;if(f.elapsed>=.22){f.active=false;f.mesh.visible=false;continue}}
+ const ring=i===0;if(ring){if(a?.kind!=='whirl'||a.stage!=='act'){f.active=false;f.mesh.visible=false;if(skWhirlMesh)skWhirlMesh.visible=false;continue}f.elapsed=a.elapsed;f.x=pl.x;f.y=pl.y;f.kind=COMBAT_TRAIL[encLevel()[0]]||'steel'}else{f.elapsed+=dt;if(f.elapsed>=.22){f.active=false;f.mesh.visible=false;continue}}
  const low=SETT.quality==='low',raw=ring?Math.floor(f.elapsed/(WHIRL.duration/8))%4:Math.min(3,Math.floor(f.elapsed/.055)),frame=low?raw<2?0:2:raw;
  setWhirlVisualFrame(f,frame);let warning=false;for(const e of S.enemies)if(!e.dead&&attackCue(e)&&Math.hypot(e.x-f.x,e.y-f.y)<f.radius+e.r+12){warning=true;break}
  const m=f.mesh;m.visible=!warning;m.position.set(f.x/16,.13,f.y/16);m.rotation.set(-Math.PI/2,0,0);const size=f.radius*2/16*(low?.94:1);m.scale.set(size,size/Math.sin(PITCH),1);m.material.opacity=(ring?.66:.45)*(SETT.flash?1:.38)*(ring?1:1-f.elapsed/.22);
+ if(ring){const wf=f.kind==='steel'?skFrames('whirl'):null,sm=skWhirl();if(wf){m.visible=false;sm.visible=!warning;sm.material=wf[frame%wf.length].n;sm.position.copy(m.position);sm.rotation.set(-Math.PI/2,0,0);const q=f.radius*2/16*1.25;sm.scale.set(q,q/Math.sin(PITCH),1)}else sm.visible=false}
 }}
 
 function activeSlotsTick(dt){S.combatLock=Math.max(0,(S.combatLock||0)-dt);S.aardCd=Math.max(0,(S.aardCd||0)-dt);if(!S.activeWind)return;
@@ -2278,21 +2289,21 @@ function requestSwordShot(k=sk('frostshot')?'frostshot':sk('embershot')?'embersh
 // Odłamek szronu: duży pocisk, przebija kilka celów i spowalnia. Kula ognia: duża, wolniejsza, wybucha na pierwszym trafionym celu.
 function swordShotLaunch(w){const ice=w.k==='frostshot',spd=ice?190:150,range=(ice?120:130)+10*w.L,L=Math.min(3,Math.max(1,w.L));
  S.swordShots.push({x:pl.x+w.x*8,y:pl.y+w.y*8,vx:w.x*spd,vy:w.y*spd,spd,R:ice?SL.shot.iceR:SL.shot.fireHit,t:range/spd,L,ice,fire:!ice,ch:CH,hit:new Set(),n:0,max:ice?SL.shot.targets[L-1]:1});
- const p=S.swordShots[S.swordShots.length-1];addVfx(ice?A.fx.nova:A.fx.inferno,p.t,p.x,p.y,.55,ice?1:1.3,'bill',ice?-screenAng(w.x,w.y):0);p.visual=S.vfx[S.vfx.length-1];
+ const p=S.swordShots[S.swordShots.length-1];{const fl=skFrames(ice?'frostf':'firef');if(fl)addVfx(skLoop(fl,p.t,ice?11:10),p.t,p.x,p.y,.55,ice?1.7:1.9,'bill',-screenAng(w.x,w.y));else addVfx(ice?A.fx.nova:A.fx.inferno,p.t,p.x,p.y,.55,ice?1:1.3,'bill',ice?-screenAng(w.x,w.y):0)}p.visual=S.vfx[S.vfx.length-1];
  swordSparks(pl.x+w.x*10,pl.y+w.y*10,ice?'#9ee9ff':'#ffa44b',ice?8:12)}
 function fireballExplode(p,main){const L=p.L,R=SL.shot.fireR[L-1],base=SL.shot.fireDmg[L-1]*(1+.07*(S.lvl-1))*skillMul();
  for(const e of [...S.enemies]){if(e.dead||e.rise>0)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy);if(e!==main&&d>R+e.r)continue;
   if(damageEnemy(e,base*(e===main?1:SL.shot.splash),dx/(d||1),dy/(d||1),e===main?.4:.7)&&e===main&&!e.dead){e.burn=Math.max(e.burn||0,1+.5*L);e.burnD=Math.max(e.burnD||0,2)}}
- addVfx(A.fx.inferno,.5,p.x,p.y,0,R/14,'bill');for(let i=0;i<26;i++){const an=Math.random()*Math.PI*2,sp=rnd(30,120);S.parts.push({k:'e',x:p.x,y:p.y,z:rnd(4,18),vx:Math.cos(an)*sp,vy:Math.sin(an)*sp*.6,vz:rnd(8,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.3,.7)})}
+ if(!skAdd('firei',.75,p.x,p.y,.2,R/13,'bill'))addVfx(A.fx.inferno,.5,p.x,p.y,0,R/14,'bill');for(let i=0;i<26;i++){const an=Math.random()*Math.PI*2,sp=rnd(30,120);S.parts.push({k:'e',x:p.x,y:p.y,z:rnd(4,18),vx:Math.cos(an)*sp,vy:Math.sin(an)*sp*.6,vz:rnd(8,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.3,.7)})}
  shake(.22,.2);play('fire',0)}
 function swordTechniqueHit(e,a){if(e.dead)return;if(a.kind==='h'&&sk('iceblade')>=3&&e.chill>0){e.chill=0;for(const o of S.enemies)if(o!==e&&!o.dead&&Math.hypot(o.x-e.x,o.y-e.y)<28){o.chill=Math.max(o.chill||0,1);o.chillMul=Math.min(o.chillMul||1,BIG.has(o.type)||o.type==='collector'?.9:.8)}swordSparks(e.x,e.y,'#b4efff',10)}const L=sk('breach');if(a.kind==='h'&&a.charged&&L){if(BIG.has(e.type)||e.type==='collector'||e.type==='jerzak')breakPoise(e,20+10*L);else{slashStagger(e,.6+.15*L,true);e.vx+=a.dx*90;e.vy+=a.dy*90}}
 }
 function swordOnKill(e){}
-function swordEarth(a,active=false){const L=sk('earthcut');if(!active||!L)return;const hit=new Set();for(let r=12;r<=48+8*L;r+=6){const x=pl.x+a.dx*r,y=pl.y+a.dy*r;if(boxSolid(x,y,2,2))break;if(r%12===0)addVfx(A.fx.spikes,.35,x,y,0,.65,'bill');for(const e of [...S.enemies])if(!e.dead&&!hit.has(e)&&Math.hypot(e.x-x,e.y-y)<10+e.r){hit.add(e);damageEnemy(e,(8+4*L)*(1+.07*(S.lvl-1))*skillMul(),a.dx,a.dy,.3)}}}
+function swordEarth(a,active=false){const L=sk('earthcut');if(!active||!L)return;const hit=new Set();let lastR=0;const haveEarth=!!skFrames('earth');for(let r=12;r<=48+8*L;r+=6){const x=pl.x+a.dx*r,y=pl.y+a.dy*r;if(boxSolid(x,y,2,2))break;lastR=r;if(!haveEarth&&r%12===0)addVfx(A.fx.spikes,.35,x,y,0,.65,'bill');for(const e of [...S.enemies])if(!e.dead&&!hit.has(e)&&Math.hypot(e.x-x,e.y-y)<10+e.r){hit.add(e);damageEnemy(e,(8+4*L)*(1+.07*(S.lvl-1))*skillMul(),a.dx,a.dy,.3)}}if(haveEarth&&lastR>0){const len=lastR+6,v=skAdd('earth',.7,pl.x+a.dx*len*.5,pl.y+a.dy*len*.5,.04,len/29,'ground',-Math.atan2(a.dy,a.dx));if(v)v.sy=1/Math.sin(PITCH)}}
 // Stone guardian: a walking golem that draws ordinary enemies to itself for up to 10 s. It has its own life,
 // deals no damage, never heals. Bosses (bottom health bar) follow it for at most SL.guard.bossTaunt seconds per summon.
 function summonSwordGuardian(active=false){const L=Math.min(3,sk('stoneguard'));if(!active||!L)return;removeGuardian();let x=pl.x+pl.fx*14,y=pl.y+pl.fy*14;if(boxSolid(x,y,6,4)){x=pl.x;y=pl.y}const mesh=new THREE.Mesh(geo32,A.golem.idle[0].n);mesh.position.set(x/16,0,y/16);mesh.scale.set(1,SQ,1);scene.add(mesh);
-  const max=Math.max(1,Math.round(pl.max*SL.guard.hp[L-1]));S.guardSeq=(S.guardSeq||0)+1;S.swordGuardian={golem:true,id:S.guardSeq,x,y,t:SL.guard.dur,hp:max,max,L,R:SL.guard.taunt[L-1],mesh,ch:CH,s:pl.fx<0?-1:1,walk:0,moving:false,inv:0,gone:false};swordSparks(x,y,'#d6bf81',12)}
+  const max=Math.max(1,Math.round(pl.max*SL.guard.hp[L-1]));S.guardSeq=(S.guardSeq||0)+1;S.swordGuardian={golem:true,id:S.guardSeq,x,y,t:SL.guard.dur,hp:max,max,L,R:SL.guard.taunt[L-1],mesh,ch:CH,s:pl.fx<0?-1:1,walk:0,moving:false,inv:0,gone:false};skAdd('stone',1.1,x,y,.3,1.5,'bill');swordSparks(x,y,'#d6bf81',12)}
 function removeGuardian(){const g=S&&S.swordGuardian;if(!g)return;g.gone=true;scene.remove(g.mesh);S.swordGuardian=null}
 function bossBar(e){return BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'||e.type==='boginka'}
 function golemTgt(e){return !!(e.tg&&e.tg.golem)}
@@ -2324,6 +2335,7 @@ function swordTick(dt){activeSlotsTick(dt);for(let i=S.swordTrails.length-1;i>=0
    if(p.fire){if(touch.length){boom=touch[0];gone=true;break}continue}
    for(const e of touch){p.hit.add(e);const ok=damageEnemy(e,(SL.shot.iceDmg+SL.shot.perL*p.L)*(1+.07*(S.lvl-1))*skillMul(),ux,uy,0);if(!ok)continue;p.n++;if(!e.dead){e.chill=Math.max(e.chill||0,1.5);e.chillMul=Math.min(e.chillMul||1,BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'?.9:1-(.25+.05*p.L))}swordSparks(p.x,p.y,'#a2e9ff',8);if(p.n>=p.max){gone=true;break}}}
   if(p.visual){p.visual.x=p.x;p.visual.y=p.y;if(gone)p.visual.t=p.visual.dur}
+  if(gone&&p.ice&&p.ch===CH)skAdd('frosti',.5,p.x,p.y,.5,1.5,'bill');
   if(gone&&p.fire&&p.ch===CH)fireballExplode(p,boom);
   if(!gone)swordSparks(p.x,p.y,p.ice?'#a2e9ff':'#ff9a43',p.ice?3:4);else S.swordShots.splice(i,1)}
 }
@@ -2338,6 +2350,7 @@ function applyEnchants(e,a,crit){if(e.dead)return;const [k,L]=encLevel();if(!k)r
   // the status itself
   if(!(e.pois>0||e.burn>0||e.chill>0||e.bleed>0))ftx(c.name,e.x,e.y,ftEntH(e)+.5,'i');
   if(k==='venom'){e.pois=4;e.poisD=2+L}else if(k==='fireblade'){e.burn=3;e.burnD=3+1.5*L}else if(k==='iceblade'){e.chill=2.5;e.chillMul=Math.max(.3,.6-.03*L)}else{e.bleed=3;e.bleedDmg=2+L}
+  skAdd(k==='venom'?'poison':k==='fireblade'?'burn':k==='iceblade'?'freeze':'bleed',.5,e.x,e.y,.3,.85,'bill');
   for(let i=0;i<8;i++)S.parts.push({k:'e',x:e.x+rnd(-5,5),y:e.y+rnd(-3,3),z:rnd(6,18),vx:rnd(-14,14),vy:0,vz:rnd(8,22),c:Math.random()<.6?c.col:c.col2,life:rnd(.3,.6)});
   if(a.statusOnly)return; // Whirl applies the status only: no elemental execution, healing or boss stun.
   e.marks=(e.marks||0)+1;if(e.marks<encMarks(e))return;e.marks=0;
@@ -2360,9 +2373,9 @@ function castAard(prepaid=false){const L=S.sk.aard||0;if(!L||pl.dead||pl.roll>0|
   for(const e of S.enemies){if(e.dead||e.rise>0)continue;const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy)||1;if(d>R+e.r)continue;let df=Math.atan2(dy,dx)-ang;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;if(!full&&Math.abs(df)>.95)continue;
     const big=BIG.has(e.type)||e.type==='collector';if(!damageEnemy(e,dmg*(1+.07*(S.lvl-1))*skillMul(),dx/d,dy/d,0)||e.dead)continue;
     if(big){breakPoise(e,60+15*L)}else{e.vx+=dx/d*(220+20*L);e.vy+=dy/d*(220+20*L);e.stun=Math.max(e.stun||0,stun);e.sw=0;e.ghoulWind=0;e.leap=0}}
-  for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i],dx=f.x-pl.x,dy=f.y-pl.y,d=Math.hypot(dx,dy);if(d>R+20)continue;if(f.mesh)scene.remove(f.mesh);S.eproj.splice(i,1)}
+  for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i],dx=f.x-pl.x,dy=f.y-pl.y,d=Math.hypot(dx,dy);if(d>R+20)continue;if(f.mesh)scene.remove(f.mesh);if(f.vfe)f.vfe.t=f.vfe.dur;S.eproj.splice(i,1)}
   for(let i=0;i<60;i++){const an=full?Math.random()*Math.PI*2:ang+rnd(-.95,.95),sp=rnd(80,240);S.parts.push({k:'i',x:pl.x+Math.cos(an)*6,y:pl.y+Math.sin(an)*4,z:rnd(4,16),vx:Math.cos(an)*sp,vy:Math.sin(an)*sp*.6,vz:rnd(0,10),c:Math.random()<.5?'#d8f0ff':'#9fb4d0',life:rnd(.25,.45)})}
-  addVfx(A.fx.nova,.3,pl.x+Math.cos(ang)*R*.35,pl.y+Math.sin(ang)*R*.35,.06,R/16*(full?1.2:.8),'ground');shake(.2,.2);play('quake',0);play('frost',.1);
+  if(!skAdd('knock',.6,pl.x+(full?0:Math.cos(ang)*R*.4),pl.y+(full?0:Math.sin(ang)*R*.4),.3,R/14.6*(full?1.15:.85),'bill'))addVfx(A.fx.nova,.3,pl.x+Math.cos(ang)*R*.35,pl.y+Math.sin(ang)*R*.35,.06,R/16*(full?1.2:.8),'ground');shake(.2,.2);play('quake',0);play('frost',.1);
   pl.swingT=pl.swingDur=.25;if(Math.abs(a[0])>Math.abs(a[1])){pl.swingDir=2;pl.swingS=a[0]>0?1:-1}else{pl.swingDir=a[1]>0?0:1;pl.swingS=1}}
 // enemy side: wind up, strike, then stand open for a moment
 function slashEnemy(e,dx,dy,d,dt){
@@ -2659,6 +2672,7 @@ function strzygaAI(e,dx,dy,d,dt){
 const warningColor=()=>SETT.contrast?'#ffe270':'#ff5a4e';
 function telegraph(e){S.parts.push({k:'e',x:e.x,y:e.y,z:26,vx:0,vy:0,vz:4,c:warningColor(),life:.45});e.atkA=.2}
 function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
+  if(f.bolt){const ar=!!(f.source&&(f.source.type==='xbow'||f.source.type==='scribe'));if(!f.vfe&&skFrames(ar?'bolt':'boss')){addVfx(skLoop(skFrames(ar?'bolt':'boss'),f.life,10),f.life,f.x,f.y,.5,ar?.95:.8,'bill',-screenAng(f.vx,f.vy));f.vfe=S.vfx[S.vfx.length-1]}if(f.vfe){f.vfe.x=f.x;f.vfe.y=f.y}}
   if(f.bolt)S.parts.push({k:'d',x:f.x,y:f.y,z:9,vx:0,vy:0,vz:0,c:'#d8cfb8',life:.12});
   else for(let k=0;k<(f.mesh?1:3);k++)S.parts.push({k:'e',x:f.x+rnd(-2,2),y:f.y+rnd(-1,1),z:9+rnd(-2,2),vx:rnd(-4,4),vy:0,vz:rnd(2,8),c:k?'#ff6a1a':'#ffb347',life:rnd(.15,.35)});
   let gone=f.life<=0||solidAt(f.x,f.y);
@@ -2666,8 +2680,8 @@ function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=
   if(!gone&&!pl.dead&&Math.hypot(pl.x-f.x,pl.y-f.y)<8){const sp=Math.hypot(f.vx,f.vy)||1,nx=f.vx/sp,ny=f.vy/sp;
     if(pl.block&&pl.inv<=0&&-(pl.fx*nx+pl.fy*ny)>.3&&pl.blockT<parryWin()+.06){onParry();pl.parryT=.45;S.hitstop=.12;padRumble(.6,.3,140);guardFeedback('parry',nx,ny,f);shake(.15,.15);ftInfo((EN?'Deflected!':'Odbicie!'))}
     else hurtPlayer(enemyDamage(f.bolt?6:7,SL.projDiv),nx,ny,f.source||(f.bolt?'night':'fire'));gone=true}
-  if(gone&&f.bolt){for(let k=0;k<5;k++)S.parts.push({k:'d',x:f.x,y:f.y,z:8,vx:rnd(-30,30),vy:rnd(-15,15),vz:rnd(5,20),c:'#9d9584',life:.3});S.eproj.splice(i,1);continue}
-  if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);S.eproj.splice(i,1)}}}
+  if(gone&&f.bolt){if(f.vfe)f.vfe.t=f.vfe.dur;if(f.source&&(f.source.type==='xbow'||f.source.type==='scribe'))skAdd('boltHit',.3,f.x,f.y,.5,.7,'bill');for(let k=0;k<5;k++)S.parts.push({k:'d',x:f.x,y:f.y,z:8,vx:rnd(-30,30),vy:rnd(-15,15),vz:rnd(5,20),c:'#9d9584',life:.3});S.eproj.splice(i,1);continue}
+  if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);if(f.vfe)f.vfe.t=f.vfe.dur;S.eproj.splice(i,1)}}}
 function sight(x0,y0,x1,y1){const n=Math.ceil(Math.hypot(x1-x0,y1-y0)/8);for(let i=1;i<n;i++)if(solidAt(x0+(x1-x0)*i/n,y0+(y1-y0)*i/n))return false;return true}
 function spawnTick(dt){
   if(pl.dead||S.phase!=='play'||S.opening||S.stage==='break'||S.dg)return;S.spawnT-=dt;if(S.spawnT>0)return;S.spawnT=.5;
@@ -3175,7 +3189,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     for(const p of S.picks){const y=.1+Math.sin(clock*4+p.ph)*.07;p.mesh.position.set(p.x/16,y+(p.k==='h'?.28:-.55),p.y/16);p.mesh.quaternion.copy(cam.quaternion);p.mesh.scale.set(p.k==='h'?.5:.9,p.k==='h'?.5:.9,1);
       p.glow.position.set(p.x/16,y+.02,p.y/16+.01);p.glow.quaternion.copy(cam.quaternion)}
     for(const f of S.vfx){setFrame(f.mesh,at(f.anim,f.t,f.anim.length/f.dur,false));
-      if(f.mode==='ground'){f.mesh.position.set(f.x/16,f.h,f.y/16);f.mesh.rotation.set(-Math.PI/2,0,0);f.mesh.scale.set(f.size,f.size,1)}
+      if(f.mode==='ground'){f.mesh.position.set(f.x/16,f.h,f.y/16);f.mesh.rotation.set(-Math.PI/2,0,f.rot||0);f.mesh.scale.set(f.size,f.size*(f.sy||1),1)}
       else{f.mesh.position.set(f.x/16,f.h+(f.mode==='bill'&&f.h===0?f.size*.42:0),f.y/16);f.mesh.quaternion.copy(cam.quaternion);if(f.rot)f.mesh.rotateZ(f.rot);f.mesh.scale.set(f.size,f.size,1)}}
     let n=0;for(const p of S.parts){if(n>=MAXP)break;pPos[n*3]=p.x/16;pPos[n*3+1]=p.z/16+.02;pPos[n*3+2]=p.y/16;const c=col(p.c);let a=p.life!==undefined?Math.max(0,Math.min(1,p.life)):1;pCol[n*3]=c.r*a;pCol[n*3+1]=c.g*a;pCol[n*3+2]=c.b*a;n++}
     pGeo.setDrawRange(0,n);pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true;
