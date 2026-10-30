@@ -1139,3 +1139,6 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 .buffs br{display:none}
 .buffs,#hud .left #chal{white-space:nowrap}
 #hud .left #chal{max-width:none}
+/* Drugie Ja: ikona umiejętności */
+:root{--nb-ui_drugieja:url(./099bea7a3a8847f17f118d2bc37e2f863c8b2e4be2829f205a3f7301b91f1ed4.webp)}
+#orient#orient#orient .ic-drugieja{background-image:var(--nb-ui_drugieja)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
