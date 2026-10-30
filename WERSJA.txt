@@ -240,3 +240,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache194: usunięta oderwana poświata miecza pod graczem (odbicie na ziemi); status zaklęcia zostaje na wrogach i w iskrach przy ostrzu. Bez testów gry; sprawdzono składnię.
 
 30.10.2026 — cache195: kolor zaklęcia leży na samym mieczu bohatera: szare piksele po stronie miecza w każdej klatce dostają kolor zatrucia/ognia/lodu/krwi i lekko świecą (przefarbowana tekstura liczona raz na klatkę, więc obraca się z postacią). Zastępuje usuniętą poświatę z cache193. Reguła geometryczna: w części klatek zamachu część klingi może zostać szara. Bez testów gry; sprawdzono składnię.
+
+30.10.2026 — cache196: krew: miecz z zaklęciem krwi ma głębszą, krwistą czerwień; animacja uderzenia krwią (smuga i wir) przefarbowana z brązu na krwistą czerwień w locie (bez zmiany plików graficznych). Kosmetyka, tylko build i składnia.
