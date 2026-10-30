@@ -819,7 +819,7 @@ function planGround(ch){if(ch!==1)return groundPatterns(ch,planOtherGround(ch));
 
 function groundHash(x,y){let n=Math.imul(x+31,374761393)^Math.imul(y+73,668265263)^(W.seed||CH*977);n=Math.imul(n^(n>>>13),1274126177);return(n^(n>>>16))>>>0}
 function naturalGround(img,row){const rows={br_ground:[0,1,2,4,6,7],dm_floor:[0,2],zl_ground:[0,2,3,5,7],cz_ground:[0,1,2,3,6],cy_ground:[0,5]};return(rows[img.nbKey]||[]).includes(row)}
-function groundPadded(img){if(!img.nbPadded){const c=canvas(512,512),g=c.getContext('2d');for(let y=0;y<8;y++)for(let x=0;x<8;x++){const X=x*64,Y=y*64;g.drawImage(img,X,Y,64,64,X+4,Y+4,56,56);for(const [sx,sy,sw,sh,dx,dy,dw,dh] of [[0,0,1,64,0,4,4,56],[63,0,1,64,60,4,4,56],[0,0,64,1,4,0,56,4],[0,63,64,1,4,60,56,4],[0,0,1,1,0,0,4,4],[63,0,1,1,60,0,4,4],[0,63,1,1,0,60,4,4],[63,63,1,1,60,60,4,4]])g.drawImage(img,X+sx,Y+sy,sw,sh,X+dx,Y+dy,dw,dh)}img.nbPadded=c}return img.nbPadded}
+function groundPadded(img){if(!img.nbPadded){const S=img.width/8,P=S/16,I=S-2*P,c=canvas(S*8,S*8),g=c.getContext('2d');for(let y=0;y<8;y++)for(let x=0;x<8;x++){const X=x*S,Y=y*S;g.drawImage(img,X,Y,S,S,X+P,Y+P,I,I);for(const [sx,sy,sw,sh,dx,dy,dw,dh] of [[0,0,1,S,0,P,P,I],[S-1,0,1,S,S-P,P,P,I],[0,0,S,1,P,0,I,P],[0,S-1,S,1,P,S-P,I,P],[0,0,1,1,0,0,P,P],[S-1,0,1,1,S-P,0,P,P],[0,S-1,1,1,0,S-P,P,P],[S-1,S-1,1,1,S-P,S-P,P,P]])g.drawImage(img,X+sx,Y+sy,sw,sh,X+dx,Y+dy,dw,dh)}img.nbPadded=c}return img.nbPadded}
 function groundCoarse(img){if(!img.nbCoarse){const c=canvas(128,128);c.getContext('2d').drawImage(img,0,0,128,128);img.nbCoarse=c}return img.nbCoarse}
 function groundTile(g,img,col,row,tx,ty){const n=groundHash(tx,ty),plan=W.groundPlan,j=ty*MW+tx;let materialCell=j;
   // A prop's collision tile has the same floor as its surroundings, not a separate old atlas patch.
@@ -881,7 +881,7 @@ vec2 nbWorld,nbDx,nbDy;
 vec3 nbCCRead(float id,vec2 world){${cc0Sample}return vec3(1.);}
 vec3 nbRead(sampler2D atlas,vec4 cell,vec2 local){if(cell.b>=128.)return nbCCRead(floor((cell.b-128.)/8.),nbWorld)*nbCCTint;vec2 uv=nbUV(cell,local);
 #ifdef NB_STABLE_GRAD
-vec2 gx=nbUV(cell,vec2(.5)+nbDx)-nbUV(cell,vec2(.5)),gy=nbUV(cell,vec2(.5)+nbDy)-nbUV(cell,vec2(.5));float cap=min(1.,4./max(512.*max(length(gx),length(gy)),.001));return texture2DGradEXT(atlas,uv,gx*cap,gy*cap).rgb;
+vec2 gx=nbUV(cell,vec2(.5)+nbDx)-nbUV(cell,vec2(.5)),gy=nbUV(cell,vec2(.5)+nbDy)-nbUV(cell,vec2(.5));float cap=min(1.,4./max(1024.*max(length(gx),length(gy)),.001));return texture2DGradEXT(atlas,uv,gx*cap,gy*cap).rgb;
 #else
 return texture2D(atlas,uv).rgb;
 #endif
