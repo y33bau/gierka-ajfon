@@ -252,3 +252,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache200: usunięte małe rekwizyty typu pal/słup z niewidzialnymi granicami: na mapie I głowy na palach i słupy z krukiem, na mapie III głowy na palach i słupy z krukiem (szubienice zostają), na mapie IV słupy z czaszkami (roślinność i reszta rekwizytów bez zmian). Generator mapy zostawia te same losowania, więc reszta układu map się nie zmienia. Nie sprawdzono na telefonie.
 
 30.10.2026 — cache200 (uzupełnienie): ciosy mieczem gracza (lekki/ciężki, kaskada, wir) zatrzymują tylko ściany i przepaście, nie rekwizyty z kolizją (wcześniej pełny kafel rekwizytu blokował cios, gdy stał na linii do moba). Nie sprawdzono na telefonie.
+
+30.10.2026 — cache201: nowa muzyka z folderu Nowe Utwory (MP3 112 kb/s, ok. 2,5 MB każdy, ok. 3 min): ekran tytułowy = Four-Note Omen, mapy I–V = Gloomeo, Motif, The Nightbrand Hymn, Lament, Death March. Muzyka krypty bez zmian. Nie sprawdzono odsłuchu (telefon, pad, głośność, zapętlenie).
