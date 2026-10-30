@@ -1,3 +1,6 @@
+FENIX nightbrand-codex-20261028-180 — nowe nagłówki-obrazki (PL i EN) złożone z liter alfabetu od autora: 11 polskich i 11 angielskich, w wersji EN obrazki zamiast tekstu (Claude). Opublikowano na GitHub.
+SHA-256 index.html: bddc14ffc0730636a7f763edbaa1afe17b1d8fd24b38e570a30bf105b4dfa6c3.
+SHA-256 sw.js: cc89de6d97e2f336cbcf8153c02bafafc2d65266b7edc065589a7cf547eb2cfb.
 FENIX nightbrand-codex-20261028-179 — wersja angielska: ekran wyboru języka (flagi) przy pierwszym uruchomieniu, zmiana w Opcjach → Ustawienia, ok. 800 tekstów gry i 150 napisów menu po angielsku wg docs/SLOWNIK_EN.md; polskie nazwy: Spalona Osada, Upadły Złotogród, Hrabia Ottokar (Claude). Opublikowano na GitHub.
 SHA-256 index.html: bddc14ffc0730636a7f763edbaa1afe17b1d8fd24b38e570a30bf105b4dfa6c3.
 SHA-256 sw.js: 77f4584ef35ef38b651b24a2794c505e158af65ad468defedb914a529983e71d.
