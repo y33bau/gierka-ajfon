@@ -1132,3 +1132,8 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 @media(min-width:1001px) and (min-height:761px) and (pointer:fine){#screen:not(.port) #lvl{overflow-y:auto}#screen:not(.port) #lvl>*{zoom:1.2}}
 @media(min-width:1001px) and (min-height:881px) and (pointer:fine){#screen:not(.port) #lvl>*{zoom:1.35}}
 @media(min-width:1001px) and (min-height:981px) and (pointer:fine){#screen:not(.port) #lvl>*{zoom:1.5}}
+/* Wyzwanie nocy w jednym pionowym układzie z listą efektów (bez nakładania) */
+#hud .left #chal{position:static;left:auto;top:auto;margin-top:.35em;max-width:22em;font-size:.8em;line-height:1.25}
+#hud .left #chal[hidden]{display:none}
+#hud .left #chal+.buffs{margin-top:.2em}
+.buffs br{display:none}

@@ -258,3 +258,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache202: nowe ilustracje rozdziałów I–V (intro1–intro5) z folderu Nowe Tła rozdziałów, 1376×768, AVIF ok. 170–190 KB każda. Nie sprawdzono na telefonie.
 
 30.10.2026 — cache203: ekran awansu na komputerze większy (zoom 1,2–1,5 zależnie od wysokości okna; telefon bez zmian). Pad: karty awansu — pad czeka do końca 1 s blokady wyboru (z dźwiękiem odmowy zamiast cichego ignorowania), zawsze ma zaznaczoną kartę, a nieaktualne okno „notice” nie przejmuje już sterowania. Nie sprawdzono na padzie ani telefonie.
+
+30.10.2026 — cache204: wyzwanie nocy (np. „Mistrz riposty”) nie nachodzi już na listę efektów (Odrodzenie, Riposta) — oba teksty układają się jeden pod drugim. Zmiana tylko wyglądu (index.html + CSS). Nie sprawdzono na telefonie.
