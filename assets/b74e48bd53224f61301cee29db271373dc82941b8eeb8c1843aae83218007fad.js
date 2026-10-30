@@ -2335,8 +2335,8 @@ function swordTick(dt){activeSlotsTick(dt);for(let i=S.swordTrails.length-1;i>=0
    if(p.fire){if(touch.length){boom=touch[0];gone=true;break}continue}
    for(const e of touch){p.hit.add(e);const ok=damageEnemy(e,(SL.shot.iceDmg+SL.shot.perL*p.L)*(1+.07*(S.lvl-1))*skillMul(),ux,uy,0);if(!ok)continue;p.n++;if(!e.dead){e.chill=Math.max(e.chill||0,1.5);e.chillMul=Math.min(e.chillMul||1,BIG.has(e.type)||e.type==='collector'||e.type==='jerzak'?.9:1-(.25+.05*p.L))}swordSparks(p.x,p.y,'#a2e9ff',8);if(p.n>=p.max){gone=true;break}}}
   if(p.visual){p.visual.x=p.x;p.visual.y=p.y;if(gone)p.visual.t=p.visual.dur}
-  if(gone&&p.t>0&&p.ice&&p.ch===CH)skAdd('frosti',.5,p.x,p.y,.5,1.5,'bill');
-  if(gone&&p.t>0&&p.fire&&p.ch===CH)fireballExplode(p,boom);
+  if(gone&&p.ice&&p.ch===CH)skAdd('frosti',.5,p.x,p.y,.5,1.5,'bill');
+  if(gone&&p.fire&&p.ch===CH)fireballExplode(p,boom);
   if(!gone)swordSparks(p.x,p.y,p.ice?'#a2e9ff':'#ff9a43',p.ice?3:4);else S.swordShots.splice(i,1)}
 }
 let swordGlow=null;
