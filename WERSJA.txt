@@ -224,3 +224,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache187: odłamek szronu znowu przebija kilka wrogów (jak przed cache186); rozbija się dopiero na ścianie lub po przebiciu maksymalnej liczby celów. Kula ognia bez zmian (wybucha na pierwszym wrogu/ścianie). Bez testów mechaniki.
 
 30.10.2026 — cache188: szron i kula ognia po wyczerpaniu zasięgu znowu rozbijają się/wybuchają (animacja trafienia na końcu lotu), jak przed cache186. Bez testów mechaniki.
+
+30.10.2026 — cache189: ekran tytułowy/przygotowania: większy napis „Poziom postaci”, cyfra poziomu gotycką czcionką z metaliczną teksturą liter i jasnym konturem. Bez testów (kosmetyka).
