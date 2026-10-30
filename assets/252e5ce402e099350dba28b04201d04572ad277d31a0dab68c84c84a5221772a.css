@@ -1084,3 +1084,7 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 @media (max-width:700px){#orient#orient#orient :is(#prep,#opts,#manual)>.backar{width:84px;height:34px;font-size:15px;margin-bottom:calc(-34px - .55em)}}
 #orient#orient#orient #prep #prepBack.backar{width:104px;min-height:0;height:40px;margin:0 0 calc(-40px - .55em) 0;padding:0 10px 2px 8px;font-size:17px;opacity:1;text-align:center}
 @media (max-width:700px){#orient#orient#orient #prep #prepBack.backar{width:84px;height:34px;font-size:15px;margin-bottom:calc(-34px - .55em)}}
+
+
+/* kontur w kolorze czcionki gry na wszystkich napisach z liter (30.10.2026), wzór: docs/WZOR_KONTUR_NAPISOW */
+#orient#orient#orient :is(#pause h1.pauseh,#opts h1.opth,#manual h1.manh,#prep h1.prepth,#prep .nimh,#end h1.lost,#end h1.swit,#end h1.wrota,#end h1.kopuly,#end h1.brzask,#end h1.splata){filter:drop-shadow(1px 0 0 #d8cfb8) drop-shadow(-1px 0 0 #d8cfb8) drop-shadow(0 1px 0 #d8cfb8) drop-shadow(0 -1px 0 #d8cfb8)!important}

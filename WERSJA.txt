@@ -212,3 +212,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache181: ekran przygotowania: „Gotowy”/„Ready” zamiast „Wyrusz”, nazwa wybranego rozdziału z liter zamiast „Nim zapadnie noc”, pasek poziomu postaci jak na ekranie tytułowym, „Poziom trudności” i poziomy trudności z liter na banerach, strzałka/baner „Wróć” w lewym górnym rogu (przygotowanie, opcje, instrukcja), ESC cofa do poprzedniego ekranu, „Poziom postaci” na ekranie tytułowym z liter. Bez testów (zmiana kosmetyczna).
 
 30.10.2026 — cache182: ekran przygotowania: „Poziom trudności” z konturem jak „Poziom postaci”, nazwy poziomów trudności czcionką przycisku „Gotowy”. Bez testów (kosmetyka).
+
+30.10.2026 — cache183: kontur w kolorze czcionki gry (#d8cfb8, 1 px) na wszystkich napisach z liter (nagłówki Pauza, Opcje, Instrukcja, Przygotowanie, nazwy rozdziałów, ekrany końca). Bez testów (kosmetyka).
