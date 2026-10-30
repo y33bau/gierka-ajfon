@@ -1115,3 +1115,16 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 /* radar okragly (cache191) */
 #mini#mini#mini{width:7.9em!important;height:7.9em!important;right:.7em!important;top:5.7em!important;border-radius:50%!important;outline:none!important;box-shadow:none!important;background:transparent!important;opacity:1!important;image-rendering:auto!important}
 #miniF#miniF#miniF{display:none!important}
+
+/* cache193: cztery karty awansu; naglowek pola skilli czcionka gry */
+#skillLoadout h2{font-family:var(--text)!important;font-weight:700;letter-spacing:.06em;text-shadow:0 2px 0 #000}
+#screen:not(.port) #lvl .level-panel{width:min(100%,84em,1600px)}
+#screen #lvl #cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:.55em}
+#screen #lvl .card{padding:.65em .65em!important}
+#screen #lvl .card .cn{font-size:1.25em}
+#screen #lvl .card .cd,#screen #lvl .card .cd.sm{font-size:1em}
+#screen.port #lvl{overflow-y:auto}
+#screen.port #lvl #cards{grid-template-columns:minmax(0,1fr);gap:.45em}
+#screen.port #lvl .card{padding:.6em .75em .65em!important}
+@media(max-width:900px){#screen:not(.port) #lvl #cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px) and (max-height:420px){#screen:not(.port) #lvl #cards{grid-template-columns:repeat(4,minmax(0,1fr))}#screen:not(.port) #lvl .card .cd,#screen:not(.port) #lvl .card .cd.sm{font-size:.92em}}
