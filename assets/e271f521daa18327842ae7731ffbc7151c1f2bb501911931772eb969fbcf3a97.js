@@ -279,10 +279,11 @@ const solidAt=(px,py)=>SOLID.has(tileAt(Math.floor(px/TS),Math.floor(py/TS)));
 function freeNear(map,PROPS,ok,x,y){for(let r=0;r<12;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const X=x+dx,Y=y+dy;let good=X>2&&Y>2&&X<GW-3&&Y<GH-3;
   for(let j=-1;j<=1&&good;j++)for(let i=-1;i<=1;i++)if(!ok.includes(map[(Y+j)*GW+X+i])){good=false;break}
   if(good&&!PROPS.some(p=>Math.abs(p.x-X-.5)<1.8&&Math.abs(p.y-Y-.5)<1.8))return[X,Y]}return[x,y]}
-function mapKit(fillWith){const map=new Uint8Array(GW*GH).fill(fillWith),under=new Uint8Array(GW*GH),PROPS=[],clearways=new Set();
+const GONE_PROPS=new Set(['impaled_head','crow_post','cz_skullpole']); // chapters I and IV: small stake/post props removed (cache 200)
+function mapKit(fillWith,skip){const map=new Uint8Array(GW*GH).fill(fillWith),under=new Uint8Array(GW*GH),PROPS=[],clearways=new Set();
   const reserve=(x0,y0,w,h)=>{for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)if(x>0&&y>0&&x<GW-1&&y<GH-1)clearways.add(y*GW+x)};
   const set=(x,y,v)=>{if(x>0&&y>0&&x<GW-1&&y<GH-1)map[y*GW+x]=v};const fill=(x0,y0,w,h,v)=>{for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)set(x,y,v)};
-  const prop=(k,x,y,solid,extra)=>{if(solid.some(([sx,sy])=>clearways.has(sy*GW+sx)))return false;PROPS.push(Object.assign({k,x,y},extra||{}));for(const [sx,sy] of solid){if(sx>0&&sy>0&&sx<GW-1&&sy<GH-1){under[sy*GW+sx]=map[sy*GW+sx];set(sx,sy,31)}}return true};
+  const prop=(k,x,y,solid,extra)=>{if(skip&&skip.has(k))return false;if(solid.some(([sx,sy])=>clearways.has(sy*GW+sx)))return false;PROPS.push(Object.assign({k,x,y},extra||{}));for(const [sx,sy] of solid){if(sx>0&&sy>0&&sx<GW-1&&sy<GH-1){under[sy*GW+sx]=map[sy*GW+sx];set(sx,sy,31)}}return true};
   return{map,under,PROPS,set,fill,prop,reserve,clearways}}
 
 // Map scale: every chapter is generated on its own grid (GW x GH) and then stretched by MK to the shared big map (MW x MH = 104 x 91).
@@ -354,7 +355,7 @@ function genDolne(){
 // Chapter I: the burned village of Brzeźnica
 // codes: 40 road, 41 ash, 42 dead grass, 43 charred planks, 44 rubble, 45 water, 46 graveyard, 47 blood mud, 48 house wall, 21 palisade/outside
 function genBrzeznica(){
-  const {map,under,PROPS,set,fill,prop,reserve,clearways}=mapKit(21);const r=rng(1349);
+  const {map,under,PROPS,set,fill,prop,reserve,clearways}=mapKit(21,GONE_PROPS);const r=rng(1349);
   reserve(30,2,3,GH-4);reserve(2,27,GW-4,3);reserve(49,16,6,5);
   const at=(x,y)=>map[y*GW+x];
   fill(2,2,GW-4,GH-4,42);
@@ -487,7 +488,7 @@ const CZ={camp:{x:30,y:57,w:21,h:11},oak:[58,17],circle:[53,34],hill:[40,6],towe
 // zone borders on the 80x70 grid
 const CZY={north:27,stones:41,campTop:55},CZX={forest:42,marsh:37};
 function genCzarnobor(seed){
-  const {map,under,PROPS,set,fill,prop,reserve,clearways}=mapKit(21);const r=rng(seed);const at=(x,y)=>map[y*GW+x];
+  const {map,under,PROPS,set,fill,prop,reserve,clearways}=mapKit(21,GONE_PROPS);const r=rng(seed);const at=(x,y)=>map[y*GW+x];
   reserve(38,54,5,14);
   const ph=[0,1,2,3,4,5].map(()=>r()*20);
   const N=(x,y)=>Math.sin(x*.19+ph[0])+Math.cos(y*.17+ph[1])+Math.sin((x+y)*.105+ph[2])+Math.cos((x-y)*.135+ph[3]);
@@ -1462,7 +1463,7 @@ function enrich(w,ch){
   const FLOOR={1:[41,42,47],2:[20,26],3:[50,52,53,57]}[ch];
   const busy=(x,y,d)=>{for(let Y=Math.floor(y-d);Y<=y+d;Y++)for(let X=Math.floor(x-d);X<=x+d;X++)if(keep.has(Y*MW+X))return true;return P.some(p=>Math.abs(p.x-x-.5)<d&&Math.abs(p.y-y-.92)<d)||w.npcs.some(n=>Math.abs(n.x/16-x)<d+1.5&&Math.abs(n.y/16-y)<d+1.5)||w.shrines.some(s=>Math.abs(s.x/16-x)<d+1.5&&Math.abs(s.y/16-y)<d+1.5)||Math.hypot(w.start.x/16-x,w.start.y/16-y)<7};
   const okRect=(x0,y0,ww,hh,pad=1)=>{for(let y=y0-pad;y<y0+hh+pad;y++)for(let x=x0-pad;x<x0+ww+pad;x++)if(!FLOOR.includes(T(x,y)))return false;return !busy(x0+ww/2,y0+hh/2,Math.max(ww,hh)/2+1.5)};
-  const add=(k,x,y,solid,extra)=>{P.push(Object.assign({k,x:x+.5,y:y+.92},extra||{}));if(solid){U[y*MW+x]=M[y*MW+x];M[y*MW+x]=31}};
+  const add=(k,x,y,solid,extra)=>{if(ch===1&&GONE_PROPS.has(k))return;P.push(Object.assign({k,x:x+.5,y:y+.92},extra||{}));if(solid){U[y*MW+x]=M[y*MW+x];M[y*MW+x]=31}};
   const spot=(ok,d=2.5)=>{for(let i=0;i<300;i++){const x=3+((r()*(MW-6))|0),y=3+((r()*(MH-6))|0);if(FLOOR.includes(T(x,y))&&!busy(x,y,d)&&[-1,0,1].every(dy=>[-1,0,1].every(dx=>!SOLID.has(T(x+dx,y+dy))))&&(!ok||ok(x,y)))return[x,y]}return null};
   const scatter=(k,n,solid=true,d=2.5,ok,extra)=>{for(let i=0;i<n;i++){const s=spot(ok,d);if(s)add(k,s[0],s[1],solid,extra)}};
   // a building: hollow (walls + floor + door to the south) or a solid block
