@@ -3085,6 +3085,18 @@ function heroFrameV2(D){const fd=()=>Math.abs(pl.fx)>Math.abs(pl.fy)?'side':pl.f
   if(pl.block){const d=fd();if(pl.gHitT>0)return d==='side'?D.guard[3]:D.parryDir?D.parryDir[d][0]:D.guard[d==='down'?1:2];if(pl.moving&&(D.guardWalkDir||d==='side'))return at(D.guardWalkDir?D.guardWalkDir[d]:D.guard_walk,pl.walk,6.7);return D.guard[d==='side'?0:d==='down'?1:2]}
   if(pl.hurtT>0)return ix(D.hurt,(.22-pl.hurtT)/.22*2);
   return null}
+// enchant colour on the sword itself: the grey pixels on the sword side of every hero frame get the spell colour (per frame, built once, so it turns with the sprite)
+const BLADE_TINT={venom:[150,255,70],fireblade:[255,122,30],iceblade:[110,200,255],bloodblade:[255,45,70]};
+function heroBladeMat(fr,k){const key='E'+k;if(fr[key]!==undefined)return fr[key];fr[key]=null;try{const n=fr.n,mi=n&&n.map&&n.map.image,ei=n&&n.emissiveMap&&n.emissiveMap.image,T=BLADE_TINT[k];if(!mi||!ei||!T)return null;
+  const w=mi.width,h=mi.height,cv=canvas(w,h),g=cv.getContext('2d');g.drawImage(mi,0,0);const id=g.getImageData(0,0,w,h),d=id.data;let x0=w,x1=-1;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(d[(y*w+x)*4+3]>0){if(x<x0)x0=x;if(x>x1)x1=x}
+  if(x1<0)return null;const lim=x0+.55*(x1-x0+1),hit=[];
+  for(let y=0;y<h;y++)for(let x=Math.ceil(lim);x<w;x++){const i=(y*w+x)*4;if(d[i+3]===0)continue;const r=d[i],gg=d[i+1],b=d[i+2],mx=Math.max(r,gg,b),mn=Math.min(r,gg,b);
+    if(mx>=95&&mx-mn<45){const l=(r+gg+b)/765;d[i]=r*.2+Math.min(255,T[0]*(.5+.7*l))*.8;d[i+1]=gg*.2+Math.min(255,T[1]*(.5+.7*l))*.8;d[i+2]=b*.2+Math.min(255,T[2]*(.5+.7*l))*.8;hit.push(i)}}
+  if(!hit.length)return null;g.putImageData(id,0,0);
+  const ec=canvas(w,h),eg=ec.getContext('2d');eg.drawImage(ei,0,0);const ed=eg.getImageData(0,0,w,h);for(const i of hit){ed.data[i]=T[0]*.6;ed.data[i+1]=T[1]*.6;ed.data[i+2]=T[2]*.6}eg.putImageData(ed,0,0);
+  const m=n.clone(),t1=texFrom(cv),t2=texFrom(ec);for(const p of ['minFilter','magFilter','generateMipmaps'])if(n.map[p]!==undefined)t1[p]=n.map[p];for(const p of ['minFilter','magFilter','generateMipmaps'])if(n.emissiveMap[p]!==undefined)t2[p]=n.emissiveMap[p];
+  m.map=t1;m.emissiveMap=t2;m.needsUpdate=true;fr[key]=m;return m}catch(e){return null}}
 function heroFrame(){
   const H=A.hero,V2=A.heroD&&A.heroD.v2?A.heroD:null;
   if(V2&&!pl.dead){const r=heroFrameV2(V2);if(r)return r}
@@ -3149,7 +3161,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     m.position.set(n.x/16,0,n.y/16);m.scale.set(1,SQ,1);if(n.art!=='tharm')blob(n.x/16,n.y/16,1)}
   if(S){
     heroMesh.visible=!(SETT.flash&&pl.inv>0&&pl.roll<=0&&!pl.dead&&Math.floor(clock*24)%2);
-    setFrame(heroMesh,heroFrame());
+    {const hf=heroFrame(),ek=encLevel()[0];setFrame(heroMesh,hf);const hv=ek&&hf?heroBladeMat(hf,ek):null;if(hv&&heroMesh.material===hf.n){hv.emissiveIntensity=.8+.35*Math.sin(clock*6);heroMesh.material=hv}}
     const hs=pl.roll>0||pl.dead?pl.s:A.heroD&&A.heroD.v2&&!pl.atk&&(pl.parryT>0||pl.broken>0||(pl.hurtT>0&&!pl.block))?(pl.fx>=0?1:-1):pl.swingT>0?(pl.swingDir===2?pl.swingS:1):(pl.charging||pl.block)&&Math.abs(pl.fx)>Math.abs(pl.fy)?(pl.fx>0?1:-1):(pl.dir===2?pl.s:1);
     const guardRecoil=!pl.dead?recoilAmount(pl.visualGuard):0;heroMesh.position.set((pl.x+(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.7)/16,0,(pl.y+(pl.visualGuard?pl.visualGuard.dy:0)*guardRecoil*.7)/16);heroMesh.rotation.z=-(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.018;heroMesh.scale.set(hs,SQ,1);
     S.qBreak=Math.max(0,(S.qBreak||0)-dt);S.qPop=Math.max(0,(S.qPop||0)-dt);
