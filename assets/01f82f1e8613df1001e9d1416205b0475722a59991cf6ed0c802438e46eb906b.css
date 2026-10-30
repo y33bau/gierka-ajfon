@@ -1099,3 +1099,15 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 
 #orient#orient#orient :is(#title,#prep) .chtop{--nbh:clamp(28px,5vh,44px);gap:calc(var(--nbh)*.4)}
 #orient#orient#orient :is(#title,#prep) .chlab{--h:var(--nbh)!important}
+/*prep-hier*/
+#orient#orient#orient #prep .nimh{width:min(96%,920px)!important;height:clamp(110px,26vh,250px)!important;margin:2px auto 8px!important}
+#orient#orient#orient #prep .nimh.ch4{height:clamp(84px,19vh,190px)!important}
+#orient#orient#orient #prep .chcard{width:min(62%,300px);margin:2px auto}
+#orient#orient#orient #prep .chtop{--nbh:clamp(20px,3.3vh,28px);gap:8px}
+#orient#orient#orient #prep .chn{width:calc(var(--nbh)*1.15);height:calc(var(--nbh)*1.15);font-size:calc(var(--nbh)*.85)}
+#orient#orient#orient #prep .xpbar.big{height:13px;margin:3px 0 1px}
+#orient#orient#orient #prep .chxp{font-size:clamp(10px,.8vw,12px)}
+#orient#orient#orient #prep .prepsth{--h:15px;margin:4px auto 0}
+#orient#orient#orient #prep #diffSw{width:min(80%,460px);gap:6px}
+#orient#orient#orient #prep #diffSw .mlab{height:clamp(32px,4.8vh,42px);font-size:clamp(12px,.4vw + 9px,16px)}
+#orient#orient#orient #prep #prepGo{width:min(70vw,260px);min-height:clamp(40px,6.5vh,54px);font-size:clamp(17px,.7vw + 10px,24px)}

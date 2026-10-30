@@ -226,3 +226,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache188: szron i kula ognia po wyczerpaniu zasięgu znowu rozbijają się/wybuchają (animacja trafienia na końcu lotu), jak przed cache186. Bez testów mechaniki.
 
 30.10.2026 — cache189: ekran tytułowy/przygotowania: większy napis „Poziom postaci”, cyfra poziomu bez zmian (wersja gotycka wycofana). Bez testów (kosmetyka).
+
+30.10.2026 — cache190: ekran przygotowania: nazwa mapy znacznie większa i dominuje; Poziom postaci, poziom trudności i przycisk GOTOWY pomniejszone. Bez testów (kosmetyka).
