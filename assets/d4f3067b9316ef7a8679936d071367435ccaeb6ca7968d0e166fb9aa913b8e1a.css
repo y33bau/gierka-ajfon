@@ -1128,3 +1128,7 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 #screen.port #lvl .card{padding:.6em .75em .65em!important}
 @media(max-width:900px){#screen:not(.port) #lvl #cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px) and (max-height:420px){#screen:not(.port) #lvl #cards{grid-template-columns:repeat(4,minmax(0,1fr))}#screen:not(.port) #lvl .card .cd,#screen:not(.port) #lvl .card .cd.sm{font-size:.92em}}
+/* Ekran awansu na komputerze: większa skala (telefon bez zmian) */
+@media(min-width:1001px) and (min-height:761px) and (pointer:fine){#screen:not(.port) #lvl{overflow-y:auto}#screen:not(.port) #lvl>*{zoom:1.2}}
+@media(min-width:1001px) and (min-height:881px) and (pointer:fine){#screen:not(.port) #lvl>*{zoom:1.35}}
+@media(min-width:1001px) and (min-height:981px) and (pointer:fine){#screen:not(.port) #lvl>*{zoom:1.5}}
