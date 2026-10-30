@@ -1067,20 +1067,14 @@ html[lang=en] #orient#orient#orient :is(#title,#prep) .chlab{width:calc(var(--h)
 #orient#orient#orient #prep .chxp{font-size:clamp(12px,1.1vw,15px);text-align:center;margin:0}
 
 /* „Poziom trudności” z liter */
-#orient#orient#orient #prep .prepsth{--h:clamp(22px,3.6vh,34px);display:block;flex:none;height:var(--h);width:calc(var(--h)*6.29);margin:6px auto 2px;font-size:0;text-indent:-9999em;overflow:hidden;white-space:nowrap;color:transparent;text-shadow:none;letter-spacing:0;background:var(--nb-letter_diffh) center/contain no-repeat}
+#orient#orient#orient #prep .prepsth{--h:22px;filter:drop-shadow(1px 0 0 #d8cfb8) drop-shadow(-1px 0 0 #d8cfb8) drop-shadow(0 1px 0 #d8cfb8) drop-shadow(0 -1px 0 #d8cfb8);display:block;flex:none;height:var(--h);width:calc(var(--h)*6.29);margin:6px auto 2px;font-size:0;text-indent:-9999em;overflow:hidden;white-space:nowrap;color:transparent;text-shadow:none;letter-spacing:0;background:var(--nb-letter_diffh) center/contain no-repeat}
 html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);background-image:var(--nb-letter_diffh_en)}
 
-/* poziomy trudności jako banery */
+/* poziomy trudności jako banery, napisy czcionką jak przycisk Gotowy */
 #orient#orient#orient #prep #diffSw{display:flex;flex-wrap:nowrap;justify-content:center;gap:8px;width:min(96%,640px);margin:2px auto;transform:none}
-#orient#orient#orient #prep #diffSw .mlab{flex:1 1 0;min-width:0;height:clamp(40px,6.5vh,58px);box-sizing:border-box;border:0;border-radius:0;margin:0;padding:0;font-size:0;text-indent:-9999em;overflow:hidden;white-space:nowrap;color:transparent;text-shadow:none;cursor:pointer;background:var(--lbl) center/auto 54% no-repeat,var(--nb-ui_button) center/100% 100% no-repeat;filter:brightness(1.0) saturate(.9);transition:filter .15s}
-#orient#orient#orient #prep #diffSw .mlab[data-d=e]{--lbl:var(--nb-letter_d_e)}
-#orient#orient#orient #prep #diffSw .mlab[data-d=n]{--lbl:var(--nb-letter_d_n)}
-#orient#orient#orient #prep #diffSw .mlab[data-d=h]{--lbl:var(--nb-letter_d_h)}
-html[lang=en] #orient#orient#orient #prep #diffSw .mlab[data-d=e]{--lbl:var(--nb-letter_d_e_en)}
-html[lang=en] #orient#orient#orient #prep #diffSw .mlab[data-d=n]{--lbl:var(--nb-letter_d_n_en)}
-html[lang=en] #orient#orient#orient #prep #diffSw .mlab[data-d=h]{--lbl:var(--nb-letter_d_h_en)}
-#orient#orient#orient #prep #diffSw .mlab:hover,#orient#orient#orient #prep #diffSw .mlab:focus-visible{filter:brightness(1.05) saturate(1)}
-#orient#orient#orient #prep #diffSw .mlab.on{background:var(--lbl) center/auto 54% no-repeat,var(--nb-ui_selected) center/100% 100% no-repeat;filter:none;border:0}
+#orient#orient#orient #prep #diffSw .mlab{flex:1 1 0;min-width:0;height:clamp(40px,6.5vh,58px);box-sizing:border-box;border:0;border-radius:0;margin:0;padding:2px 8px 4px;display:flex;align-items:center;justify-content:center;text-align:center;text-indent:0;overflow:hidden;white-space:nowrap;font:700 clamp(15px,.6vw + 10px,22px)/1.1 var(--text);letter-spacing:.12em;text-transform:uppercase;color:#b9ad9d;text-shadow:0 2px 2px #000;cursor:pointer;background:var(--nb-ui_button) center/100% 100% no-repeat;filter:brightness(.9);transition:filter .15s,color .15s}
+#orient#orient#orient #prep #diffSw .mlab:hover,#orient#orient#orient #prep #diffSw .mlab:focus-visible{filter:brightness(1.1);color:#fff0cc}
+#orient#orient#orient #prep #diffSw .mlab.on{background:var(--nb-ui_selected) center/100% 100% no-repeat;filter:none;border:0;color:#fff0cc;text-shadow:0 0 12px rgba(255,138,40,.6),0 2px 2px #000}
 
 /* Wróć: mała strzałka-baner w lewym górnym rogu, nie przewija się z treścią */
 #orient#orient#orient :is(#prep,#opts,#manual)>.backar{position:sticky;top:6px;align-self:flex-start;flex:none;z-index:6;box-sizing:border-box;width:104px;height:40px;margin:0 0 calc(-40px - .55em) 0;padding:0 10px 2px 8px;display:flex;align-items:center;justify-content:center;gap:5px;border:0!important;border-image:none!important;background:var(--nb-ui_button) center/100% 100% no-repeat!important;color:#f1e6c8;font:600 17px/1 var(--text);text-shadow:0 1px 2px #000;cursor:pointer;min-height:0}
