@@ -1088,3 +1088,11 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 
 /* kontur w kolorze czcionki gry na wszystkich napisach z liter (30.10.2026), wzór: docs/WZOR_KONTUR_NAPISOW */
 #orient#orient#orient :is(#pause h1.pauseh,#opts h1.opth,#manual h1.manh,#prep h1.prepth,#prep .nimh,#end h1.lost,#end h1.swit,#end h1.wrota,#end h1.kopuly,#end h1.brzask,#end h1.splata){filter:drop-shadow(1px 0 0 #d8cfb8) drop-shadow(-1px 0 0 #d8cfb8) drop-shadow(0 1px 0 #d8cfb8) drop-shadow(0 -1px 0 #d8cfb8)!important}
+
+
+/* v184: w przygotowaniu zamiast „Przygotowanie” jest nazwa wybranej mapy (ta sama czcionka), reszta wyskalowana */
+#orient#orient#orient #prep h1.prepth{display:none!important}
+#orient#orient#orient #prep .nimh{width:min(92%,700px)!important;height:clamp(84px,17vh,150px)!important;margin:4px auto 6px!important}
+#orient#orient#orient #prep .nimh.ch4{height:clamp(60px,11vh,100px)!important}
+#orient#orient#orient #prep .chcard{margin:6px auto 4px}
+@media (max-height:640px){#orient#orient#orient #prep .nimh{height:clamp(60px,15vh,100px)!important}}

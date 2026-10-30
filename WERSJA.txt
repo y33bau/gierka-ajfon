@@ -214,3 +214,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 30.10.2026 — cache182: ekran przygotowania: „Poziom trudności” z konturem jak „Poziom postaci”, nazwy poziomów trudności czcionką przycisku „Gotowy”. Bez testów (kosmetyka).
 
 30.10.2026 — cache183: kontur w kolorze czcionki gry (#d8cfb8, 1 px) na wszystkich napisach z liter (nagłówki Pauza, Opcje, Instrukcja, Przygotowanie, nazwy rozdziałów, ekrany końca). Bez testów (kosmetyka).
+
+30.10.2026 — cache184: ekran przygotowania bez napisu „Przygotowanie”; na jego miejscu większa nazwa wybranej mapy (ta sama czcionka z liter), układ przeskalowany. Bez testów (kosmetyka).
