@@ -1152,6 +1152,10 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 /* Drugie Ja: ikona umiejętności */
 :root{--nb-ui_drugieja:url(./099bea7a3a8847f17f118d2bc37e2f863c8b2e4be2829f205a3f7301b91f1ed4.webp)}
 #orient#orient#orient .ic-drugieja{background-image:var(--nb-ui_drugieja)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
-@media (pointer:fine){#orient#orient#orient #title .title-under-actions .titleassist{display:grid;grid-template-columns:repeat(3,auto);grid-auto-flow:column;max-width:none;width:100%;justify-content:space-between;column-gap:6px}#orient#orient#orient #title .title-under-actions .titleassist .tgl{width:auto;flex:0 1 auto}}
-@media (pointer:coarse){#orient#orient#orient #title .titleassist .tgl{min-height:80px!important;font-size:24px!important;padding:0 14px!important;width:auto!important;gap:14px!important}
-#orient#orient#orient #title .titleassist .tgl .sl{width:52px!important;height:52px!important}}
+#orient#orient#orient #title .title-left .titleassist{position:static!important;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:center;align-items:center;gap:clamp(10px,1.8vw,28px);width:86%;max-width:none;margin:0;font-size:clamp(11px,1.1vw,16px);z-index:2}
+#orient#orient#orient #title .title-left .titleassist .tgl{margin:0;width:auto;min-height:2.6em;gap:.5em;white-space:nowrap;font-size:1em;color:#f0e2c6;text-shadow:0 1px 3px #000;padding:0}
+#orient#orient#orient #title .title-left .titleassist .tgl>span{color:#f0e2c6;font-size:inherit}
+#orient#orient#orient #title .title-left .titleassist .tgl .sl{width:3em;height:2em}
+@media (pointer:coarse){#orient#orient#orient #title .title-left .titleassist .tgl{min-height:44px}}
+#orient#orient#orient #prep .prepassist{display:flex;justify-content:center;margin:.1em 0 .3em}
+#orient#orient#orient #prep .prepassist .tgl{margin:0;min-height:44px;font-size:1em}
