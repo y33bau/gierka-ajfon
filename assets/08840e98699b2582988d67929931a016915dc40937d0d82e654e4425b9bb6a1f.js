@@ -2353,7 +2353,7 @@ function golemTick(dt){const g=S.swordGuardian;if(!g)return;g.t-=dt;g.inv=Math.m
   if(Math.abs(dx)>1)g.s=dx>0?1:-1;
   g.mesh.position.set(g.x/16,0,g.y/16);g.mesh.scale.set(g.s,SQ,1);setFrame(g.mesh,g.moving?at(A.golem.walk,g.walk,7):at(A.golem.idle,clock,2))}
 function clearSwordTransient(){clearCombatEffects();clearWhirlVisuals();if(!S)return;if(pl?.atk?.kind==='whirl')endWhirl();S.activeWind=null;S.cascade=null;if(pl?.atk?.kind==='skill')pl.atk=null;if(pl?.atk?.kind==='shot')pl.atk=null;S.swordTrails=[];removeGuardian();removeTwin();for(const p of S.swordShots||[])if(p.visual)p.visual.t=p.visual.dur;S.swordShots=[];S.shotWind=null;S.shadowReady=0;S.retaliate=0}
-function swordTick(dt){activeSlotsTick(dt);twinTick(dt);for(let i=S.swordTrails.length-1;i>=0;i--){const z=S.swordTrails[i];z.t-=dt;if(z.t<=0){S.swordTrails.splice(i,1);continue}if(Math.random()<dt*16)swordSparks(z.x,z.y,'#ff8a38',1);for(const e of S.enemies)if(!e.dead&&!z.hit.has(e)&&Math.hypot(e.x-z.x,e.y-z.y)<12+e.r){z.hit.add(e);e.burn=Math.max(e.burn||0,1);e.burnD=Math.max(e.burnD||0,2)}}for(const k of ['shotCd','earthCd','guardCd','whirlCd','cascadeCd','twinCd','shadowReady','retaliate'])S[k]=Math.max(0,(S[k]||0)-dt);
+function swordTick(dt){navUpdate(dt);activeSlotsTick(dt);twinTick(dt);for(let i=S.swordTrails.length-1;i>=0;i--){const z=S.swordTrails[i];z.t-=dt;if(z.t<=0){S.swordTrails.splice(i,1);continue}if(Math.random()<dt*16)swordSparks(z.x,z.y,'#ff8a38',1);for(const e of S.enemies)if(!e.dead&&!z.hit.has(e)&&Math.hypot(e.x-z.x,e.y-z.y)<12+e.r){z.hit.add(e);e.burn=Math.max(e.burn||0,1);e.burnD=Math.max(e.burnD||0,2)}}for(const k of ['shotCd','earthCd','guardCd','whirlCd','cascadeCd','twinCd','shadowReady','retaliate'])S[k]=Math.max(0,(S[k]||0)-dt);
  if(S.shotWind){if(pl.dead||pl.roll>0||pl.broken>0){S.shotWind=null;if(pl.atk?.kind==='shot')pl.atk=null}else{S.shotWind.t-=dt;if(S.shotWind.t<=0){swordShotLaunch(S.shotWind);S.shotWind=null;pl.atk={kind:'shot',stage:'rec',t:.18}}}}
  golemTick(dt);cascadeTick(dt);
  for(let i=S.swordShots.length-1;i>=0;i--){const p=S.swordShots[i];p.t-=dt;let gone=p.t<=0||p.ch!==CH,boom=null;const steps=Math.max(1,Math.ceil(p.spd*dt/3));for(let s=0;s<steps&&!gone;s++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;if(boxSolid(p.x,p.y,2,2)){gone=true;break}const ux=p.vx/p.spd,uy=p.vy/p.spd,touch=S.enemies.filter(e=>!e.dead&&!(e.rise>0)&&!p.hit.has(e)&&Math.hypot(e.x-p.x,e.y-p.y)<=e.r+p.R).sort((a,b)=>((a.x-p.x)*ux+(a.y-p.y)*uy)-((b.x-p.x)*ux+(b.y-p.y)*uy));
@@ -2429,7 +2429,7 @@ function spawnEnemy(type,x,y,extra){const T=ET[type],mul=(BIG.has(type)||type===
   if((BIG.has(type)||type==='collector'||type==='boginka'||type==='jerzak')){e.hp*=SL.bossHp;e.max*=SL.bossHp}
   if(type==='ghoul'&&CH===1)e.lcd=4;if(type==='beast'){e.hw=7;e.cT=2.5;e.lT=3}if(type==='leszy'||type==='strzyga')e.hw=7;
   e.mesh=new THREE.Mesh(BIG.has(type)||type==='collector'&&CH===5&&A.collectorC5?geo64:type==='bat'?geoC:geo32,A[type].walk[0].n);e.mesh.castShadow=true;scene.add(e.mesh);S.enemies.push(e);return e}
-function ringSpot(rmin=260,rmax=320){for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=rnd(rmin,rmax),x=pl.x+Math.cos(a)*d,y=pl.y+Math.sin(a)*d*.75;if(x<20||y<20||x>WW-20||y>WH-20||boxSolid(x,y,6,3))continue;return[x,y]}return null}
+function ringSpot(rmin=260,rmax=320){for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=rnd(rmin,rmax),x=pl.x+Math.cos(a)*d,y=pl.y+Math.sin(a)*d*.75;if(x<20||y<20||x>WW-20||y>WH-20||boxSolid(x,y,6,3)||!navReach(x,y)||CH===1&&tileAt(Math.floor(x/TS),Math.floor(y/TS))===43)continue;return[x,y]}return null}
 let ftCrit=false,ftHeavy=false,ftMelee=false;
 function steelEnemy(e){return ['knight','warden','rotknight','wight','guard','executioner','bookgolem','collector'].includes(e.type)||e.type==='boss'&&CH===5}
 function recoilAmount(v){if(!SETT.shake||!v||v.t<=0)return 0;const p=1-v.t/v.life;return(1-p)*(1-p)*Math.cos(p*Math.PI*1.5)}
@@ -2592,6 +2592,7 @@ function stepEnemyAI(e,dt){
   let sp=e.spd*(e.chill>0?e.chillMul||.6:1);if(e.type==='madman'){sp*=.4+1.1*Math.abs(Math.sin(e.walk*4.3+e.ph));e.side=Math.sin(clock*2+e.ph)>0?1:-1}if(e.type==='dwarf'||e.type==='possessed')sp*=.65+.6*Math.abs(Math.sin(e.walk*3));
   if(e.type==='ghoul'||e.type==='hound'||e.type==='wolf'||e.type==='strzygon'||e.type==='paperrat'){e.lcd-=dt;if(e.leap>0){e.leap-=dt;moveBox(e,e.lx*dt,e.ly*dt,4,3);e.walk+=dt*2;if(!e.lhit&&d<e.r+9){e.lhit=1;S.attacker=e;hitT(e,enemyDamage(e.dmg*SL.enemyHit,SL.dmgDiv),dx/d,dy/d);S.attacker=null}return}if(d<52&&d>22&&e.lcd<=0){if(e.type==='ghoul'&&CH===1){e.ghoulWind=.35;e.ghoulDX=dx/d;e.ghoulDY=dy/d;e.lcd=4.5+Math.random()*1.7;telegraph(e);return}e.leap=.3;e.lhit=0;e.atkA=.3;e.lx=dx/d*105;e.ly=dy/d*105;e.lcd=3.2+Math.random()*1.5;return}}
   let mx=dx/d,my=dy/d;
+  if(!fly&&T===pl&&d>18){e.navT=(e.navT||0)-dt;if(e.navT<=0){e.navT=.25+Math.random()*.1;e.navOn=!sight(e.x,e.y,pl.x,pl.y)}if(e.navOn){const nd=navDir(e);if(nd){mx=nd[0];my=nd[1]}}}
   if(fly){const w=Math.sin(clock*5+e.ph)*1.2,c=Math.cos(w),s=Math.sin(w);[mx,my]=[mx*c-my*s,mx*s+my*c]}
   for(const o of nearbyEnemies(e)){if(o===e||o.dead)continue;const ox=e.x-o.x,oy=e.y-o.y;if(Math.abs(ox)>24||Math.abs(oy)>24)continue;const od=Math.hypot(ox,oy),min=e.r+o.r+1;if(od<min&&od>0){mx+=ox/od*.9;my+=oy/od*.9}}
   const ml=Math.hypot(mx,my)||1;
@@ -2712,6 +2713,21 @@ function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=
   if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);if(f.vfe)f.vfe.t=f.vfe.dur;S.eproj.splice(i,1)}}}
 // player sword strikes (light/heavy, cascade, whirl) are stopped only by walls/cliffs, not by prop tiles (31) whose collision box is bigger than the sprite (cache 200)
 function sightSword(x0,y0,x1,y1){const n=Math.ceil(Math.hypot(x1-x0,y1-y0)/8);for(let i=1;i<n;i++){const px=x0+(x1-x0)*i/n,py=y0+(y1-y0)*i/n,t=tileAt(Math.floor(px/TS),Math.floor(py/TS));if(t!==31&&SOLID.has(t))return false}return true}
+// Nawigacja wrogów: mapa odległości po kaflach (BFS) od bohatera, odświeżana co 0,35 s.
+// Wróg, który nie widzi bohatera przez ścianę, idzie po niej: wychodzi z domów drzwiami i obchodzi przeszkody.
+const NAV={d:null,q:null,t:0};
+function navUpdate(dt){NAV.t-=dt;if(NAV.t>0||!pl)return;NAV.t=.35;const n=MW*MH;if(!NAV.d||NAV.d.length!==n){NAV.d=new Int16Array(n);NAV.q=new Int32Array(n)}
+  const D=NAV.d,Q=NAV.q,tx=Math.floor(pl.x/TS),ty=Math.floor(pl.y/TS);D.fill(-1);if(tx<0||ty<0||tx>=MW||ty>=MH)return;let h=0,t=0;D[ty*MW+tx]=0;Q[t++]=ty*MW+tx;
+  while(h<t){const c=Q[h++],cx=c%MW,cy=(c/MW)|0,v=D[c]+1;
+    if(cx>0&&D[c-1]<0&&!SOLID.has(tileAt(cx-1,cy))){D[c-1]=v;Q[t++]=c-1}
+    if(cx<MW-1&&D[c+1]<0&&!SOLID.has(tileAt(cx+1,cy))){D[c+1]=v;Q[t++]=c+1}
+    if(cy>0&&D[c-MW]<0&&!SOLID.has(tileAt(cx,cy-1))){D[c-MW]=v;Q[t++]=c-MW}
+    if(cy<MH-1&&D[c+MW]<0&&!SOLID.has(tileAt(cx,cy+1))){D[c+MW]=v;Q[t++]=c+MW}}}
+function navReach(x,y){const D=NAV.d;if(!D)return true;const tx=Math.floor(x/TS),ty=Math.floor(y/TS);return tx>=0&&ty>=0&&tx<MW&&ty<MH&&D[ty*MW+tx]>=0}
+const NAV8=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+function navDir(e){const D=NAV.d;if(!D)return null;const ex=Math.floor(e.x/TS),ey=Math.floor(e.y/TS);if(ex<0||ey<0||ex>=MW||ey>=MH)return null;const here=D[ey*MW+ex];if(here<=0)return null;let best=here,bx=0,by=0;
+  for(const [ox,oy] of NAV8){const nx=ex+ox,ny=ey+oy;if(nx<0||ny<0||nx>=MW||ny>=MH)continue;const v=D[ny*MW+nx];if(v<0||v>=best)continue;if(ox&&oy&&(D[ey*MW+nx]<0||D[ny*MW+ex]<0))continue;best=v;bx=ox;by=oy}
+  if(!bx&&!by)return null;const cx=(ex+bx+.5)*TS-e.x,cy=(ey+by+.5)*TS-e.y,l=Math.hypot(cx,cy)||1;return [cx/l,cy/l]}
 function sight(x0,y0,x1,y1){const n=Math.ceil(Math.hypot(x1-x0,y1-y0)/8);for(let i=1;i<n;i++)if(solidAt(x0+(x1-x0)*i/n,y0+(y1-y0)*i/n))return false;return true}
 function spawnTick(dt){
   if(pl.dead||S.phase!=='play'||S.opening||S.stage==='break'||S.dg)return;S.spawnT-=dt;if(S.spawnT>0)return;S.spawnT=.5;
