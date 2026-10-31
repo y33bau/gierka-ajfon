@@ -2128,19 +2128,19 @@ const BR={def:{n:(EN?'Defender':'Obrońca'),set:(EN?'Parry: 0.35 s of invulnerab
 const FALA_B=[0,.1,.2,.3,.4,.6],ZRYW_N=[0,6,4,3];// Fala Mocy: łączny bonus na poziomie; Zryw: co ile trafień
 const STY={
   garda:{br:'def',name:(EN?'Iron Guard':'Żelazna Garda'),ic:'quen',max:5,d:(EN?'Block −10% stamina per level (lvl 5: −50%).':'Blok −10% staminy za poziom (poz. 5: −50%).')},
-  riposta:{br:'def',name:(EN?'Mortal Riposte':'Śmiertelna Riposta'),ic:'sword',max:5,d:(EN?'Riposte multiplier: ×1.5 base, ×2 at level 1, ×3 from level 2; +0.25 s window per level.':'Mnożnik riposty: ×1,5 bazowo, ×2 na poziomie 1, ×3 od poziomu 2; +0,25 s okna za poziom.')},
-  odzysk:{br:'def',name:(EN?'Second Wind':'Odzysk Tchu'),ic:'boot',max:3,d:(EN?'Parrying restores 10 stamina per level. Lvl 3: +2% health (once per 2.5 s).':'Parowanie zwraca 10 staminy za poziom. Poz. 3: +2% życia (raz na 2,5 s).')},
+  riposta:{br:'def',name:(EN?'Mortal Riposte':'Śmiertelna Riposta'),ic:'riposta',max:5,d:(EN?'Riposte multiplier: ×1.5 base, ×2 at level 1, ×3 from level 2; +0.25 s window per level.':'Mnożnik riposty: ×1,5 bazowo, ×2 na poziomie 1, ×3 od poziomu 2; +0,25 s okna za poziom.')},
+  odzysk:{br:'def',name:(EN?'Second Wind':'Odzysk Tchu'),ic:'odzysk',max:3,d:(EN?'Parrying restores 10 stamina per level. Lvl 3: +2% health (once per 2.5 s).':'Parowanie zwraca 10 staminy za poziom. Poz. 3: +2% życia (raz na 2,5 s).')},
   ostrze:{br:'off',name:(EN?'Swift Blade':'Szybkie Ostrze'),ic:'whet',max:5,d:(EN?'Light attack: −8% stamina and −6% recovery time per level.':'Lekki cios: −8% staminy i −6% czasu powrotu za poziom.')},
-  rytm:{br:'off',name:(EN?'Death Rhythm':'Rytm Śmierci'),ic:'might',max:5,d:(EN?'Third combo hit: +18% damage per level.':'Trzeci cios combo: +18% obrażeń za poziom.')},
+  rytm:{br:'off',name:(EN?'Death Rhythm':'Rytm Śmierci'),ic:'rytm',max:5,d:(EN?'Third combo hit: +18% damage per level.':'Trzeci cios combo: +18% obrażeń za poziom.')},
   taniec:{br:'off',name:(EN?'Blade Dance':'Taniec Ostrzy'),ic:'haste',max:3,d:(EN?'Per level: dodge −12% stamina, first hit after a dodge +25% damage.':'Za poziom: unik −12% staminy, pierwszy cios po uniku +25% obrażeń.')},
-  fala:{br:'wav',name:(EN?'Force Wave':'Fala Mocy'),ic:'area',max:5,d:(EN?'Slash wave: +10% damage per level (lvl 5: +20%).':'Fala cięcia: +10% obrażeń za poziom (poz. 5: +20%).')},
-  zasieg:{br:'wav',name:(EN?'Distant Wave':'Daleka Fala'),ic:'frost',max:5,d:(EN?'Slash wave: +18% range and width per level.':'Fala cięcia: +18% zasięgu i szerokości za poziom.')},
+  fala:{br:'wav',name:(EN?'Force Wave':'Fala Mocy'),ic:'fala',max:5,d:(EN?'Slash wave: +10% damage per level (lvl 5: +20%).':'Fala cięcia: +10% obrażeń za poziom (poz. 5: +20%).')},
+  zasieg:{br:'wav',name:(EN?'Distant Wave':'Daleka Fala'),ic:'zasieg',max:5,d:(EN?'Slash wave: +18% range and width per level.':'Fala cięcia: +18% zasięgu i szerokości za poziom.')},
   echo:{br:'wav',name:(EN?'Parry Echo':'Echo Parowania'),ic:'earth',max:3,d:(EN?'More waves after a parry: lvl 1 – two, lvl 2–3 – three (lvl 3: +20% damage).':'Po parowaniu więcej fal: poz. 1 – dwie, poz. 2–3 – trzy (poz. 3: +20% obrażeń).')},
-  zryw:{br:'wav',name:(EN?'Blade Rush':'Zryw Ostrza'),ic:'inferno',max:3,d:(EN?'Every 6th, 4th or 3rd light hit (lvl 1–3) releases a wave (60% damage).':'Co 6., 4. lub 3. trafienie lekkim ciosem (poz. 1–3) wypuszcza falę (60% obrażeń).')},
-  krew:{pact:1,name:(EN?'Blood Pact':'Pakt Krwi'),ic:'heart',max:1,d:(EN?'+35% damage, −25% max health.':'+35% obrażeń, −25% maks. życia.')},
+  zryw:{br:'wav',name:(EN?'Blade Rush':'Zryw Ostrza'),ic:'zryw',max:3,d:(EN?'Every 6th, 4th or 3rd light hit (lvl 1–3) releases a wave (60% damage).':'Co 6., 4. lub 3. trafienie lekkim ciosem (poz. 1–3) wypuszcza falę (60% obrażeń).')},
+  krew:{pact:1,name:(EN?'Blood Pact':'Pakt Krwi'),ic:'krew',max:1,d:(EN?'+35% damage, −25% max health.':'+35% obrażeń, −25% maks. życia.')},
   szklo:{pact:1,name:(EN?'Glass Sword':'Szklany Miecz'),ic:'wisp',max:1,d:(EN?'+50% damage, enemies hit you 30% harder.':'+50% obrażeń, wrogowie ranią cię o 30% mocniej.')},
   zelazo:{pact:1,name:(EN?'Iron Pact':'Pakt Żelaza'),ic:'amulet',max:1,d:(EN?'+40% max stamina, −15% damage.':'+40% maks. staminy, −15% obrażeń.')},
-  cisza:{pact:1,name:(EN?'Pact of Silence':'Pakt Ciszy'),ic:'brew',max:1,d:(EN?'+50% stamina regeneration, −20% max health.':'+50% regeneracji staminy, −20% maks. życia.')}};
+  cisza:{pact:1,name:(EN?'Pact of Silence':'Pakt Ciszy'),ic:'cisza',max:1,d:(EN?'+50% stamina regeneration, −20% max health.':'+50% regeneracji staminy, −20% maks. życia.')}};
 for(const k in STY){const t=STY[k];t.kind=t.pact?(EN?'Pact':'Pakt'):(EN?'Style · ':'Styl · ')+BR[t.br].n;if(t.pact)t.sub=(EN?'An edge with a price':'Przewaga z ceną');Object.assign(SK[k]=SK[k]||{},t)}
 const sk=k=>(S&&S.sk&&S.sk[k])||0;
 const brSum=br=>Object.keys(STY).filter(k=>STY[k].br===br).reduce((a,k)=>a+sk(k),0),brOn=br=>brSum(br)>=SET_N;

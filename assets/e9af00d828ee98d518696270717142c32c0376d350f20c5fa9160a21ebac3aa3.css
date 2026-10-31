@@ -1139,6 +1139,16 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 .buffs br{display:none}
 .buffs,#hud .left #chal{white-space:nowrap}
 #hud .left #chal{max-width:none}
+/* Własne ikony: Gemini, 31.10.2026 */
+:root{--nb-ui_i_cisza:url(./0805f0ee74a2e696b48196368d71466ca9b18d9f9e297468bc1f2c2f6add4073.webp);--nb-ui_i_fala:url(./b4b1fa6a02b9a45da7845bf2f313d4af13a7a11bb963722e0e36350ef0c61ab8.webp);--nb-ui_i_krew:url(./7469e7f2345a7a84b03674ff9f28cec1bd1eee4ef476623f2edbbfd87c643aa9.webp);--nb-ui_i_odzysk:url(./88623b54f78e95febc5d76070cc4b5c46289fd5a5e97ee9f89d3cffd0a293f40.webp);--nb-ui_i_riposta:url(./b7a4e505b12e2baf6e7af26e2ca55b540eb252a252e670898b043485ef0ca137.webp);--nb-ui_i_rytm:url(./160d69ba7c02be0233716f0e9f1ce5fe66671eeb6a9a65df2bc1f5650702527b.webp);--nb-ui_i_zasieg:url(./b8be961460db78e0708fad30c322e26f9b25cea510c0ee999dccfb8f0f157465.webp);--nb-ui_i_zryw:url(./23c2022852f4e83a374a21893a0949c7da36687910f25afbac739047998299d9.webp);}
+#orient#orient#orient .ic-cisza{background-image:var(--nb-ui_i_cisza)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-fala{background-image:var(--nb-ui_i_fala)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-krew{background-image:var(--nb-ui_i_krew)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-odzysk{background-image:var(--nb-ui_i_odzysk)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-riposta{background-image:var(--nb-ui_i_riposta)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-rytm{background-image:var(--nb-ui_i_rytm)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-zasieg{background-image:var(--nb-ui_i_zasieg)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+#orient#orient#orient .ic-zryw{background-image:var(--nb-ui_i_zryw)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
 /* Drugie Ja: ikona umiejętności */
 :root{--nb-ui_drugieja:url(./099bea7a3a8847f17f118d2bc37e2f863c8b2e4be2829f205a3f7301b91f1ed4.webp)}
 #orient#orient#orient .ic-drugieja{background-image:var(--nb-ui_drugieja)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
