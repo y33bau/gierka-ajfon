@@ -268,3 +268,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 31.10.2026 — cache206: czwarty slot umiejętności aktywnej. Klawiatura R, pad LT + A, dotyk czwarta ikona; ekran wyposażenia w pauzie ma 4 sloty. Opisy sterowania poprawione (PL i EN). Nie sprawdzono na telefonie ani na padzie.
 
 31.10.2026 — cache207: wrogowie nie klinują się w domach (mapa I i inne): mapa odległości po kaflach od bohatera (co 0,35 s); wróg bez widoku na bohatera idzie po niej i wychodzi drzwiami lub dziurą w ścianie. Wrogowie nie pojawiają się już w środku domów (rozdz. I) ani w miejscach bez dojścia do bohatera. Rekwizyty z kolizją (m.in. Ognisko mocy po lewej na mapie II): po powiększeniu mapy kolizja tylko w dolnym rzędzie, u podstawy grafiki — koniec niewidzialnej blokady od góry. Nie sprawdzono na telefonie.
+
+31.10.2026 — cache208: mapa I wypełniona roślinnością bez kolizji (ok. 95 kęp: paprocie, jeżyny, grzyby, trzciny przy stawie), z dala od dróg, drzwi, postaci, ognisk i startu. Nie sprawdzono na telefonie (wydajność).

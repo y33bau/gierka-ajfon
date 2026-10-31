@@ -1002,6 +1002,21 @@ function dressSettlementsHD(w){
    if(SOLID.has(tileAt(ix,iy))||VOID.has(tileAt(ix,iy))||w.clearways?.has(i)||w.groundPlan.road[i]||w.npcs.some(a=>Math.hypot(a.x/TS-x,a.y/TS-y)<3)||w.PROPS.some(a=>Math.hypot(a.x-x,a.y-y)<1)||used.some(a=>Math.hypot(a.x-x,a.y-y)<.6))continue;
    const k=j===0?'brambles':'ferns',fr=frames[k],m=new THREE.Mesh(geo,fr.n),z=j===0?.24:.18;m.position.set(x,0,y);m.scale.set(z,z*SQ,z);m.userData.propAsset=true;m.castShadow=false;w.group.add(m);used.push({x,y});
   }}
+  // Roślinność bez kolizji po całej mapie: paprocie (trawa), jeżyny (krzaki), grzyby; przy stawie trzciny.
+  {const ex={mushrooms:[128,256,64,64],reeds:[0,256,64,64]};for(const [k,r]of Object.entries(ex)){frames[k]=procFrame(IMGS.cz_trees,...r,'prop');cutCircle(frames[k].n)}
+   const rr=rng(4711),byK={ferns:[],brambles:[],mushrooms:[],reeds:[]},
+     near=(x,y,t,R)=>{for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++)if(tileAt(x+dx,y+dy)===t)return true;return false},
+     free=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),i=iy*MW+ix,t=tileAt(ix,iy);if(SOLID.has(t)||VOID.has(t)||t===40||t===43||w.clearways?.has(i)||w.groundPlan.road[i])return false;
+       if(w.npcs.some(a=>Math.hypot(a.x/TS-x,a.y/TS-y)<3)||w.shrines.some(s=>Math.hypot(s.x/TS-x,s.y/TS-y)<3)||Math.hypot(w.start.x/TS-x,w.start.y/TS-y)<4)return false;
+       return !w.PROPS.some(a=>Math.hypot(a.x-x,a.y-y)<1.2)&&!used.some(a=>Math.hypot(a.x-x,a.y-y)<.9)};
+   let clumps=0;for(let a=0;a<4000&&clumps<95;a++){const cx=3+rr()*(MW-6),cy=3+rr()*(MH-6);if(!free(cx,cy))continue;const wet=near(Math.floor(cx),Math.floor(cy),45,2);clumps++;
+     const n=2+((rr()*3)|0);for(let j=0;j<n;j++){const x=cx+(j?(rr()-.5)*2.4:0),y=cy+(j?(rr()-.5)*1.6:0);if(!free(x,y))continue;
+       const q=rr(),k=wet?(q<.7?'reeds':'ferns'):q<.55?'ferns':q<.88?'brambles':'mushrooms';
+       byK[k].push({x,y,f:rr()<.5,s:(k==='brambles'?.22:k==='reeds'?.26:k==='mushrooms'?.12:.18)*(.85+rr()*.3)});used.push({x,y})}}
+   const pg=new THREE.PlaneGeometry(4,4).translate(0,1.875,0),Mx=new THREE.Matrix4(),Vv=new THREE.Vector3(),Qq=new THREE.Quaternion(),Ss=new THREE.Vector3();
+   for(const k in byK){const L=byK[k];if(!L.length)continue;const im=new THREE.InstancedMesh(pg,frames[k].n,L.length);
+     L.forEach((p,i)=>{Mx.compose(Vv.set(p.x,0,p.y),Qq,Ss.set((p.f?-1:1)*p.s,p.s*SQ,p.s));im.setMatrixAt(i,Mx)});im.castShadow=false;im.receiveShadow=false;im.frustumCulled=false;im.userData.propAsset=true;w.group.add(im)}
+   w.plantCount=Object.values(byK).reduce((a,l)=>a+l.length,0)}
  }
  if(w.ch===2){
   const fr=[0,1,2,3].map(i=>procFrame(IMGS.br_props,...[[64,64],[96,64],[0,96],[32,96]][i],32,32,'prop'));
