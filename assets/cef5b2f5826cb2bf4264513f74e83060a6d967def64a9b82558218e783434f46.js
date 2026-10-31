@@ -1009,10 +1009,10 @@ function dressSettlementsHD(w){
      free=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),i=iy*MW+ix,t=tileAt(ix,iy);if(SOLID.has(t)||VOID.has(t)||t===40||t===43||w.clearways?.has(i)||w.groundPlan.road[i])return false;
        if(w.npcs.some(a=>Math.hypot(a.x/TS-x,a.y/TS-y)<3)||w.shrines.some(s=>Math.hypot(s.x/TS-x,s.y/TS-y)<3)||Math.hypot(w.start.x/TS-x,w.start.y/TS-y)<4)return false;
        return !w.PROPS.some(a=>Math.hypot(a.x-x,a.y-y)<1.2)&&!used.some(a=>Math.hypot(a.x-x,a.y-y)<.9)};
-   let clumps=0;for(let a=0;a<4000&&clumps<95;a++){const cx=3+rr()*(MW-6),cy=3+rr()*(MH-6);if(!free(cx,cy))continue;const wet=near(Math.floor(cx),Math.floor(cy),45,2);clumps++;
-     const n=2+((rr()*3)|0);for(let j=0;j<n;j++){const x=cx+(j?(rr()-.5)*2.4:0),y=cy+(j?(rr()-.5)*1.6:0);if(!free(x,y))continue;
+   let clumps=0;for(let a=0;a<6000&&clumps<170;a++){const cx=3+rr()*(MW-6),cy=3+rr()*(MH-6);if(!free(cx,cy))continue;const wet=near(Math.floor(cx),Math.floor(cy),45,2);clumps++;
+     const n=3+((rr()*3)|0);for(let j=0;j<n;j++){const x=cx+(j?(rr()-.5)*2.4:0),y=cy+(j?(rr()-.5)*1.6:0);if(!free(x,y))continue;
        const q=rr(),k=wet?(q<.7?'reeds':'ferns'):q<.55?'ferns':q<.88?'brambles':'mushrooms';
-       byK[k].push({x,y,f:rr()<.5,s:(k==='brambles'?.22:k==='reeds'?.26:k==='mushrooms'?.12:.18)*(.85+rr()*.3)});used.push({x,y})}}
+       byK[k].push({x,y,f:rr()<.5,s:(k==='brambles'?.26:k==='reeds'?.28:k==='mushrooms'?.13:.22)*(.85+rr()*.3)});used.push({x,y})}}
    const pg=new THREE.PlaneGeometry(4,4).translate(0,1.875,0),Mx=new THREE.Matrix4(),Vv=new THREE.Vector3(),Qq=new THREE.Quaternion(),Ss=new THREE.Vector3();
    for(const k in byK){const L=byK[k];if(!L.length)continue;const im=new THREE.InstancedMesh(pg,frames[k].n,L.length);
      L.forEach((p,i)=>{Mx.compose(Vv.set(p.x,0,p.y),Qq,Ss.set((p.f?-1:1)*p.s,p.s*SQ,p.s));im.setMatrixAt(i,Mx)});im.castShadow=false;im.receiveShadow=false;im.frustumCulled=false;im.userData.propAsset=true;w.group.add(im)}
