@@ -288,3 +288,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 cache221 (runda 221, etap 2 trybu 2 graczy, test): gracz 2 ma pasek HP i staminy w rogu oraz male przezroczyste paski nad obiema postaciami; powalony gracz lezy, gdy partner zyje, i wstaje po ok. 3 s obok partnera lub kapliczki; noc konczy sie, gdy padna obaj; wrogowie i pociski celuja w najblizszego zywego gracza; kamera idzie za zywym. Nie sprawdzono: prawdziwe pady.
 
 cache222 (test): promien wskrzeszania 2 graczy zwiekszony do ok. 3,5 kratki.
+
+cache223 (test): tryb 2 graczy: TOTEM PRZYWOLANIA w srodku mapy (3 wskrzeszenia na noc, 5 s ladowania, zywy partner stoi przy totemie); kapliczki: odrodzenie jednorazowe dla kazdego gracza, tylko jesli sam ja aktywowal (drugi pad: przycisk Y); wskrzeszanie przy ciele usuniete. Nie sprawdzono: prawdziwe pady.

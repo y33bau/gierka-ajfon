@@ -2058,30 +2058,44 @@ function pad2Tick(g2){if(!g2){PAD2.g=null;PAD2.cur=[];PAD2.prev=[];PAD2.x=PAD2.y
   const c=PAD2.cur,pv=PAD2.prev,pr=i=>c[i]&&!pv[i];
   let [x,y]=padDz(g2.axes[0]||0,g2.axes[1]||0,.22);x+=(c[15]?1:0)-(c[14]?1:0);y+=(c[13]?1:0)-(c[12]?1:0);PAD2.x=x;PAD2.y=y;
   const [ax,ay]=padDz(g2.axes[2]||0,g2.axes[3]||0,.35);if(ax||ay){const m=Math.hypot(ax,ay);PAD2.ax=ax/m;PAD2.ay=ay/m;PAD2.aimT=clock}
-  PAD2.atk=!!c[7]||!!c[2];PAD2.blk=!!c[4];if(pr(0))PAD2.roll=true;if(pr(1)||pr(5))PAD2.heavy=true}
+  PAD2.atk=!!c[7]||!!c[2];PAD2.blk=!!c[4];if(pr(0))PAD2.roll=true;if(pr(1)||pr(5))PAD2.heavy=true;if(pr(3))PAD2.talk=true}
 function drawP2(){if(!pl2||!mesh2)return;const p1=pl;pl=pl2;try{const hf=heroFrame();setFrame(mesh2,hf,'p2');
   const hs=pl.roll>0||pl.dead?pl.s:A.heroD&&A.heroD.v2&&!pl.atk&&(pl.parryT>0||pl.broken>0||(pl.hurtT>0&&!pl.block))?(pl.fx>=0?1:-1):pl.swingT>0?(pl.swingDir===2?pl.swingS:1):(pl.charging||pl.block)&&Math.abs(pl.fx)>Math.abs(pl.fy)?(pl.fx>0?1:-1):(pl.dir===2?pl.s:1);
   mesh2.position.set(pl.x/16,0,pl.y/16);mesh2.scale.set(hs,SQ,1);mesh2.visible=!(SETT.flash&&pl.inv>0&&pl.roll<=0&&!pl.dead&&Math.floor(clock*24)%2)}finally{pl=p1}}
 function allDead(){return pl1.dead&&(!pl2||pl2.dead)}
 function pickTarget(e){if(!pl2)return pl1;const a=pl1.dead,b=pl2.dead;if(a&&b)return pl1;if(a)return pl2;if(b)return pl1;return Math.hypot(e.x-pl2.x,e.y-pl2.y)<Math.hypot(e.x-pl1.x,e.y-pl1.y)?pl2:pl1}
-function mpReviveTick(dt){if(!pl2)return;for(const [d,o] of [[pl1,pl2],[pl2,pl1]]){if(!d.dead)continue;if(o.dead){d.revT=0;continue}
-    let near=Math.hypot(d.x-o.x,d.y-o.y)<56;if(!near)for(const sh of SHRINES)if(Math.hypot(d.x-sh.x,d.y-sh.y)<56){near=true;break}
-    d.revT=near?(d.revT||0)+dt:Math.max(0,(d.revT||0)-dt*2);
-    if(d.revT>=3){d.dead=false;d.hp=d.max*.5;d.inv=2;d.deadT=0;d.revT=0;d.atk=null;d.roll=0;d.block=false;d.broken=0;d.sta=d.staMax;play('bless',0);for(let k=0;k<14;k++)S.parts.push({k:'e',x:d.x+rnd(-6,6),y:d.y,z:rnd(2,14),vx:rnd(-8,8),vy:0,vz:rnd(12,30),c:'#7fd0ff',life:rnd(.5,1)})}}}
+function withRb(p,fn){if(!pl2||p!==pl2)return fn();const a=S.rebirth,b=S.rebirthUsed;S.rebirth=p.rbF||null;S.rebirthUsed=!!p.rbU;try{return fn()}finally{p.rbF=S.rebirth;p.rbU=S.rebirthUsed;S.rebirth=a;S.rebirthUsed=b}}
+let mpTotLast=null;
+function totemSpot(){const cx=MW/2*TS,cy=MH/2*TS;for(let r=0;r<40;r++)for(let k=0;k<(r?16:1);k++){const a=k/16*6.2832,x=cx+Math.cos(a)*r*8,y=cy+Math.sin(a)*r*8;if(!boxSolid(x,y,12,10)&&!VOID.has(tileAt(Math.floor(x/TS),Math.floor(y/TS))))return{x,y}}return{x:START.x,y:START.y}}
+function mkTotem(x,y){const g=new THREE.Group(),st=new THREE.MeshBasicMaterial({color:0x5a5c70}),dk=new THREE.MeshBasicMaterial({color:0x3a3b4a}),gl=new THREE.MeshBasicMaterial({color:0x7fd0ff,transparent:true,opacity:.92});
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(.6,.78,.4,8),dk);base.position.y=.2;const pil=new THREE.Mesh(new THREE.CylinderGeometry(.24,.38,1.6,6),st);pil.position.y=1.2;
+  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.34),gl);gem.position.y=2.3;
+  const ring=new THREE.Mesh(new THREE.RingGeometry(2.1,2.3,56).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0x7fd0ff,transparent:true,opacity:.4,depthWrite:false,side:THREE.DoubleSide}));ring.position.y=.04;
+  g.add(base,pil,gem,ring);g.position.set(x/16,0,y/16);scene.add(g);return{g,gem,ring}}
+function mpTotemTick(dt){if(!S||!pl2||S.dg){if(mpTotLast)mpTotLast.visible=false;return}
+  if(S.mpCh==null){S.mpCh=3;S.mpProg=0;S.mpHintT=0}
+  let T=S.mpTot;if(T&&T.W!==W){scene.remove(T.o.g);T=S.mpTot=null}
+  if(!T){if(mpTotLast)scene.remove(mpTotLast);const sp=totemSpot();T=S.mpTot={W,x:sp.x,y:sp.y,o:mkTotem(sp.x,sp.y)}}
+  mpTotLast=T.o.g;T.o.g.visible=true;T.o.gem.position.y=2.3+Math.sin(clock*2)*.12;T.o.gem.rotation.y=clock;T.o.ring.material.opacity=S.mpCh>0?.35+.15*Math.sin(clock*3):.1;T.o.gem.material.color.setHex(S.mpCh>0?0x7fd0ff:0x555566);
+  const d=pl1.dead?pl1:pl2.dead?pl2:null,o=d===pl1?pl2:pl1;
+  if(!d||o.dead||S.mpCh<=0){S.mpProg=Math.max(0,(S.mpProg||0)-dt*2);return}
+  S.mpHintT=(S.mpHintT||0)-dt;if(S.mpHintT<=0){S.mpHintT=9;ftx(EN?'Totem in the middle of the map will revive your partner':'Totem w środku mapy wskrzesi towarzysza',o.x,o.y,2.4,'i')}
+  if(Math.hypot(o.x-T.x,o.y-T.y)<44)S.mpProg=(S.mpProg||0)+dt;else S.mpProg=Math.max(0,(S.mpProg||0)-dt*2);
+  if(S.mpProg>=5){S.mpProg=0;S.mpCh--;Object.assign(d,{x:T.x+(d===pl2?12:-12),y:T.y+10,hp:Math.round(d.max*.5),dead:false,deadT:0,inv:2.5,roll:0,atk:null,block:false,charging:false,atkHeld:false,queue:false,swingT:0,broken:0,hurtT:0,sta:d.staMax,revT:0});play('bless',0);ftx(EN?'Revived!':'Wskrzeszony!',T.x,T.y,2.8,'i');for(let k=0;k<16;k++)S.parts.push({k:'e',x:T.x+rnd(-8,8),y:T.y,z:rnd(2,16),vx:rnd(-8,8),vy:0,vz:rnd(12,30),c:'#7fd0ff',life:rnd(.5,1)})}}
 let mpEls=null;const MPV=new THREE.Vector3();
 function mpHudTick(){const show=!!(S&&pl2&&S.phase==='play'&&!S.paused&&!S.choosing&&!S.shop&&!S.dialog&&!S.intro&&!S.notice);
   if(!mpEls){if(!show)return;const left=document.querySelector('#hud .left');if(!left)return;
     const panel=document.createElement('div');panel.style.cssText='margin-top:6px;pointer-events:none';
-    panel.innerHTML='<span style="font-size:11px;color:#8fb4ff;text-shadow:0 1px 2px #000">'+(EN?'Player 2':'Gracz 2')+'</span><div style="width:150px;height:10px;background:#1a1315;border:1px solid #4a2f31"><i style="display:block;height:100%;width:100%;background:#4f7fd8"></i></div><div style="width:110px;height:5px;background:#1a1315;margin-top:2px"><i style="display:block;height:100%;width:100%;background:#d8c15a"></i></div>';
+    panel.innerHTML='<span style="font-size:11px;color:#8fb4ff;text-shadow:0 1px 2px #000">'+(EN?'Player 2':'Gracz 2')+'</span><div style="width:150px;height:10px;background:#1a1315;border:1px solid #4a2f31"><i style="display:block;height:100%;width:100%;background:#4f7fd8"></i></div><div style="width:110px;height:5px;background:#1a1315;margin-top:2px"><i style="display:block;height:100%;width:100%;background:#d8c15a"></i></div><div style="font-size:11px;color:#9fd8ff;text-shadow:0 1px 2px #000;margin-top:2px"></div>';
     left.appendChild(panel);const mkBar=col=>{const b=document.createElement('div');b.style.cssText='position:fixed;z-index:50;width:38px;height:5px;background:rgba(0,0,0,.45);pointer-events:none;transform:translate(-50%,-100%);opacity:.7;display:none';b.innerHTML='<i style="display:block;height:100%;width:100%;background:'+col+'"></i>';document.body.appendChild(b);return b};
-    mpEls={panel,hp:panel.children[1].firstChild,st:panel.children[2].firstChild,b1:mkBar('#d84a4a'),b2:mkBar('#4f8fd8')}}
+    mpEls={panel,tot:panel.children[3],hp:panel.children[1].firstChild,st:panel.children[2].firstChild,b1:mkBar('#d84a4a'),b2:mkBar('#4f8fd8')}}
   mpEls.panel.style.display=pl2&&S&&S.phase==='play'?'block':'none';
   if(!show){mpEls.b1.style.display=mpEls.b2.style.display='none';return}
-  mpEls.hp.style.width=Math.max(0,pl2.hp)/pl2.max*100+'%';mpEls.st.style.width=Math.max(0,Math.min(1,pl2.sta/pl2.staMax))*100+'%';
+  mpEls.hp.style.width=Math.max(0,pl2.hp)/pl2.max*100+'%';mpEls.st.style.width=Math.max(0,Math.min(1,pl2.sta/pl2.staMax))*100+'%';mpEls.tot.textContent='Totem: '+(S.mpCh==null?3:S.mpCh)+'/3'+((S.mpProg||0)>0?' · '+Math.round(S.mpProg/5*100)+'%':'');
   const r=$('screen').getBoundingClientRect();
   for(const [p,el] of [[pl1,mpEls.b1],[pl2,mpEls.b2]]){MPV.set(p.x/16,2.1,p.y/16).project(cam);const inView=MPV.z<1&&Math.abs(MPV.x)<1.05&&Math.abs(MPV.y)<1.05;
     el.style.display=inView?'block':'none';if(!inView)continue;el.style.left=(r.left+(MPV.x*.5+.5)*r.width)+'px';el.style.top=(r.top+(-MPV.y*.5+.5)*r.height)+'px';
-    const f=p.dead?Math.min(1,(p.revT||0)/3):Math.max(0,p.hp)/p.max;el.firstChild.style.width=f*100+'%';el.firstChild.style.background=p.dead?'#e8c85a':(p===pl1?'#d84a4a':'#4f8fd8')}}
+    const f=p.dead?Math.min(1,(S.mpProg||0)/5):Math.max(0,p.hp)/p.max;el.firstChild.style.width=f*100+'%';el.firstChild.style.background=p.dead?'#e8c85a':(p===pl1?'#d84a4a':'#4f8fd8')}}
 function clearScene(){if(!S)return;for(const f of S.vfx)if(f.ownMat)for(const a of f.anim)a.n.dispose();clearSwordTransient();if(swordGlow)swordGlow.visible=false;const all=[...S.enemies.map(e=>e.mesh),...S.picks.flatMap(p=>[p.mesh,p.glow]),...S.vfx.map(f=>f.mesh),...S.corpses.map(c=>c.mesh),...S.golems.map(g=>g.mesh),...S.zones.map(z=>z.mesh),...(S.eproj||[]).map(f=>f.mesh),...(S.deathPurses||[]).map(p=>p.mesh)];for(const m of all)if(m)scene.remove(m);for(const c of S.corpses)if(c.own)c.mesh.material.dispose()}
 function newGame(){
   clearScene();dg.clearRect(0,0,WW,WH);decalDirty=true;resetFog();MINI.t=0;
@@ -2664,7 +2678,7 @@ function hurtPlayer(dmg,nx,ny,source='night'){if(S.notice||pl.inv>0||pl.dead)ret
     if(pl.sta>=0){pl.inv=.18;moveBox(pl,nx*6,ny*4,4,3);return}
     pl.sta=0;pl.broken=SL.guardBreak;pl.block=false;dmg*=.5;play('empty',0);ftInfo((EN?'Guard broken':'Garda przełamana'))}
   S.combatLock=4;S.hitsT++;pl.hp-=dmg;padRumble(.8,.5,200);pl.inv=.45;pl.hurtT=.22;S.hurt=.3;shake(.25,.18);blood(pl.x,pl.y,10,nx,ny);play('hurt',.1);
-  if(pl.hp<=0){{const o=pl===pl2?pl1:pl2;if(o&&!o.dead){pl.hp=0;pl.dead=true;pl.deadT=0;pl.revT=0;blood(pl.x,pl.y,40,nx,ny,3);play('kill',0);return true}}if(tryRebirth())return true;S.deathCause=deathCauseName(source);loseSecondLife();clearSwordTransient();S.swordTrails=[];pl.hp=0;pl.dead=true;pl.deadT=0;blood(pl.x,pl.y,70,nx,ny,3);play('kill',0);S.endT=2.6;pool(pl.x,pl.y,20,8)}return true}
+  if(pl.hp<=0){if(pl2&&withRb(pl,tryRebirth))return true;{const o=pl===pl2?pl1:pl2;if(o&&!o.dead){pl.hp=0;pl.dead=true;pl.deadT=0;pl.revT=0;blood(pl.x,pl.y,40,nx,ny,3);play('kill',0);return true}}if(tryRebirth())return true;S.deathCause=deathCauseName(source);loseSecondLife();clearSwordTransient();S.swordTrails=[];pl.hp=0;pl.dead=true;pl.deadT=0;blood(pl.x,pl.y,70,nx,ny,3);play('kill',0);S.endT=2.6;pool(pl.x,pl.y,20,8)}return true}
 function updEnemy(e,dt){
   keepEnemyDistance(e);const ox=e.x,oy=e.y,dx=pl.x-e.x,dy=pl.y-e.y,d=Math.hypot(dx,dy);
   if(d>.001){e.contactNX=dx/d;e.contactNY=dy/d}
@@ -3142,7 +3156,7 @@ function update(dt){
   const nn=nearNpc();if(talkPress&&nn){openDialog(nn);return}
   const nf=!nn&&!nm?nearPowerFire():null;if(talkPress&&nf){activatePowerFire(nf);return}const nx=!nn&&!nm&&!nf?nearExit():null;if(talkPress&&nx){useExit(nx);return}
   updPlayer(dt);recoverPurses();if(S.notice)return;events();if(S.notice)return;spawnTick(dt);miniTick();if(S.notice)return;chTick();
-  slashUpdate(dt);if(pl2){asP2(()=>{updPlayer(dt);slashUpdate(dt,true)});mpReviveTick(dt)}for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
+  slashUpdate(dt);if(pl2){asP2(()=>{updPlayer(dt);slashUpdate(dt,true);if(PAD2.talk){PAD2.talk=false;if(!pl.dead)withRb(pl,()=>{const nf=nearPowerFire();if(nf)activatePowerFire(nf)})}});mpTotemTick(dt)}for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
   updZones(dt);
   buildEnemyGrid();for(const e of S.enemies)if(!e.dead){const tg=pl2?pickTarget(e):pl;if(tg!==pl){const p1=pl;pl=tg;try{updEnemy(e,dt)}finally{pl=p1}}else updEnemy(e,dt)}
   S.enemies=S.enemies.filter(e=>!e.dead);
@@ -3414,7 +3428,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     let n=0;for(const p of S.parts){if(n>=MAXP)break;pPos[n*3]=p.x/16;pPos[n*3+1]=p.z/16+.02;pPos[n*3+2]=p.y/16;const c=col(p.c);let a=p.life!==undefined?Math.max(0,Math.min(1,p.life)):1;pCol[n*3]=c.r*a;pCol[n*3+1]=c.g*a;pCol[n*3+2]=c.b*a;n++}
     pGeo.setDrawRange(0,n);pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true;
     postMat.uniforms.hurt.value=SETT.flash?Math.max(S.hurt*1.2,pl.dead?.25:0,(!pl.dead&&pl.hp<pl.max*.3)?(.12+.08*Math.sin(clock*5)):0):pl.dead?.18:pl.hp<pl.max*.3?.1:0;
-  }else{heroMesh.visible=false;if(mesh2)mesh2.visible=false;mpHudTick();pGeo.setDrawRange(0,0);postMat.uniforms.hurt.value=0}
+  }else{heroMesh.visible=false;if(mesh2)mesh2.visible=false;if(mpTotLast)mpTotLast.visible=false;mpHudTick();pGeo.setDrawRange(0,0);postMat.uniforms.hurt.value=0}
   blobs.count=bi;blobs.instanceMatrix.needsUpdate=true;
   decalT-=dt;if(decalDirty&&decalT<=0){decalTex.needsUpdate=true;decalDirty=false;decalT=.15}
   updatePowerVisuals();
