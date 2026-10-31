@@ -2065,7 +2065,7 @@ function drawP2(){if(!pl2||!mesh2)return;const p1=pl;pl=pl2;try{const hf=heroFra
 function allDead(){return pl1.dead&&(!pl2||pl2.dead)}
 function pickTarget(e){if(!pl2)return pl1;const a=pl1.dead,b=pl2.dead;if(a&&b)return pl1;if(a)return pl2;if(b)return pl1;return Math.hypot(e.x-pl2.x,e.y-pl2.y)<Math.hypot(e.x-pl1.x,e.y-pl1.y)?pl2:pl1}
 function mpReviveTick(dt){if(!pl2)return;for(const [d,o] of [[pl1,pl2],[pl2,pl1]]){if(!d.dead)continue;if(o.dead){d.revT=0;continue}
-    let near=Math.hypot(d.x-o.x,d.y-o.y)<28;if(!near)for(const sh of SHRINES)if(Math.hypot(d.x-sh.x,d.y-sh.y)<26){near=true;break}
+    let near=Math.hypot(d.x-o.x,d.y-o.y)<56;if(!near)for(const sh of SHRINES)if(Math.hypot(d.x-sh.x,d.y-sh.y)<56){near=true;break}
     d.revT=near?(d.revT||0)+dt:Math.max(0,(d.revT||0)-dt*2);
     if(d.revT>=3){d.dead=false;d.hp=d.max*.5;d.inv=2;d.deadT=0;d.revT=0;d.atk=null;d.roll=0;d.block=false;d.broken=0;d.sta=d.staMax;play('bless',0);for(let k=0;k<14;k++)S.parts.push({k:'e',x:d.x+rnd(-6,6),y:d.y,z:rnd(2,14),vx:rnd(-8,8),vy:0,vz:rnd(12,30),c:'#7fd0ff',life:rnd(.5,1)})}}}
 let mpEls=null;const MPV=new THREE.Vector3();
