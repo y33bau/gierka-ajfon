@@ -1161,3 +1161,4 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 @media (pointer:coarse){#orient#orient#orient #title .title-left .titleassist .tgl{min-height:44px}}
 #orient#orient#orient #prep .prepassist{display:flex;justify-content:center;margin:.1em 0 .3em}
 #orient#orient#orient #prep .prepassist .tgl{margin:0;min-height:44px;font-size:1em}
+#hud.mp2 .left{transform:scale(.58);transform-origin:top left}

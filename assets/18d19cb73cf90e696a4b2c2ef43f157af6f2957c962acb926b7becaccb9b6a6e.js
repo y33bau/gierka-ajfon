@@ -2096,7 +2096,7 @@ function mpTotemTick(dt){if(!S||!pl2||S.dg){if(mpTotLast)mpTotLast.visible=false
   if(Math.hypot(o.x-T.x,o.y-T.y)<44)S.mpProg=(S.mpProg||0)+dt;else S.mpProg=Math.max(0,(S.mpProg||0)-dt*2);
   if(S.mpProg>=5){S.mpProg=0;S.mpCh--;Object.assign(d,{x:T.x+(d===pl2?12:-12),y:T.y+10,hp:Math.round(d.max*.5),dead:false,deadT:0,inv:2.5,roll:0,atk:null,block:false,charging:false,atkHeld:false,queue:false,swingT:0,broken:0,hurtT:0,sta:d.staMax,revT:0});play('bless',0);ftx(EN?'Revived!':'Wskrzeszony!',T.x,T.y,2.8,'i');for(let k=0;k<16;k++)S.parts.push({k:'e',x:T.x+rnd(-8,8),y:T.y,z:rnd(2,16),vx:rnd(-8,8),vy:0,vz:rnd(12,30),c:'#7fd0ff',life:rnd(.5,1)})}}
 let mpEls=null;const MPV=new THREE.Vector3();
-function mpHudTick(){const show=!!(S&&pl2&&S.phase==='play'&&!S.paused&&!S.choosing&&!S.shop&&!S.dialog&&!S.intro&&!S.notice);
+function mpHudTick(){{const h=$('hud');if(h)h.classList.toggle('mp2',!!(S&&pl2&&S.phase==='play'))}const show=!!(S&&pl2&&S.phase==='play'&&!S.paused&&!S.choosing&&!S.shop&&!S.dialog&&!S.intro&&!S.notice);
   if(!mpEls){if(!show)return;const left=document.querySelector('#hud .left');if(!left)return;
     const mk=h=>{const d=document.createElement('div');d.innerHTML=h;return d.firstChild},bars='<b class="l"></b><b class="m"></b><b class="r"></b></div>';
     const panel=mk('<div style="pointer-events:none"></div>'),tag=mk('<span class="lvl-tag" style="color:#8fb4ff"></span>');tag.textContent=EN?'Player 2':'Gracz 2';

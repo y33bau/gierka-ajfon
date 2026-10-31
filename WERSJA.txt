@@ -312,3 +312,5 @@ cache232 (test): ekran tytulowy na komputerze: rzad przelacznikow ma trzy kolumn
 cache233 (test): ekran tytulowy: przelaczniki "2 graczy" i "Sterowanie dotykowe" w lewej kolumnie miedzy poziomem postaci a przebiegiem gry; "Samouczek" przeniesiony na ekran Przygotowania. Nie sprawdzono: telefon, pady.
 
 cache234 (test): telefon w poziomie: logo i karty zmniejszone, zeby zmiescic rzad przelacznikow. Nie sprawdzono: prawdziwy telefon.
+
+cache235 (test): tryb 2 graczy: paski HUD zmniejszone do ok. 58% (mniej zaslaniaja ekran). Nie sprawdzono: pady.
