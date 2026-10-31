@@ -1595,6 +1595,8 @@ function initWorld(ch){setGrid(ch);if((ch===4||ch===5)&&WORLD_SEEDS[ch]===undefi
   if(ch===9)w.rooms=w.rooms.map(R=>Object.assign(SR(R),{k:R.k}));
   Object.assign(w,{ch,group:new THREE.Group(),propObjs:[],npcMeshes:{},walls:[],cliffs:[],pillars:[],lavas:[],braziers:[],waters:[],rots:[],shallow:[],LSRC:[]});
   for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;if(ch===4)deepMarsh(w);
+  // runda 215: bez ognisk (koksowników) tuż przy lawie w rozdz. II
+  if(ch===2)for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const i=y*MW+x;if(w.map[i]!==27)continue;let n=false;for(let dy=-3;dy<=3&&!n;dy++)for(let dx=-3;dx<=3;dx++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<MW&&Y<MH&&w.map[Y*MW+X]===24){n=true;break}}if(n)w.map[i]=(w.under&&w.under[i]&&w.under[i]!==27)?w.under[i]:20}
   scene.add(w.group);
   const ta=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?21:w.map[y*MW+x];
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const t=ta(x,y);
