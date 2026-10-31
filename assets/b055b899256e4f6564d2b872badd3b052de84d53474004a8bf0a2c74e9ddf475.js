@@ -2066,19 +2066,22 @@ function allDead(){return pl1.dead&&(!pl2||pl2.dead)}
 function pickTarget(e){if(!pl2)return pl1;const a=pl1.dead,b=pl2.dead;if(a&&b)return pl1;if(a)return pl2;if(b)return pl1;return Math.hypot(e.x-pl2.x,e.y-pl2.y)<Math.hypot(e.x-pl1.x,e.y-pl1.y)?pl2:pl1}
 function withRb(p,fn){if(!pl2||p!==pl2)return fn();const a=S.rebirth,b=S.rebirthUsed;S.rebirth=p.rbF||null;S.rebirthUsed=!!p.rbU;try{return fn()}finally{p.rbF=S.rebirth;p.rbU=S.rebirthUsed;S.rebirth=a;S.rebirthUsed=b}}
 let mpTotLast=null;
-function totemSpot(){const cx=MW/2*TS,cy=MH/2*TS;for(let r=0;r<40;r++)for(let k=0;k<(r?16:1);k++){const a=k/16*6.2832,x=cx+Math.cos(a)*r*8,y=cy+Math.sin(a)*r*8;if(!boxSolid(x,y,12,10)&&!VOID.has(tileAt(Math.floor(x/TS),Math.floor(y/TS))))return{x,y}}return{x:START.x,y:START.y}}
+function totemSpot(){const cx=MW/2*TS,cy=MH/2*TS,bad=[...(W.npcs||[]),...(W.shrines||[]),W.start].filter(Boolean);
+  for(const md of [144,112,80,0])for(let r=0;r<44;r++)for(let k=0;k<(r?16:1);k++){const a=k/16*6.2832,x=cx+Math.cos(a)*r*8,y=cy+Math.sin(a)*r*8;if(boxSolid(x,y,12,10)||VOID.has(tileAt(Math.floor(x/TS),Math.floor(y/TS))))continue;if(bad.some(n=>Math.hypot(n.x-x,n.y-y)<md))continue;return{x,y}}
+  return{x:START.x,y:START.y}}
+const TOTGLOW=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),gr=x.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,.04)');gr.addColorStop(.6,'rgba(255,255,255,.2)');gr.addColorStop(.88,'rgba(255,255,255,.38)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)})();
 const TOTDOT=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d'),gr=x.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.4,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,32,32);return new THREE.CanvasTexture(c)})();
 function mkTotem(x,y){const g=new THREE.Group();let fr=null;
   try{if(IMGS&&IMGS.cz_trees){fr=procFrame(IMGS.cz_trees,0,64,128,128,'prop');cutCircle(fr.n);foliageWind(fr)}}catch(e){fr=null}
-  if(fr){const geo=new THREE.PlaneGeometry(8,8).translate(0,3.875,0),n=geo.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,.8,.6);const m=new THREE.Mesh(geo,fr.n);m.scale.set(.9,SQ*.9,.9);g.add(m)}
+  if(fr){const geo=new THREE.PlaneGeometry(8,8).translate(0,3.875,0),n=geo.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,.8,.6);const m=new THREE.Mesh(geo,fr.n);m.scale.set(.5,SQ*.5,.5);g.add(m)}
   else{const st=new THREE.MeshBasicMaterial({color:0x5a5c70}),base=new THREE.Mesh(new THREE.CylinderGeometry(.6,.78,.4,8),st);base.position.y=.2;const pil=new THREE.Mesh(new THREE.CylinderGeometry(.24,.38,2.4,6),st);pil.position.y=1.4;g.add(base,pil)}
-  const ring=new THREE.Mesh(new THREE.RingGeometry(2.1,2.3,56).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xff9a3c,transparent:true,opacity:.4,depthWrite:false,side:THREE.DoubleSide}));ring.position.y=.04;g.add(ring);
+  const ring=new THREE.Mesh(new THREE.PlaneGeometry(5.6,5.6).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({map:TOTGLOW,color:0xff9a3c,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));ring.position.y=.05;g.add(ring);
   const low=SETT&&SETT.quality==='low',mk=(n,col,size)=>{const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));const pt=new THREE.Points(geo,new THREE.PointsMaterial({color:col,size,map:TOTDOT,sizeAttenuation:true,transparent:true,opacity:.95,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));pt.frustumCulled=false;g.add(pt);return pt};
   const em=mk(low?18:36,0xff9a3c,.3),wi=mk(low?5:10,0x8fe8ff,.5);
   g.position.set(x/16,0,y/16);scene.add(g);return{g,ring,em,wi}}
 function mpTotAnim(o,t,on){const E=o.em.geometry.attributes.position,Wp=o.wi.geometry.attributes.position;
-  for(let i=0;i<E.count;i++){const ph=(t*.32+i*.6180339)%1,a=i*2.399+t*.45*(i%2?1:-1),r=1.1+((i*37)%10)*.2;E.setXYZ(i,Math.cos(a)*r,.2+ph*4.4,Math.sin(a)*r*.8)}E.needsUpdate=true;
-  for(let i=0;i<Wp.count;i++){const a=t*.7+i/Wp.count*6.2832;Wp.setXYZ(i,Math.cos(a)*2.5,.9+Math.sin(t*1.3+i*1.7)*.5+(i%3)*.45,Math.sin(a)*2.1)}Wp.needsUpdate=true;
+  for(let i=0;i<E.count;i++){const ph=(t*.32+i*.6180339)%1,a=i*2.399+t*.45*(i%2?1:-1),r=.8+((i*37)%10)*.13;E.setXYZ(i,Math.cos(a)*r,.2+ph*3.2,Math.sin(a)*r*.8)}E.needsUpdate=true;
+  for(let i=0;i<Wp.count;i++){const a=t*.7+i/Wp.count*6.2832;Wp.setXYZ(i,Math.cos(a)*2.1,.7+Math.sin(t*1.3+i*1.7)*.4+(i%3)*.35,Math.sin(a)*1.8)}Wp.needsUpdate=true;
   o.em.material.opacity=on?.95:.25;o.wi.material.opacity=on?.9:.2;o.ring.material.opacity=on?.35+.15*Math.sin(t*3):.1;o.ring.material.color.setHex(on?0xff9a3c:0x666666)}
 function mpTotTxt(){const c=S.mpCh==null?3:S.mpCh,p=S.mpProg||0;return(EN?"Whisperer's Tree: ":'Drzewo Szeptuchy: ')+c+'/3'+(p>0?' · '+Math.round(p/5*100)+'%':'')}
 function mpTotemTick(dt){if(!S||!pl2||S.dg){if(mpTotLast)mpTotLast.visible=false;return}
@@ -3172,7 +3175,7 @@ function update(dt){
   const nn=nearNpc();if(talkPress&&nn){openDialog(nn);return}
   const nf=!nn&&!nm?nearPowerFire():null;if(talkPress&&nf){activatePowerFire(nf);return}const nx=!nn&&!nm&&!nf?nearExit():null;if(talkPress&&nx){useExit(nx);return}
   updPlayer(dt);recoverPurses();if(S.notice)return;events();if(S.notice)return;spawnTick(dt);miniTick();if(S.notice)return;chTick();
-  slashUpdate(dt);if(pl2){asP2(()=>{updPlayer(dt);slashUpdate(dt,true);if(PAD2.talk){PAD2.talk=false;if(!pl.dead)withRb(pl,()=>{const nf=nearPowerFire();if(nf)activatePowerFire(nf)})}});mpTotemTick(dt)}for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
+  slashUpdate(dt);if(pl2){asP2(()=>{updPlayer(dt);slashUpdate(dt,true);if(PAD2.talk){PAD2.talk=false;if(!pl.dead)withRb(pl,()=>{const nf=nearPowerFire();if(nf&&activatePowerFire(nf))ftInfo(EN?'Revival ready':'Odrodzenie gotowe')})}});mpTotemTick(dt)}for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
   updZones(dt);
   buildEnemyGrid();for(const e of S.enemies)if(!e.dead){const tg=pl2?pickTarget(e):pl;if(tg!==pl){const p1=pl;pl=tg;try{updEnemy(e,dt)}finally{pl=p1}}else updEnemy(e,dt)}
   S.enemies=S.enemies.filter(e=>!e.dead);

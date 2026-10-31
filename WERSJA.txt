@@ -292,3 +292,5 @@ cache222 (test): promien wskrzeszania 2 graczy zwiekszony do ok. 3,5 kratki.
 cache223 (test): tryb 2 graczy: TOTEM PRZYWOLANIA w srodku mapy (3 wskrzeszenia na noc, 5 s ladowania, zywy partner stoi przy totemie); kapliczki: odrodzenie jednorazowe dla kazdego gracza, tylko jesli sam ja aktywowal (drugi pad: przycisk Y); wskrzeszanie przy ciele usuniete. Nie sprawdzono: prawdziwe pady.
 
 cache224 (test): Drzewo Szeptuchy (duze drzewo z rozdz. 4) jako totem wskrzeszania, z zarem i ognikami dookola; gracz 2 ma te same paski co gracz 1 (HP, stamina, mana); obaj gracze widza info o totemie, gracz 2 tez o odrodzeniu; leczenie przy ognisku: 4% maks. HP na s (bylo 14 HP/s), do 60% (bylo 70%). Nie sprawdzono: prawdziwe pady.
+
+cache225 (test): Drzewo Szeptuchy mniejsze (ok. polowa), zamiast ostrego okregu miekka poswiata na ziemi, totem omija NPC, kapliczki i start (min. 9 kratek, wiec nie stoi przy studni), gracz 2 widzi nad soba napis "Odrodzenie gotowe". Nie sprawdzono: prawdziwe pady.
