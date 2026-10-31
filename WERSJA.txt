@@ -314,3 +314,4 @@ cache233 (test): ekran tytulowy: przelaczniki "2 graczy" i "Sterowanie dotykowe"
 cache234 (test): telefon w poziomie: logo i karty zmniejszone, zeby zmiescic rzad przelacznikow. Nie sprawdzono: prawdziwy telefon.
 
 cache235 (test): tryb 2 graczy: paski HUD zmniejszone do ok. 58% (mniej zaslaniaja ekran). Nie sprawdzono: pady.
+cache236 (test): fala po parowaniu oslabiona o 20% (takze Echo); okno parowania 0,20 s -> 0,15 s (pociski 0,26 -> 0,21 s). Nie sprawdzono: granie.

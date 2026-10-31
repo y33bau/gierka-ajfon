@@ -2250,7 +2250,7 @@ const SL={regen:28,delay:.55,roll:24,blockRegen:.25,stepCost:8,
   mana:{max:60,regen:1.2,delay:.75,onHit:1,onParry:0,onKill:0,hitGap:.5},
   shot:{iceDmg:16,perL:2,targets:[3,4,6],iceR:8,fireDmg:[30,36,42],fireR:[34,38,42],fireHit:9,splash:.5},
   cascade:{dmg:[9,11,13],cuts:3,gap:.2,start:.1,arc:1.25,range:34,lunge:5,rec:.15},
-  guard:{dur:10,hp:[.8,1,1.2],taunt:[96,112,128],bossTaunt:5,spd:42,r:7,leash:140,inv:.3},parry:.2,blockMul:1.2,guardBreak:.8,riposte:1.5,cap:28,ramp:.12,bossHp:.45,enemyWind:.5,enemyRec:.5,enemyHit:1.6,staggerGap:.9,coinDrop:.45,coinStrong:2,coinSurvive:15,projDiv:900,dmgDiv:800,shotGap:1.3,aim:.55,
+  guard:{dur:10,hp:[.8,1,1.2],taunt:[96,112,128],bossTaunt:5,spd:42,r:7,leash:140,inv:.3},parry:.15,blockMul:1.2,guardBreak:.8,riposte:1.5,cap:28,ramp:.12,bossHp:.45,enemyWind:.5,enemyRec:.5,enemyHit:1.6,staggerGap:.9,coinDrop:.45,coinStrong:2,coinSurvive:15,projDiv:900,dmgDiv:800,shotGap:1.3,aim:.55,
   wave:{l:{dmg:.6,speed:230,life:.62,r:13,size:1.25},h:{dmg:.7,speed:250,life:.75,r:19,size:1.8},stun:.4},
   light:{cost:14,dmg:[17,19,28],wind:.12,act:.1,rec:.27,range:30,arc:1.05,stun:[.18,.18,.3],lunge:[30,30,55]},
   heavy:{cost:36,dmg:48,charge:.42,wind:.52,act:.12,rec:.3,range:37,arc:1.5,stun:.7,lunge:70}};
@@ -2307,7 +2307,7 @@ function attackHit(a){const P=a.kind==='h'?SL.heavy:SL.light,R=P.range,arc=P.arc
   const c=Math.cos(ang),s=Math.sin(ang),trail=COMBAT_TRAIL[encLevel()[0]],visualSize=swordVisualSize(a.kind);
   if(!trail||!emitCombatEffect(trail,pl.x+c*R*.12,pl.y+s*R*.12,visualSize,-screenAng(c,s))){if(!skAdd('slash',.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize*1.1,'bill',-screenAng(c,s)))addVfx(A.fx.slash,.26,pl.x+c*R*.4,pl.y+s*R*.4,.6,visualSize,'bill',-screenAng(c,s))}
   {const en=ENCH.filter(k=>S.sk[k]);if(en.length)for(let i=0;i<16;i++){const t=ang+rnd(-arc,arc),rr=rnd(10,R),k=en[i%en.length];S.parts.push({k:'e',x:pl.x+Math.cos(t)*rr,y:pl.y+Math.sin(t)*rr,z:rnd(8,18),vx:0,vy:0,vz:rnd(4,12),c:Math.random()<.6?ENC[k].col:ENC[k].col2,life:rnd(.2,.45)})}}
-  if(crit){pl.riposte=0;launchWave(a,ang,waveDmg);const ec=sk('echo');if(ec>=1){launchWave(a,ang-.28,waveDmg*(ec>=3?1.2:1),1);if(ec>=2)launchWave(a,ang+.28,waveDmg*(ec>=3?1.2:1),1)}if(hits)ftInfo((EN?'Critical hit!':'Cios krytyczny!'))}
+  if(crit){pl.riposte=0;const wdp=waveDmg*.8;launchWave(a,ang,wdp);const ec=sk('echo');if(ec>=1){launchWave(a,ang-.28,wdp*(ec>=3?1.2:1),1);if(ec>=2)launchWave(a,ang+.28,wdp*(ec>=3?1.2:1),1)}if(hits)ftInfo((EN?'Critical hit!':'Cios krytyczny!'))}
   else if(hits&&a.kind==='l'&&sk('zryw')){S.hitN=(S.hitN||0)+1;if(S.hitN>=ZRYW_N[sk('zryw')]){S.hitN=0;launchWave(a,ang,waveDmg)}}
   if(hits){S.hitstop=a.kind==='h'?.09:crit?.12:.045;shake(a.kind==='h'?.25:.1,.1);if(crit)play('katana',0)}
   if(S.twin)twinPush(a,crit,twinBase)}
