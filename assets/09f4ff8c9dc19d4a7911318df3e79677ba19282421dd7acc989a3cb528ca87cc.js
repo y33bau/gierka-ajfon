@@ -3897,7 +3897,7 @@ function lrect(el){return el.getBoundingClientRect()}
 function fit(){const st=$('stage'),r=st.getBoundingClientRect();let w=Math.max(1,Math.floor(r.width)),h=Math.max(1,Math.floor(r.height));if(w/h>2.4)w=Math.floor(h*2.4);const s=Math.min(w/320,h/180),port=h>w;
   const scr=$('screen');scr.style.width=w+'px';scr.style.height=h+'px';scr.classList.toggle('port',port);document.documentElement.classList.toggle('port',port);scr.style.fontSize=(Math.max(10,s*5.2)*SETT.fts/100)+'px';
   renderer.setPixelRatio(SETT.quality==='low'?1:Math.min(1.5,window.devicePixelRatio||1));renderer.setSize(w,h,false);
-  const q=SETT.quality==='low'?(SETT.hiRes?540:360):(SETT.hiRes?Math.max(RT_H,720):RT_H),rw=port?q:Math.round(q*w/h),rh=port?Math.round(q*h/w):q;rt.setSize(rw,rh);postMat.uniforms.res.value.set(rw,rh);
+  const q=SETT.quality==='low'?(SETT.hiRes?720:540):(SETT.hiRes?Math.max(RT_H,720):RT_H),rw=port?q:Math.round(q*w/h),rh=port?Math.round(q*h/w):q;rt.setSize(rw,rh);postMat.uniforms.res.value.set(rw,rh);
   cam.aspect=w/h;cam.fov=2*Math.atan(Math.tan(12*Math.PI/180)/Math.min(1,w/h))*180/Math.PI;cam.updateProjectionMatrix()}
 addEventListener('resize',fit);fit();
 // iPhone (above all as a home-screen app) often reports the new size late after rotating, so fit again on every signal and a moment later
