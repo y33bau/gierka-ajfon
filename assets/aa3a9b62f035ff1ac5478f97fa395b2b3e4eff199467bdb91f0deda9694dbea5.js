@@ -1845,6 +1845,7 @@ function enemyWinding(e){return e.ghoulWind>0||e.sw>0||e.ctw>0||e.chT>0||e.hamT>
 function attackCue(e){if(e.dead||e.rise>0||e.stun>0||e.frozen>0||e.trans>0)return null;
   return enemyWinding(e)?(e.sw>0&&e.red?(SETT.contrast?'y':'r'):'w'):null}
 function setFrame(mesh,fr,mode){if(!fr)return;
+  if(mode==='p2'&&!fr.p2){const m=fr.n.clone();if(fr.n.map){m.map=recolorTex(fr.n.map);if(m.emissiveMap)m.emissiveMap=m.map}fr.p2=m}
   const STT={sg:[0x8aff5a,.55],so:[0xff9a40,.6],sb:[0xe03048,.4],sc:[0x9adcff,.5],sh:[0x7a62d8,.45]};if(STT[mode]&&!fr[mode]){const m=fr.n.clone(),s=STT[mode];m.color.setHex(s[0]);if(m.emissive){m.emissive.setHex(s[0]);m.emissiveMap=fr.n.map;m.emissiveIntensity=s[1]}if(mode==='sh'){m.transparent=true;m.opacity=.6;m.depthWrite=false}fr[mode]=m}
   if((mode==='w'||mode==='r'||mode==='y')&&!fr[mode]){const m=fr.n.clone(),color=mode==='r'?0xff694b:mode==='y'?0xffdf62:0xffe1b0;
     m.color.setHex(color);if(m.emissive){m.emissive.setHex(color);m.emissiveMap=fr.n.map;m.emissiveIntensity=mode==='w'?.55:.8}m.fog=false;fr[mode]=m}
@@ -2040,14 +2041,34 @@ function breakPoise(e,amount){if(e.dead||e.inv>0||e.trans>0)return;e.poise=(e.po
 const STONE_N=6,DZIADY_AT=540;
 const XP_BASE=5,XP_GROW=1.05,xpNeed=l=>Math.ceil(XP_BASE*l*Math.pow(XP_GROW,l-1));
 let STORY=true;// fabuła jest zawsze włączona (przełącznik usunięty)
-let S=null,pl=null;const keys={};let rollPress=false,talkPress=false;const tj={x:0,y:0};
+let S=null,pl=null,pl2=null,mesh2=null;const keys={};let rollPress=false,talkPress=false;const tj={x:0,y:0};
+/* ===== tryb 2 graczy (etap 1): gracz 2 = drugi pad, kamera na graczu 1 ===== */
+const PAD2={cur:[],prev:[],x:0,y:0,ax:0,ay:0,aimT:-99,atk:false,blk:false,roll:false,heavy:false,g:null};
+function mpWanted(){return /[?&]mp=1/.test(location.search)&&!!PAD2.g}
+function spawnP2(){pl2=Object.assign({},pl,{x:pl.x+14,y:pl.y+6,visualGuard:null,atk:null});if(!mesh2){mesh2=new THREE.Mesh(geo32,A.hero.idle_down[0].n);scene.add(mesh2)}mesh2.visible=true}
+const P2TEX=new WeakMap();
+function recolorTex(t){if(P2TEX.has(t))return P2TEX.get(t);let out=t;try{const im=t.image,w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),a=d.data;for(let i=0;i<a.length;i+=4){const r=a[i],g=a[i+1],b=a[i+2];if(a[i+3]>8&&r>60&&r>b*1.5&&r>g*1.5){a[i]=b;a[i+2]=r;a[i+1]=Math.min(255,g*1.15)}}x.putImageData(d,0,0);out=t.clone();out.image=c;out.needsUpdate=true}catch(e){}P2TEX.set(t,out);return out}
+function asP2(fn){if(!pl2)return;const sPl=pl,sx=PAD.x,sy=PAD.y,sa=PAD.atk,sb=PAD.blk,sax=PAD.ax,say=PAD.ay,sat=PAD.aimT,sKeys={...keys},sTjx=tj.x,sTjy=tj.y,sRoll=rollPress,sHeavy=heavyPress,sTalk=talkPress,sML=mouseL,sMR=mouseR,sTA=tAtk,sTB=tBlock,sMT=mouseT,sBuf=S.bufRoll;
+  pl=pl2;for(const k of Object.keys(keys))delete keys[k];tj.x=0;tj.y=0;PAD.x=PAD2.x;PAD.y=PAD2.y;PAD.atk=PAD2.atk;PAD.blk=PAD2.blk;PAD.ax=PAD2.ax;PAD.ay=PAD2.ay;PAD.aimT=PAD2.aimT;
+  rollPress=PAD2.roll;PAD2.roll=false;heavyPress=PAD2.heavy;PAD2.heavy=false;talkPress=false;mouseL=mouseR=tAtk=tBlock=false;mouseT=-99;S.bufRoll=0;
+  try{fn()}finally{pl2=pl;pl=sPl;PAD.x=sx;PAD.y=sy;PAD.atk=sa;PAD.blk=sb;PAD.ax=sax;PAD.ay=say;PAD.aimT=sat;for(const k of Object.keys(keys))delete keys[k];Object.assign(keys,sKeys);tj.x=sTjx;tj.y=sTjy;rollPress=sRoll;heavyPress=sHeavy;talkPress=sTalk;mouseL=sML;mouseR=sMR;tAtk=sTA;tBlock=sTB;mouseT=sMT;S.bufRoll=sBuf}}
+function pad2Tick(g2){if(!g2){PAD2.g=null;PAD2.cur=[];PAD2.prev=[];PAD2.x=PAD2.y=0;PAD2.atk=PAD2.blk=false;return}
+  PAD2.g=g2;PAD2.prev=PAD2.cur;PAD2.cur=g2.buttons.map(b=>!!b&&(b.pressed||b.value>.5));
+  if(!S||S.phase!=='play'||S.intro||padMenuId()){PAD2.x=PAD2.y=0;PAD2.atk=PAD2.blk=false;return}
+  const c=PAD2.cur,pv=PAD2.prev,pr=i=>c[i]&&!pv[i];
+  let [x,y]=padDz(g2.axes[0]||0,g2.axes[1]||0,.22);x+=(c[15]?1:0)-(c[14]?1:0);y+=(c[13]?1:0)-(c[12]?1:0);PAD2.x=x;PAD2.y=y;
+  const [ax,ay]=padDz(g2.axes[2]||0,g2.axes[3]||0,.35);if(ax||ay){const m=Math.hypot(ax,ay);PAD2.ax=ax/m;PAD2.ay=ay/m;PAD2.aimT=clock}
+  PAD2.atk=!!c[7]||!!c[2];PAD2.blk=!!c[4];if(pr(0))PAD2.roll=true;if(pr(1)||pr(5))PAD2.heavy=true}
+function drawP2(){if(!pl2||!mesh2)return;const p1=pl;pl=pl2;try{const hf=heroFrame();setFrame(mesh2,hf,'p2');
+  const hs=pl.roll>0||pl.dead?pl.s:A.heroD&&A.heroD.v2&&!pl.atk&&(pl.parryT>0||pl.broken>0||(pl.hurtT>0&&!pl.block))?(pl.fx>=0?1:-1):pl.swingT>0?(pl.swingDir===2?pl.swingS:1):(pl.charging||pl.block)&&Math.abs(pl.fx)>Math.abs(pl.fy)?(pl.fx>0?1:-1):(pl.dir===2?pl.s:1);
+  mesh2.position.set(pl.x/16,0,pl.y/16);mesh2.scale.set(hs,SQ,1);mesh2.visible=!(SETT.flash&&pl.inv>0&&pl.roll<=0&&!pl.dead&&Math.floor(clock*24)%2)}finally{pl=p1}}
 function clearScene(){if(!S)return;for(const f of S.vfx)if(f.ownMat)for(const a of f.anim)a.n.dispose();clearSwordTransient();if(swordGlow)swordGlow.visible=false;const all=[...S.enemies.map(e=>e.mesh),...S.picks.flatMap(p=>[p.mesh,p.glow]),...S.vfx.map(f=>f.mesh),...S.corpses.map(c=>c.mesh),...S.golems.map(g=>g.mesh),...S.zones.map(z=>z.mesh),...(S.eproj||[]).map(f=>f.mesh),...(S.deathPurses||[]).map(p=>p.mesh)];for(const m of all)if(m)scene.remove(m);for(const c of S.corpses)if(c.own)c.mesh.material.dispose()}
 function newGame(){
   clearScene();dg.clearRect(0,0,WW,WH);decalDirty=true;resetFog();MINI.t=0;
   S={t:0,kills:0,coins:0,lvl:1,xp:0,need:xpNeed(1),pendLv:0,choosing:false,phase:'play',enemies:[],parts:[],picks:[],vfx:[],corpses:[],quakes:[],golems:[],zones:[],delayed:[],
     waves:[],sk:{sword:1},cd:{sword:.6},spawnT:1,hurt:0,shakeT:0,shakeM:0,endT:0,stage:'p1',merchant:null,collector:null,bought:{},whet:0,magnet:0,ev:new Set(),shr:SHRINES.map(()=>60),eproj:[],stones:[0,0,0,0,0],boom:new Set(),trapCd:new Map(),dialog:null,dlg:0,npc:Object.fromEntries(W.npcs.map(n=>[n.id,{state:'alive',t:0}])),flash:0,nextBolt:9};
   pl={x:START.x,y:START.y,fx:1,fy:0,dir:2,s:1,hp:100,max:100,inv:0,roll:0,rollT:0,rvx:0,rvy:0,walk:0,moving:false,dead:false,deadT:0,rollCd:0,swingT:0,swingDir:2,swingS:1,hurtT:0};
-  S.activeSlots=[null,null,null,null];S.activeWind=null;S.combatLock=0;S.cascade=null;S.cascadeCd=0;S.swordShots=[];S.mainEnchant=null;S.elementMain=null;S.elementSupport=null;S.shotCd=0;S.manaHitCd=0;S.manaFlash=0;S.enemyShotCd=0;S.swordGuardian=null;S.shotWind=null;S.swordTrails=[];S.sk={};S.cd={};S.str=1;S.dex=1;S.int=1;Object.assign(pl,{mana:SL.mana.max,manaMax:SL.mana.max,manaDelay:0,sta:100,staMax:100,staDelay:0,atk:null,block:false,blockT:0,broken:0,riposte:0,atkHeld:false,charge:0,charging:false,comboT:0,nextCombo:0,queue:false})
+  S.activeSlots=[null,null,null,null];S.activeWind=null;S.combatLock=0;S.cascade=null;S.cascadeCd=0;S.swordShots=[];S.mainEnchant=null;S.elementMain=null;S.elementSupport=null;S.shotCd=0;S.manaHitCd=0;S.manaFlash=0;S.enemyShotCd=0;S.swordGuardian=null;S.shotWind=null;S.swordTrails=[];S.sk={};S.cd={};S.str=1;S.dex=1;S.int=1;Object.assign(pl,{mana:SL.mana.max,manaMax:SL.mana.max,manaDelay:0,sta:100,staMax:100,staDelay:0,atk:null,block:false,blockT:0,broken:0,riposte:0,atkHeld:false,charge:0,charging:false,comboT:0,nextCombo:0,queue:false});pl2=null;if(mesh2)mesh2.visible=false;if(mpWanted())spawnP2()
   S.deathCause=null;S.pk=PK0();S.hitsT=0;S.parries=0;S.cEarn=0;S.coinFrac=0;S.dealt=0;S.chal=null;S.perkIds=[];S.actions={attack:0,dodge:0,block:0,parry:0,collect:0};S.firstNight=CH===1&&!tutorialDone();S.noticeQueue=[];S.rebirth=null;S.rebirthUsed=false;S.deaths=0;S.deathPurses=[];S.finalDeathLoss=false;
   heroMesh.visible=true;chipsDirty=true;
 }
@@ -2246,10 +2267,10 @@ function waveTick(dt){if(!S.waves||!S.waves.length)return;for(let i=S.waves.leng
       for(let k=0;k<6;k++)S.parts.push({k:'e',x:e.x,y:e.y,z:rnd(6,18),vx:rnd(-40,40),vy:rnd(-20,20),vz:rnd(4,12),c:'#ffe9a0',life:rnd(.2,.4)})}}}
 
 function manaTick(dt){S.manaHitCd=Math.max(0,(S.manaHitCd||0)-dt);S.manaFlash=Math.max(0,(S.manaFlash||0)-dt);if(!pl.manaMax)return;if(pl.manaDelay>0)pl.manaDelay=Math.max(0,pl.manaDelay-dt);else pl.mana=Math.min(pl.manaMax,pl.mana+SL.mana.regen*dt)}
-function slashUpdate(dt){
-  manaTick(dt);swordTick(dt);if(pl.atk?.kind==='whirl'){whirlTick(dt);return}if(pl.atk?.kind==='shot'||pl.atk?.kind==='skill'){if(!S.shotWind&&!S.activeWind&&!S.cascade){pl.atk.t-=dt;if(pl.atk.t<=0)pl.atk=null}return}
+function slashUpdate(dt,p2){
+  if(!p2){manaTick(dt);swordTick(dt)}if(pl.atk?.kind==='whirl'){whirlTick(dt);return}if(pl.atk?.kind==='shot'||pl.atk?.kind==='skill'){if(!S.shotWind&&!S.activeWind&&!S.cascade){pl.atk.t-=dt;if(pl.atk.t<=0)pl.atk=null}return}
   if(pl.staDelay>0)pl.staDelay-=dt;else if(!pl.atk&&pl.roll<=0)pl.sta=Math.min(pl.staMax,pl.sta+SL.regen*(S.regenMul||1)*(S.heri>0?1.15:1)*(pl.block?SL.blockRegen:1)*dt);
-  if(pl.parryHealCd>0)pl.parryHealCd-=dt;if(pl.parryCd>0)pl.parryCd-=dt;if(pl.riposte>0)pl.riposte-=dt;if(pl.dance>0)pl.dance-=dt;waveTick(dt);
+  if(pl.parryHealCd>0)pl.parryHealCd-=dt;if(pl.parryCd>0)pl.parryCd-=dt;if(pl.riposte>0)pl.riposte-=dt;if(pl.dance>0)pl.dance-=dt;if(!p2)waveTick(dt);
   if(pl.broken>0){pl.broken-=dt;pl.block=false;pl.atk=null;return}
   if(pl.dead||pl.roll>0){pl.block=false;pl.atkHeld=false;pl.charging=false;return}
   // block (hold), parry = block raised just before the hit lands
@@ -3100,9 +3121,9 @@ function update(dt){
   const nn=nearNpc();if(talkPress&&nn){openDialog(nn);return}
   const nf=!nn&&!nm?nearPowerFire():null;if(talkPress&&nf){activatePowerFire(nf);return}const nx=!nn&&!nm&&!nf?nearExit():null;if(talkPress&&nx){useExit(nx);return}
   updPlayer(dt);recoverPurses();if(S.notice)return;events();if(S.notice)return;spawnTick(dt);miniTick();if(S.notice)return;chTick();
-  slashUpdate(dt);for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
+  slashUpdate(dt);if(pl2)asP2(()=>{updPlayer(dt);slashUpdate(dt,true)});for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
   updZones(dt);
-  buildEnemyGrid();for(const e of S.enemies)if(!e.dead)updEnemy(e,dt);
+  buildEnemyGrid();for(const e of S.enemies)if(!e.dead){if(pl2&&!pl2.dead&&!pl.dead&&Math.hypot(e.x-pl2.x,e.y-pl2.y)<Math.hypot(e.x-pl.x,e.y-pl.y)){const p1=pl;pl=pl2;try{updEnemy(e,dt)}finally{pl2=pl;pl=p1}}else updEnemy(e,dt)}
   S.enemies=S.enemies.filter(e=>!e.dead);
   musTick(dt);
   updEproj(dt);updPicks(dt);
@@ -3326,11 +3347,11 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     heroMesh.visible=!(SETT.flash&&pl.inv>0&&pl.roll<=0&&!pl.dead&&Math.floor(clock*24)%2);
     {const hf=heroFrame(),ek=encLevel()[0];S.heroHF=hf;setFrame(heroMesh,hf);const hv=ek&&hf?heroBladeMat(hf,ek):null;if(hv&&heroMesh.material===hf.n){hv.emissiveIntensity=.8+.35*Math.sin(clock*6);heroMesh.material=hv}}
     const hs=pl.roll>0||pl.dead?pl.s:A.heroD&&A.heroD.v2&&!pl.atk&&(pl.parryT>0||pl.broken>0||(pl.hurtT>0&&!pl.block))?(pl.fx>=0?1:-1):pl.swingT>0?(pl.swingDir===2?pl.swingS:1):(pl.charging||pl.block)&&Math.abs(pl.fx)>Math.abs(pl.fy)?(pl.fx>0?1:-1):(pl.dir===2?pl.s:1);
-    const guardRecoil=!pl.dead?recoilAmount(pl.visualGuard):0;heroMesh.position.set((pl.x+(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.7)/16,0,(pl.y+(pl.visualGuard?pl.visualGuard.dy:0)*guardRecoil*.7)/16);heroMesh.rotation.z=-(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.018;heroMesh.scale.set(hs,SQ,1);twinDraw(hs);
+    const guardRecoil=!pl.dead?recoilAmount(pl.visualGuard):0;heroMesh.position.set((pl.x+(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.7)/16,0,(pl.y+(pl.visualGuard?pl.visualGuard.dy:0)*guardRecoil*.7)/16);heroMesh.rotation.z=-(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.018;heroMesh.scale.set(hs,SQ,1);twinDraw(hs);drawP2();
     S.qBreak=Math.max(0,(S.qBreak||0)-dt);S.qPop=Math.max(0,(S.qPop||0)-dt);
     // charges orbit the hero as sparks; runes of time and reach leave their own orbiting motes
     const orbit=(n,r,sp,col,z)=>{if(dt<=0)return;for(let i=0;i<n;i++){const a=clock*sp+i*Math.PI*2/n;S.parts.push({k:'e',x:pl.x+Math.cos(a)*r,y:pl.y+Math.sin(a)*r*.6,z,vx:0,vy:0,vz:0,c:col,life:.05})}};
-    if(!pl.dead)blob(pl.x/16,pl.y/16,1);
+    if(!pl.dead)blob(pl.x/16,pl.y/16,1);if(pl2&&!pl2.dead)blob(pl2.x/16,pl2.y/16,1);
     for(const e of S.enemies){
       const an=A[e.type];let fr;
       if(e.type==='bat')fr=at(an.walk,clock+e.ph,12);
@@ -3372,7 +3393,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     let n=0;for(const p of S.parts){if(n>=MAXP)break;pPos[n*3]=p.x/16;pPos[n*3+1]=p.z/16+.02;pPos[n*3+2]=p.y/16;const c=col(p.c);let a=p.life!==undefined?Math.max(0,Math.min(1,p.life)):1;pCol[n*3]=c.r*a;pCol[n*3+1]=c.g*a;pCol[n*3+2]=c.b*a;n++}
     pGeo.setDrawRange(0,n);pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true;
     postMat.uniforms.hurt.value=SETT.flash?Math.max(S.hurt*1.2,pl.dead?.25:0,(!pl.dead&&pl.hp<pl.max*.3)?(.12+.08*Math.sin(clock*5)):0):pl.dead?.18:pl.hp<pl.max*.3?.1:0;
-  }else{heroMesh.visible=false;pGeo.setDrawRange(0,0);postMat.uniforms.hurt.value=0}
+  }else{heroMesh.visible=false;if(mesh2)mesh2.visible=false;pGeo.setDrawRange(0,0);postMat.uniforms.hurt.value=0}
   blobs.count=bi;blobs.instanceMatrix.needsUpdate=true;
   decalT-=dt;if(decalDirty&&decalT<=0){decalTex.needsUpdate=true;decalDirty=false;decalT=.15}
   updatePowerVisuals();
@@ -3942,8 +3963,8 @@ function padNav(id,dt,pr,g){
 }
 function padMark(){for(const e of document.querySelectorAll('.pf'))e.classList.remove('pf');if(!PAD.menu||!document.body.classList.contains('padnav'))return;const a=document.activeElement,root=$(PAD.menu);if(!a||!root||!root.contains(a))return;const t=a.type==='range'?a.parentNode:a.type==='checkbox'?(a.closest('label')||a):a;t.classList.add('pf')}
 function padTick(dt){
-  let g=null;try{const l=navigator.getGamepads?navigator.getGamepads():[];for(const p of l)if(p&&p.connected){g=p;break}}catch(e){}
-  PAD.prev=PAD.cur;PAD.g=g;
+  let g=null,g2=null;try{const l=navigator.getGamepads?navigator.getGamepads():[];for(const p of l)if(p&&p.connected){if(!g)g=p;else{g2=p;break}}}catch(e){}
+  pad2Tick(g2);PAD.prev=PAD.cur;PAD.g=g;
   if(!g){PAD.cur=[];PAD.x=PAD.y=0;PAD.atk=PAD.blk=PAD.skillHeld=PAD.skillConsumed=false;return}
   PAD.cur=g.buttons.map(b=>!!b&&(b.pressed||b.value>.5));
   // krzyżak w nietypowych padach: oś hat (axes[9]) albo osie 6/7
