@@ -302,3 +302,5 @@ cache227 (test): Drzewo Szeptuchy zastapione totemem z Gemini (wariant 3: krwawy
 cache228 (test): totem w wysokiej rozdzielczosci (305x720 px, gestosc 5x, ok. 280 KB) zamiast malej wersji. Nie sprawdzono: telefon, pady.
 
 cache229 (test): ekran tytulowy: przelacznik "2 graczy (dwa pady)" (tylko na komputerze, zapamietywany), zastepuje adres ?mp=1 (ten dalej dziala); pod przelacznikiem podpowiedz, gdy brak drugiego pada. Nie sprawdzono: prawdziwe pady, wyglad na telefonie.
+
+cache230 (test): ekran tytulowy na komputerze: przelaczniki z powrotem w zwyklym rozmiarze (powiekszone zostaja tylko na ekranach dotykowych), zeby miescil sie przelacznik 2 graczy. Nie sprawdzono: telefon, pady.
