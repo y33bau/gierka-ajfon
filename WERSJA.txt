@@ -270,3 +270,5 @@ Korekta autora: „Into the Abyss” skrócone dokładnie do 2:55 (175 s), kompr
 31.10.2026 — cache207: wrogowie nie klinują się w domach (mapa I i inne): mapa odległości po kaflach od bohatera (co 0,35 s); wróg bez widoku na bohatera idzie po niej i wychodzi drzwiami lub dziurą w ścianie. Wrogowie nie pojawiają się już w środku domów (rozdz. I) ani w miejscach bez dojścia do bohatera. Rekwizyty z kolizją (m.in. Ognisko mocy po lewej na mapie II): po powiększeniu mapy kolizja tylko w dolnym rzędzie, u podstawy grafiki — koniec niewidzialnej blokady od góry. Nie sprawdzono na telefonie.
 
 31.10.2026 — cache208: mapa I wypełniona roślinnością bez kolizji (ok. 170 kęp, ok. 400 roślin: paprocie, jeżyny, grzyby, trzciny przy stawie), z dala od dróg, drzwi, postaci, ognisk i startu. Nie sprawdzono na telefonie (wydajność).
+
+31.10.2026 — cache209: nowa lawa w rozdziale II: tekstura CC0 lava_d (Stunt Rally / Nobiax, folder „skille claude”), 512 px, rozpięta w przestrzeni świata (powtórzenie co 5 kafli, bez widocznej siatki), z powolnym ruchem i pulsowaniem żaru. Stara lawa zostaje jako zapas, gdy obraz się nie wczyta. Nie sprawdzono na telefonie.
