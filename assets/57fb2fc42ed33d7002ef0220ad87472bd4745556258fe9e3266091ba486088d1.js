@@ -39,7 +39,8 @@ const SPRITE_GROUPS={
     "r2"
   ],
   "cc0_lava": [
-    "r2"
+    "r2",
+    "r3"
   ],
   "cc0_ash": [
     "core"
@@ -954,7 +955,21 @@ function cutaway(mat){mat.onBeforeCompile=sh=>{sh.uniforms.uCut=CUT;
 const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),V=new THREE.Vector3(),SC=new THREE.Vector3(1,1,1),UP=new THREE.Vector3(0,1,0);
 let ROOT=scene;
 function instanced(geo,mat,list,fn,cast=true,recv=true){const im=new THREE.InstancedMesh(geo,mat,Math.max(1,list.length));list.forEach((p,i)=>{fn(p);im.setMatrixAt(i,M4)});im.count=list.length;im.castShadow=cast;im.receiveShadow=recv;ROOT.add(im);return im}
-let LAVA_HD=null;// lawa HD (CC0, Stunt Rally / Nobiax): jedna płaszczyzna z teksturą w przestrzeni świata, bez siatki kafli
+let LAVA_HD=null,LAVA_ALL=[];
+// Runda 213: wspólna lawa HD (ch II lawa, ch III kałuże): tekstura płynie, a druga kopia jako mapa świecenia płynie w inną stronę,
+// więc pęknięcia rozjaśniają się i gasną nierówno; wokół brzegów miękka łuna (warstwa addytywna, bez prawdziwych świateł).
+function lavaHD(li,cells,Y,RU){if(!li||!cells.length)return null;LAVA_ALL=LAVA_ALL.filter(o=>o.ch!==CH);
+ const mk=()=>{const t=new THREE.Texture(li);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());t.needsUpdate=true;return t};
+ const lt=mk(),et=mk();et.repeat.set(.83,.83);
+ const pos=[],uv=[],idx=[];for(const [x,y] of cells){const b=pos.length/3;pos.push(x,Y,y,x+1,Y,y,x,Y,y+1,x+1,Y,y+1);uv.push(x/RU,-y/RU,(x+1)/RU,-y/RU,x/RU,-(y+1)/RU,(x+1)/RU,-(y+1)/RU);idx.push(b,b+2,b+1,b+1,b+2,b+3)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
+ const mat=liquidMat({map:lt,emissiveMap:et,emissive:0xff6a28,emissiveIntensity:.8},1),mesh=new THREE.Mesh(g,mat);mesh.castShadow=false;mesh.receiveShadow=false;ROOT.add(mesh);
+ const L=new Set(cells.map(([x,y])=>x+','+y)),R=2.2,inten=(cx,cy)=>{let d=9;for(let oy=-3;oy<=2;oy++)for(let ox=-3;ox<=2;ox++){const x=Math.floor(cx)+ox,y=Math.floor(cy)+oy;if(!L.has(x+','+y))continue;const dx=Math.max(x-cx,0,cx-x-1),dy=Math.max(y-cy,0,cy-y-1);d=Math.min(d,Math.hypot(dx,dy))}return Math.pow(Math.max(0,1-d/R),1.6)};
+ const hp=[],hc=[],hi=[],done=new Set();for(const [lx,ly] of cells)for(let y=ly-2;y<=ly+2;y++)for(let x=lx-2;x<=lx+2;x++){const k=x+','+y;if(L.has(k)||done.has(k))continue;done.add(k);
+  const c=[inten(x,y),inten(x+1,y),inten(x,y+1),inten(x+1,y+1)];if(Math.max(...c)<.01)continue;const b=hp.length/3,hy=(Y<0?0:Y)+.02;hp.push(x,hy,y,x+1,hy,y,x,hy,y+1,x+1,hy,y+1);for(const v of c)hc.push(v,v*.42,v*.12);hi.push(b,b+2,b+1,b+1,b+2,b+3)}
+ let halo=null;if(hp.length){const hg=new THREE.BufferGeometry();hg.setAttribute('position',new THREE.Float32BufferAttribute(hp,3));hg.setAttribute('color',new THREE.Float32BufferAttribute(hc,3));hg.setIndex(hi);
+  halo=new THREE.Mesh(hg,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false}));halo.renderOrder=2;halo.castShadow=halo.receiveShadow=false;ROOT.add(halo)}
+ const o={ch:CH,tex:lt,etex:et,mat,halo};LAVA_ALL.push(o);return o}// lawa HD (CC0, Stunt Rally / Nobiax): jedna płaszczyzna z teksturą w przestrzeni świata, bez siatki kafli
 const lavaC=canvas(64,64),lavaG=lavaC.getContext('2d'),lavaTex=texFrom(lavaC,true);let lavaFrames=[],lavaFrame=-1;
 const waterC=canvas(64,64),waterG=waterC.getContext('2d'),waterTex=texFrom(waterC,true);let waterFrames=[],waterFrame=-1;
 const DEC={};
@@ -1108,7 +1123,7 @@ function buildDolne(I){planGround(2);
   const bandGeo=new THREE.CylinderGeometry(.395,.395,.14,8);bandGeo.translate(0,1.9,0);
   instanced(bandGeo,cutaway(phong({color:0x4e3c1c})),pillars,([x,y])=>M4.makeTranslation(x+.5,0,y+.5));
   lavaFrames=[0,1,2,3].map(i=>tcut(F,i,5));
-  {const li=I.cc0_lava||(IMGS&&IMGS.cc0_lava);if(li&&lavas.length){const lt=new THREE.Texture(li);lt.wrapS=lt.wrapT=THREE.RepeatWrapping;lt.magFilter=THREE.LinearFilter;lt.minFilter=THREE.LinearMipmapLinearFilter;lt.generateMipmaps=true;lt.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());lt.needsUpdate=true;
+  {const li=I.cc0_lava;if(li&&lavas.length&&(LAVA_HD=lavaHD(li,lavas,-.32,5))){}else if(false){const lt=new THREE.Texture(li);lt.wrapS=lt.wrapT=THREE.RepeatWrapping;lt.magFilter=THREE.LinearFilter;lt.minFilter=THREE.LinearMipmapLinearFilter;lt.generateMipmaps=true;lt.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());lt.needsUpdate=true;
     const pos=[],uv=[],idx=[],RU=5;for(const [x,y] of lavas){const b=pos.length/3;pos.push(x,-.32,y,x+1,-.32,y,x,-.32,y+1,x+1,-.32,y+1);uv.push(x/RU,-y/RU,(x+1)/RU,-y/RU,x/RU,-(y+1)/RU,(x+1)/RU,-(y+1)/RU);idx.push(b,b+2,b+1,b+1,b+2,b+3)}
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
     const mat=liquidMat({map:lt,emissiveMap:lt,emissive:0xff7a30,emissiveIntensity:.75},1),mesh=new THREE.Mesh(g,mat);mesh.castShadow=false;mesh.receiveShadow=false;ROOT.add(mesh);LAVA_HD={tex:lt,mat}}
@@ -1236,9 +1251,10 @@ function buildStolica(I){planGround(3);
   groundDetails(fg);
   const floor=new THREE.Mesh(floorGeo,groundMaterial(phong({map:surfaceTex(fc),alphaTest:.5,color:0x9a8e90})));floor.position.set(MW/2,0,MH/2);floor.receiveShadow=true;ROOT.add(floor);
   // animated rot sludge on top of the pools (Z1 row 4, frames 0-3), faintly glowing
+  W.rotTex=null;if(!lavaHD(I.cc0_lava,W.rots,.014,4)){
   W.rotFrames=[0,1,2,3].map(i=>tcut(ZG,i,4));W.rotC=canvas(64,64);W.rotG=W.rotC.getContext('2d');W.rotTex=texFrom(W.rotC,true);W.rotF=-1;
   const rGeo=new THREE.PlaneGeometry(1,1);rGeo.rotateX(-Math.PI/2);
-  instanced(rGeo,liquidMat({map:W.rotTex,emissiveMap:W.rotTex,emissive:0x5a2a18,shininess:22,specular:0x30221a},1),W.rots,([x,y])=>M4.makeTranslation(x+.5,.012,y+.5),false,true);
+  instanced(rGeo,liquidMat({map:W.rotTex,emissiveMap:W.rotTex,emissive:0x5a2a18,shininess:22,specular:0x30221a},1),W.rots,([x,y])=>M4.makeTranslation(x+.5,.012,y+.5),false,true)}
   // walls from Z2: r0-1 townhouse facades, r2 cathedral, r3 gold dome, r4 slate roof, r5 monastery brick, r6 shacks, r7 caps
   const stackE=(img,rows)=>{const size=16*(img.nbDensity||1),h=rows.length*size,c=canvas(size,h),g=c.getContext('2d');rows.forEach(([col,row],i)=>atlasDraw(g,img,col*16,row*16,16,16,0,i*size,size,size));
     const e=canvas(size,h),eg=e.getContext('2d'),d=g.getImageData(0,0,size,h).data,ed=eg.createImageData(size,h);
@@ -3230,7 +3246,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
   LPOOL.forEach((l,i)=>{const L=i<lightCap?nearL[i]:null;if(!L||L.d>26){l.intensity=0;return}l.color.setHex(L.col);l.distance=L.dist;l.position.set(L.x,L.y,L.z);l.intensity=L.k*Math.min(1,(26-L.d)/4)});
   if(S&&S.t>0&&Math.random()<dt*(SETT.quality==='low'?12:22)){const a=Math.random()*Math.PI*2,d=Math.random()*200;S.parts.push(CH===4?(Math.random()<.35?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(4,26),vx:rnd(-4,4),vy:rnd(-2,2),vz:rnd(-1.5,1.5),c:Math.random()<.5?'#c8e070':'#7fffd0',life:rnd(1.5,3.5)}:{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(1,8),vx:rnd(-5,-1),vy:rnd(-1,1),vz:rnd(-.5,.5),c:Math.random()<.6?'#4a5660':'#5e6a72',life:rnd(3,6)}):CH===3?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(30,70),vx:rnd(-3,3),vy:rnd(-1,1),vz:rnd(-5,-2),c:Math.random()<.6?'#c8a040':'#7a6030',life:rnd(4,7)}:CH===1?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(30,70),vx:rnd(-6,2),vy:rnd(-1,1),vz:rnd(-9,-5),c:Math.random()<.6?'#6a6670':'#8a8490',life:rnd(3,6)}:{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(4,40),vx:rnd(-3,3),vy:rnd(-2,2),vz:rnd(-1,2),c:Math.random()<.7?'#5c5566':'#7d6a58',life:rnd(2,4)})}
   if(S&&CH===2&&Math.abs(pl.x/16-MP(37.5))<16&&Math.random()<dt*14)S.parts.push({k:'e',x:rnd(MP(35.2),MP(39.8))*16,y:(camTarget.z+rnd(-7,7))*16,z:-rnd(20,90),vx:rnd(-2,2),vy:0,vz:rnd(14,30),c:Math.random()<.6?'#ff6a1a':'#ffb347',life:rnd(2,4)});
-  if(CH===2&&LAVA_HD){LAVA_HD.tex.offset.set(clock*.008,clock*.005);LAVA_HD.mat.emissiveIntensity=.62+.16*Math.sin(clock*1.6)+.06*Math.sin(clock*4.3)}
+  for(const o of LAVA_ALL){if(o.ch!==CH)continue;o.tex.offset.set(clock*.008,clock*.005);o.etex.offset.set(.37-clock*.006,.61+clock*.009);const p=Math.sin(clock*1.7)*.5+Math.sin(clock*.63+1.3)*.35+Math.sin(clock*4.1)*.15;o.mat.emissiveIntensity=.78+.22*p;if(o.halo)o.halo.material.opacity=.45+.2*p}
   const lf=((clock*5)|0)%4;if(CH===2&&!LAVA_HD&&lf!==lavaFrame&&lavaFrames.length){lavaFrame=lf;lavaG.clearRect(0,0,64,64);lavaG.drawImage(lavaFrames[lf],0,0);lavaTex.needsUpdate=true}
   if(CH===3&&W.rotTex){const rf=((clock*2.5)|0)%4;if(rf!==W.rotF){W.rotF=rf;W.rotG.clearRect(0,0,64,64);W.rotG.drawImage(W.rotFrames[rf],0,0);W.rotTex.needsUpdate=true}}
   if(CH===4&&W.water){const f4=((clock*4)|0)%4;for(const o of W.water)if(o.f!==f4){o.f=f4;o.g.clearRect(0,0,64,64);o.g.drawImage(o.frames[f4],0,0);o.tex.needsUpdate=true}
