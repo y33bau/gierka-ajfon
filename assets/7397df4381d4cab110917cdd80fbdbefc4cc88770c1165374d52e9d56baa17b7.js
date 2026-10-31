@@ -2073,6 +2073,54 @@ const TOTGLOW=(()=>{const c=document.createElement('canvas');c.width=c.height=12
 const TOTDOT=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d'),gr=x.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.4,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,32,32);return new THREE.CanvasTexture(c)})();
 const TOTEM_PNG='./assets/450093d43cdcfb4c4a8de3632fbc10d27f8e33d2580e5ff871e7b1b3d69c5430.png';let _totImg=null,_totFr=null;
 function totemLoad(cb){if(_totFr){cb(_totFr);return}if(!_totImg){const im=_totImg=new Image();im.nbKey='totem';im.nbDensity=5;im.cbs=[];im.onload=()=>{try{_totFr=procFrame(im,0,0,im.width/5,im.height/5,'prop');cutCircle(_totFr.n)}catch(e){_totFr=null}for(const f of im.cbs)f(_totFr);im.cbs=[]};im.src=TOTEM_PNG}_totImg.cbs.push(cb)}
+let FXS=null;
+function fireFxTick(){
+ if(FXS===false)return;
+ if(!S||!W||!scene||!W.propObjs){if(FXS)FXS.g.visible=false;return}
+ try{
+ const low=SETT&&SETT.quality==='low';
+ if(!FXS){
+  const mk=(n,size)=>{const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(n*3),3));const pt=new THREE.Points(geo,new THREE.PointsMaterial({size,map:TOTDOT,vertexColors:true,sizeAttenuation:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));pt.frustumCulled=false;return pt};
+  const ne=low?90:200,nw=low?10:26,em=mk(ne,.26),wi=mk(nw,.5),g=new THREE.Group();g.add(em,wi);scene.add(g);
+  const P=n=>Array.from({length:n},()=>({a:0,l:0,y:-99,ex:0,ez:0,vy:0,ph:0,sw:0}));
+  FXS={g,em,wi,pe:P(ne),pw:P(nw),W:null,fire:[],lava:[],shr:[],t:clock}}
+ const F=FXS;F.g.visible=true;
+ if(F.W!==W){F.W=W;F.fire=[];F.shr=[];F.lava=[];
+  for(const o of W.propObjs)if(o.kind==='shrine'&&o.mesh)F.shr.push({x:o.mesh.position.x,z:o.mesh.position.z-.3,h:.55,r:.6});
+  for(const p of W.PROPS||[]){const k=p.k||'';if(p.shrine!==undefined)continue;
+   if(!(p.fire||p.anim==='torch'||p.anim==='furnace'||/debris_fire|pyre|bonfire|cz_fire|furnace|torch|brazier/.test(k)))continue;
+   const m=p.obj&&p.obj.mesh,x=m?m.position.x:p.x,z=m?m.position.z:p.y,tor=/torch/.test(k)||p.anim==='torch',fur=/furnace/.test(k);
+   F.fire.push({x,z:z-(tor?.1:.3),h:tor?1.1:fur?.9:.45,r:p.big?.7:tor?.12:.35})}
+  for(const b of W.braziers||[])F.fire.push({x:b[0]+.5,z:b[1]+.62,h:.8,r:.25});
+  for(const l of W.lavas||[])F.lava.push([l[0]+.5,l[1]+.5])}
+ const dt=Math.min(.1,Math.max(0,clock-F.t));F.t=clock;
+ const cx=cam.position.x,cz=cam.position.z,near=(x,z)=>{const dx=x-cx,dz=z-cz;return dx*dx+dz*dz<676};
+ const pick=()=>{const r=Math.random();
+  if(r<.3&&F.lava.length){for(let t=0;t<6;t++){const c=F.lava[(Math.random()*F.lava.length)|0];if(near(c[0],c[1]))return{x:c[0]+rnd(-.5,.5),z:c[1]+rnd(-.5,.5),h:-.2,r:0,lava:1}}}
+  if(r<.5&&F.shr.length){const e=F.shr[(Math.random()*F.shr.length)|0];if(near(e.x,e.z))return e}
+  if(F.fire.length){for(let t=0;t<6;t++){const e=F.fire[(Math.random()*F.fire.length)|0];if(near(e.x,e.z))return e}}
+  return null};
+ const pos=F.em.geometry.attributes.position,col=F.em.geometry.attributes.color;
+ for(let i=0;i<F.pe.length;i++){const q=F.pe[i];q.a+=dt;
+  if(q.a>=q.l){const e=pick();q.a=0;
+   if(!e){q.l=.3+Math.random()*.5;q.y=-99;q.ex=q.ez=0;pos.setXYZ(i,0,-99,0);col.setXYZ(i,0,0,0);continue}
+   q.ex=e.x+rnd(-1,1)*(e.r||0);q.ez=e.z+rnd(-1,1)*(e.r||0);q.y=e.h+Math.random()*.15;q.vy=(e.lava?.5:.8)+Math.random()*.9;q.l=(e.lava?1.2:.9)+Math.random()*1.3;q.lava=e.lava?1:0;q.ph=Math.random()*6.28;q.sw=.15+Math.random()*.3}
+  if(q.y<-50)continue;
+  q.y+=q.vy*dt;const k=q.a/q.l,f=k<.15?k/.15:Math.max(0,1-(k-.15)/.85);
+  pos.setXYZ(i,q.ex+Math.sin(clock*2.2+q.ph)*q.sw*k,q.y,q.ez+Math.cos(clock*1.7+q.ph)*q.sw*k*.7);
+  col.setXYZ(i,f,f*(q.lava?.35:.55)*(1-k*.4),f*(q.lava?.08:.18))}
+ pos.needsUpdate=true;col.needsUpdate=true;
+ const wp=F.wi.geometry.attributes.position,wc=F.wi.geometry.attributes.color;
+ for(let i=0;i<F.pw.length;i++){const q=F.pw[i];q.a+=dt;
+  if(q.a>=q.l){q.a=0;const e=F.shr.length?F.shr[(Math.random()*F.shr.length)|0]:null;
+   if(!e||!near(e.x,e.z)){q.l=.5;q.y=-99;wp.setXYZ(i,0,-99,0);wc.setXYZ(i,0,0,0);continue}
+   q.ph=Math.random()*6.28;q.sw=.5+Math.random()*.7;q.ex=e.x;q.ez=e.z;q.y=.3+Math.random()*.4;q.vy=.25+Math.random()*.3;q.l=2.2+Math.random()*2;q.w=(Math.random()<.5?1:-1)*(.8+Math.random()*.8)}
+  if(q.y<-50)continue;
+  q.y+=q.vy*dt;const k=q.a/q.l,ang=q.ph+clock*q.w,f=Math.sin(Math.PI*k)*.9;
+  wp.setXYZ(i,q.ex+Math.cos(ang)*q.sw,q.y,q.ez+Math.sin(ang)*q.sw*.8);wc.setXYZ(i,.55*f,.9*f,f)}
+ wp.needsUpdate=true;wc.needsUpdate=true;
+ }catch(err){console.warn('fireFx',err);FXS=false}}
+
 function mkTotem(x,y){const g=new THREE.Group();
   const fb=new THREE.Group(),st=new THREE.MeshBasicMaterial({color:0x5a5c70}),base=new THREE.Mesh(new THREE.CylinderGeometry(.6,.78,.4,8),st);base.position.y=.2;const pil=new THREE.Mesh(new THREE.CylinderGeometry(.24,.38,2.4,6),st);pil.position.y=1.4;fb.add(base,pil);g.add(fb);
   totemLoad(fr=>{if(!fr)return;const im=_totImg,hh=4.5,geo=new THREE.PlaneGeometry(hh*im.width/im.height,hh).translate(0,hh/2-.1,0),n=geo.attributes.normal;for(let i=0;i<n.count;i++)n.setXYZ(i,0,.8,.6);const m=new THREE.Mesh(geo,fr.n);m.scale.set(1,SQ,1);g.add(m);g.remove(fb)});
@@ -2214,7 +2262,7 @@ let _fgt=null;function fireGlowTex(){if(_fgt)return _fgt;const c=document.create
 function preparePowerFires(w){if(!A.powerFire)A.powerFire=[[64,64],[96,64],[0,96],[32,96]].map(([x,y])=>procFrame(IMGS.br_props,x,y,32,32,'prop'));
   w.fireMarkers=[];for(const o of w.propObjs)if(o.kind==='shrine'){o.frames=A.powerFire;o.fps=6;o.mesh.geometry=geo32;o.mesh.material=o.frames[0].n;o.mesh.castShadow=false;const mat=new THREE.MeshBasicMaterial({map:fireGlowTex(),color:0xffad55,transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}),ring=new THREE.Mesh(new THREE.PlaneGeometry(3.4,3.4).rotateX(-Math.PI/2),mat);ring.position.set(o.mesh.position.x,.035,o.mesh.position.z);w.group.add(ring);w.fireMarkers.push({mesh:ring,index:o.si})}for(const l of w.LSRC)if(l.kind==='shrine')l.col=0xffa355}
 function makeDeathPurse(x,y,amount){if(!(amount>0))return;const mesh=new THREE.Mesh(geoC,A.pick.c.n);mesh.scale.setScalar(.8);mesh.position.set(x/16,.2,y/16);scene.add(mesh);(S.deathPurses||(S.deathPurses=[])).push({ch:CH,x,y,amount,mesh,ready:false})}
-function updatePowerVisuals(){if(!S)return;for(const f of W.fireMarkers||[]){const armed=S.rebirth&&S.rebirth.ch===CH&&S.rebirth.index===f.index;f.mesh.material.color.setHex(S.rebirthUsed||S.rebirth&&!armed?0x766b65:armed?0x8cead4:0xffad55);f.mesh.material.opacity=(S.rebirthUsed||S.rebirth&&!armed)?.18:armed?.85:.48+.18*Math.sin(clock*2)}for(const p of S.deathPurses||[]){p.mesh.visible=p.ch===CH;p.mesh.position.set(p.x/16,.2+Math.sin(clock*3)*.035,p.y/16)}}
+function updatePowerVisuals(){fireFxTick();if(!S)return;for(const f of W.fireMarkers||[]){const armed=S.rebirth&&S.rebirth.ch===CH&&S.rebirth.index===f.index;f.mesh.material.color.setHex(S.rebirthUsed||S.rebirth&&!armed?0x766b65:armed?0x8cead4:0xffad55);f.mesh.material.opacity=(S.rebirthUsed||S.rebirth&&!armed)?.18:armed?.85:.48+.18*Math.sin(clock*2);if(S.fxHeal!=null&&f.index===S.fxHealIdx&&clock-S.fxHeal<.25){f.mesh.material.color.setHex(0x9dffc0);f.mesh.material.opacity=.95;f.mesh.scale.setScalar(1.15+.12*Math.sin(clock*8))}else f.mesh.scale.setScalar(1)}for(const p of S.deathPurses||[]){p.mesh.visible=p.ch===CH;p.mesh.position.set(p.x/16,.2+Math.sin(clock*3)*.035,p.y/16)}}
 function recoverPurses(){for(let i=(S.deathPurses||[]).length-1;i>=0;i--){const p=S.deathPurses[i];if(p.ch!==CH)continue;const distance=Math.hypot(pl.x-p.x,pl.y-p.y);if(!p.ready){if(distance>24)p.ready=true;continue}if(distance>16)continue;S.coins+=p.amount;scene.remove(p.mesh);S.deathPurses.splice(i,1);play('coin',0);say((EN?'You recover the purse from where you died: ':'Odzyskujesz sakwę z miejsca śmierci: ')+p.amount+(EN?' coins.':' monet.'))}}
 function tryRebirth(){if(!S.rebirth||S.rebirthUsed)return false;clearSwordTransient();S.swordTrails=[];const f=S.rebirth;makeDeathPurse(pl.x,pl.y,S.coins);S.coins=0;S.rebirthUsed=true;S.deaths=1;let x=f.ch===CH?f.x:START.x,y=f.ch===CH?f.y:START.y;
   if(boxSolid(x,y,4,3)){x=START.x;y=START.y}Object.assign(pl,{x,y,hp:Math.max(1,Math.round(pl.max*.7)),dead:false,deadT:0,inv:3,roll:0,rollCd:0,atk:null,block:false,charging:false,atkHeld:false,queue:false,swingT:0,broken:0,hurtT:0,sta:pl.staMax,mana:pl.manaMax,manaDelay:0});S.endT=0;S.hurt=0;S.hitstop=0;S.snare=0;S.slowT=0;camTarget.set(x/16,0,y/16);resetInput();play('bless',0);say((EN?'The power fire brings you back to life. Character experience for this night: −50%. Your purse waits where you fell. Another death will end the night without its rewards.':'Ognisko przywraca cię do życia. Doświadczenie postaci za tę noc: −50%. Sakwa czeka tam, gdzie upadłeś. Kolejna śmierć zakończy noc bez jej nagród.'));return true}
@@ -2284,7 +2332,7 @@ const sk=k=>(S&&S.sk&&S.sk[k])||0;
 const brSum=br=>Object.keys(STY).filter(k=>STY[k].br===br).reduce((a,k)=>a+sk(k),0),brOn=br=>brSum(br)>=SET_N;
 const parryWin=()=>SL.parry,riMul=()=>{const l=sk('riposta');return l>=2?3:l>=1?2:SL.riposte},blockMulX=()=>SL.blockMul*(1-.1*sk('garda'));
 function onParry(){S.combatLock=4;if(sk('retaliation'))S.retaliate=2;S.parries++;S.actions.parry++;pl.riposte=1.6+.25*sk('riposta');const o=sk('odzysk');if(o)pl.sta=Math.min(pl.staMax,pl.sta+10*o);
-  const ready=!(pl.parryHealCd>0);if(ready&&(o>=3||brOn('def'))){heal(pl.max*((o>=3?.02:0)+(brOn('def')?.02:0)));pl.parryHealCd=2.5}
+  const ready=!(pl.parryHealCd>0);if(ready){heal(pl.max*(.01+(o>=3?.02:0)+(brOn('def')?.02:0)));pl.parryHealCd=2.5}
   if(brOn('def')){pl.inv=Math.max(pl.inv,.35);ftInfo((EN?'Defender\'s Wall':'Mur obrońcy'))}}
 function attackCost(kind){return (kind==='h'?SL.heavy.cost:SL.light.cost)*(S.dex||1)*(kind==='l'?1-.08*sk('ostrze'):1)}
 function startAttack(kind,combo=0,charged=false){if(pl.atk?.kind==='whirl')return;const P=kind==='h'?SL.heavy:SL.light,cost=attackCost(kind);if(pl.sta+1e-8<cost){S.stamFlash=.45;play('empty',.25);return}
@@ -3148,7 +3196,7 @@ function updPlayer(dt){
   if(ml>.1&&hold>0){if(!(pl.block||pl.charging)){pl.fx=mx/ml;pl.fy=my/ml}const ox=pl.x,oy=pl.y;moveBox(pl,mx*72*slow*hold*S.pk.spd*dt,my*72*slow*hold*S.pk.spd*dt,4,3);const distance=Math.hypot(pl.x-ox,pl.y-oy);pl.walk+=distance/72;pl.moving=distance>.001}else pl.moving=false;
   if(Math.abs(pl.fx)>Math.abs(pl.fy)){pl.dir=2;pl.s=pl.fx>0?1:-1}else{pl.dir=pl.fy>0?0:1}
   for(let si=0;si<SHRINES.length;si++){const sh=SHRINES[si],sd=Math.hypot(pl.x-sh.x,pl.y-sh.y);
-  if(sd<26&&pl.hp<pl.max*.6){heal(Math.min(pl.max*.04*dt,pl.max*.6-pl.hp));play('heal',.6);if(Math.random()<dt*14)S.parts.push({k:'i',x:pl.x+rnd(-5,5),y:pl.y,z:rnd(0,10),vx:0,vy:0,vz:rnd(12,24),c:'#7fd0ff',life:rnd(.6,1)})}}
+  if(sd<26&&pl.hp<pl.max*.6){const hh=heal(Math.min(pl.max*.04*dt,pl.max*.6-pl.hp));play('heal',.6);S.fxHeal=clock;S.fxHealIdx=si;pl.healAcc=(pl.healAcc||0)+hh;pl.healT=(pl.healT||0)+dt;if(pl.healT>=.9){pl.healT=0;if(pl.healAcc>=1)ftInfo('+'+Math.round(pl.healAcc)+' HP');pl.healAcc=0}if(Math.random()<dt*46)S.parts.push({k:'i',x:pl.x+rnd(-6,6),y:pl.y+rnd(-2,2),z:rnd(0,8),vx:0,vy:0,vz:rnd(16,34),c:Math.random()<.5?'#7dffb0':'#d8ffe8',life:rnd(.7,1.2)})}}
 }
 function updParts(dt){
   const ps=S.parts;
