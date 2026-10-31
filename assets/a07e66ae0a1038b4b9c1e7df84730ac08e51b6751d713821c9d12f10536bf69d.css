@@ -1152,5 +1152,6 @@ html[lang=en] #orient#orient#orient #prep .prepsth{width:calc(var(--h)*4.71);bac
 /* Drugie Ja: ikona umiejętności */
 :root{--nb-ui_drugieja:url(./099bea7a3a8847f17f118d2bc37e2f863c8b2e4be2829f205a3f7301b91f1ed4.webp)}
 #orient#orient#orient .ic-drugieja{background-image:var(--nb-ui_drugieja)!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
+@media (pointer:fine){#orient#orient#orient #title .title-under-actions .titleassist{flex-wrap:nowrap;max-width:none;width:100%;justify-content:space-between;gap:6px}#orient#orient#orient #title .title-under-actions .titleassist .tgl{width:auto;flex:0 1 auto}}
 @media (pointer:coarse){#orient#orient#orient #title .titleassist .tgl{min-height:80px!important;font-size:24px!important;padding:0 14px!important;width:auto!important;gap:14px!important}
 #orient#orient#orient #title .titleassist .tgl .sl{width:52px!important;height:52px!important}}

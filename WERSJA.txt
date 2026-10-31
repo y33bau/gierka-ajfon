@@ -304,3 +304,5 @@ cache228 (test): totem w wysokiej rozdzielczosci (305x720 px, gestosc 5x, ok. 28
 cache229 (test): ekran tytulowy: przelacznik "2 graczy (dwa pady)" (tylko na komputerze, zapamietywany), zastepuje adres ?mp=1 (ten dalej dziala); pod przelacznikiem podpowiedz, gdy brak drugiego pada. Nie sprawdzono: prawdziwe pady, wyglad na telefonie.
 
 cache230 (test): ekran tytulowy na komputerze: przelaczniki z powrotem w zwyklym rozmiarze (powiekszone zostaja tylko na ekranach dotykowych), zeby miescil sie przelacznik 2 graczy. Nie sprawdzono: telefon, pady.
+
+cache231 (test): ekran tytulowy na komputerze: trzy przelaczniki w jednym rzedzie (bez zawijania), krotsza podpowiedz "brak pad 2". Nie sprawdzono: telefon, pady.
