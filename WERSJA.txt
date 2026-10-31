@@ -316,3 +316,4 @@ cache234 (test): telefon w poziomie: logo i karty zmniejszone, zeby zmiescic rza
 cache235 (test): tryb 2 graczy: paski HUD zmniejszone do ok. 58% (mniej zaslaniaja ekran). Nie sprawdzono: pady.
 cache236 (test): fala po parowaniu oslabiona o 20% (takze Echo); okno parowania 0,20 s -> 0,15 s (pociski 0,26 -> 0,21 s). Nie sprawdzono: granie.
 cache237 (test): zar i ogniki przy ogniskach, pochodniach, piecach, zarzewiach i lawie; przy kapliczkach wskrzeszenia dodatkowo blekitne ogniki; wyrazniejsze leczenie przy ognisku (zielone czastki, blysk kapliczki, +HP co ok. 1 s); kazde parowanie leczy 1% maks. HP (max raz na 2,5 s). Nie sprawdzono w grze.
+cache238 (test): naprawa efektu zaru (pozycja odniesienia = cel kamery, wiekszy zasieg i punkty); nowa zasada: brak ognisk w pomieszczeniach - 6 ognisk w domach Brzeznicy (rozdz. I) przeniesione na zewnatrz. Nie sprawdzono w grze.

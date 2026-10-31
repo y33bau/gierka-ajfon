@@ -409,7 +409,7 @@ function genBrzeznica(){
   prop('marga_cart',52,25.92,[[51,25],[52,25]]);
   prop('crow_post',33.5,20.92,[[33,20]]);prop('covered_corpses',25.5,33.92,[]);
   // fires still burning in the ruins
-  for(const [x,y,big] of [[9,8],[42,8],[21,42],[8,19,1],[12,22,1],[54,45],[25,30],[46,24]])prop('debris_fire',x+.5,y+.92,[[x,y]],{fire:true,big:!!big,anim:'fire'});
+  for(const [x,y,big] of [[16,9],[47,9],[26,43],[20,24,1],[24,24,1],[48,45],[25,30],[46,24]])prop('debris_fire',x+.5,y+.92,[[x,y]],{fire:true,big:!!big,anim:'fire'});
   prop('covered_corpses',18.5,23.92,[]);prop('burnt_hay',6.5,23.92,[]);
   // the order's camp to the south-west: bonfire with a burnt stake and torn banners
   prop('order_bonfire',12.5,49.92,[[12,49]],{fire:true,big:true});prop('order_banner',9.5,47.92,[[9,47]]);prop('order_banner',15.5,47.92,[[15,47]]);
@@ -2081,7 +2081,7 @@ function fireFxTick(){
  const low=SETT&&SETT.quality==='low';
  if(!FXS){
   const mk=(n,size)=>{const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*3),3));geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(n*3),3));const pt=new THREE.Points(geo,new THREE.PointsMaterial({size,map:TOTDOT,vertexColors:true,sizeAttenuation:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));pt.frustumCulled=false;return pt};
-  const ne=low?90:200,nw=low?10:26,em=mk(ne,.26),wi=mk(nw,.5),g=new THREE.Group();g.add(em,wi);scene.add(g);
+  const ne=low?90:200,nw=low?10:26,em=mk(ne,.34),wi=mk(nw,.5),g=new THREE.Group();g.add(em,wi);scene.add(g);
   const P=n=>Array.from({length:n},()=>({a:0,l:0,y:-99,ex:0,ez:0,vy:0,ph:0,sw:0}));
   FXS={g,em,wi,pe:P(ne),pw:P(nw),W:null,fire:[],lava:[],shr:[],t:clock}}
  const F=FXS;F.g.visible=true;
@@ -2094,7 +2094,7 @@ function fireFxTick(){
   for(const b of W.braziers||[])F.fire.push({x:b[0]+.5,z:b[1]+.62,h:.8,r:.25});
   for(const l of W.lavas||[])F.lava.push([l[0]+.5,l[1]+.5])}
  const dt=Math.min(.1,Math.max(0,clock-F.t));F.t=clock;
- const cx=cam.position.x,cz=cam.position.z,near=(x,z)=>{const dx=x-cx,dz=z-cz;return dx*dx+dz*dz<676};
+ const cx=camTarget.x,cz=camTarget.z,near=(x,z)=>{const dx=x-cx,dz=z-cz;return dx*dx+dz*dz<900};
  const pick=()=>{const r=Math.random();
   if(r<.3&&F.lava.length){for(let t=0;t<6;t++){const c=F.lava[(Math.random()*F.lava.length)|0];if(near(c[0],c[1]))return{x:c[0]+rnd(-.5,.5),z:c[1]+rnd(-.5,.5),h:-.2,r:0,lava:1}}}
   if(r<.5&&F.shr.length){const e=F.shr[(Math.random()*F.shr.length)|0];if(near(e.x,e.z))return e}
