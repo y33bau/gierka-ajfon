@@ -300,3 +300,5 @@ cache226 (test): ognisko (kapliczka): zamiast ostrego pierscienia miekka cieplo-
 cache227 (test): Drzewo Szeptuchy zastapione totemem z Gemini (wariant 3: krwawy slup z czaszkami, 15 KB, nowy plik w assets/). Zar, ogniki i poswiata bez zmian; gdyby obrazek sie nie wczytal, pojawi sie prosty slup. Nazwa w grze nadal Drzewo Szeptuchy (do decyzji autora). Nie sprawdzono: telefon, pady.
 
 cache228 (test): totem w wysokiej rozdzielczosci (305x720 px, gestosc 5x, ok. 280 KB) zamiast malej wersji. Nie sprawdzono: telefon, pady.
+
+cache229 (test): ekran tytulowy: przelacznik "2 graczy (dwa pady)" (tylko na komputerze, zapamietywany), zastepuje adres ?mp=1 (ten dalej dziala); pod przelacznikiem podpowiedz, gdy brak drugiego pada. Nie sprawdzono: prawdziwe pady, wyglad na telefonie.
