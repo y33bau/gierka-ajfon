@@ -320,3 +320,4 @@ cache238 (test): naprawa efektu zaru (pozycja odniesienia = cel kamery, wiekszy 
 cache239 (test): dachy domow Brzeznicy znikaja po wejsciu; stodola: szersze wejscie wschodnie + przejscie polnoc-poludnie; kapliczki mocy z pula leczenia (120% maks. HP na noc, kociolek). Nie sprawdzono w grze.
 cache240 (test): leczenie przy kociolku bez gornej granicy 60% HP (do pelna, ogranicza je pula), tempo 4% -> 6% maks. HP na sekunde. Nie sprawdzono w grze.
 cache241 (test): kociolek (grafika od autora, gulasz) zamiast ognia na kaplicach mocy; zar, ogniki i zielone leczenie bez zmian. Nie sprawdzono w grze.
+cache242 (test): kociolek mniejszy (wysokosc 1,6 pola); nazwa Ognisko mocy -> Sycacy Kociolek (EN: Nourishing Cauldron) we wszystkich tekstach i w podreczniku; dachy z tekstury autora (rooftiles_base_color_0), niebieski zmieniony na braz, mech zostaje. Nie sprawdzono w grze.
