@@ -42,6 +42,10 @@ const SPRITE_GROUPS={
     "r2",
     "r3"
   ],
+  "cc0_water": [
+    "core",
+    "r4"
+  ],
   "cc0_ash": [
     "core"
   ],
@@ -289,7 +293,7 @@ function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15
 
 /* ============ WORLDS ============ */
 // Each chapter has its own tile map, props, NPCs, lights and meshes. useWorld(ch) swaps the active one.
-const SOLID=new Set([21,22,23,24,27,31,45,48,58,59,68,69,78,80]),WALLC=new Set([21,48,58,59,78,80]),VOID=new Set([23,24,25]);
+const SOLID=new Set([21,22,23,24,27,31,45,48,58,59,68,69,78,80,91]),WALLC=new Set([21,48,58,59,78,80]),VOID=new Set([23,24,25]);
 let CH=2,W=null,map,PROPS,START,SHRINES,region,walls,cliffs,pillars,lavas,braziers,waters,LSRC,propObjs;
 const WORLDS={},WORLD_SEEDS={};
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?21:map[y*MW+x];
@@ -385,7 +389,9 @@ function genBrzeznica(){
   for(let y=21;y<36;y++)for(let x=23;x<40;x++)if(Math.hypot((x-31)/7.8,(y-28)/6.6)<1)set(x,y,40);
   // graveyard to the north-east and a stagnant pond to the south-east
   fill(43,15,17,9,46);
-  for(let y=29;y<38;y++)for(let x=44;x<61;x++)if(Math.hypot((x-52.5)/6.6,(y-33.2)/2.9)<1)set(x,y,45);
+  for(let y=29;y<38;y++)for(let x=44;x<61;x++){const q=Math.hypot((x-52.5)/6.6,(y-33.2)/2.9);if(q<1)set(x,y,q<.66?45:90)}
+  // bajoro: sama płytka woda (runda 214)
+  for(let y=14;y<22;y++)for(let x=17;x<28;x++)if(Math.hypot((x-22.2)/3.6,(y-17.6)/2.3)<1)set(x,y,90);
   // burned houses [x, y, w, h, door side]; the big one in the west is the barn where the order burned the villagers
   const H=[[6,5,9,7,'s'],[18,5,8,6,'s'],[38,5,8,7,'s'],[50,5,9,7,'s'],[6,37,8,7,'n'],[18,40,7,6,'n'],[38,40,9,7,'n'],[50,42,9,7,'n'],[4,15,13,10,'e']];
   for(const [hx,hy,w,h,door] of H){
@@ -956,6 +962,21 @@ const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),V=new THREE.Vector3(),SC=n
 let ROOT=scene;
 function instanced(geo,mat,list,fn,cast=true,recv=true){const im=new THREE.InstancedMesh(geo,mat,Math.max(1,list.length));list.forEach((p,i)=>{fn(p);im.setMatrixAt(i,M4)});im.count=list.length;im.castShadow=cast;im.receiveShadow=recv;ROOT.add(im);return im}
 let LAVA_HD=null,LAVA_ALL=[];
+// Runda 214: woda HD (tekstura + połysk + jaśniejsze brzegi). Płytka (chodzi się po niej) jaśniejsza i bardziej zielonkawa, głęboka (blokuje) ciemna, granatowa.
+let WATER_ALL=[];
+function waterHD(li,cells,Y,RU,col,deep){if(!li||!cells||!cells.length)return null;
+ const lt=new THREE.Texture(li);lt.wrapS=lt.wrapT=THREE.RepeatWrapping;lt.magFilter=THREE.LinearFilter;lt.minFilter=THREE.LinearMipmapLinearFilter;lt.generateMipmaps=true;lt.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());lt.needsUpdate=true;
+ const L=new Set(cells.map(([x,y])=>x+','+y)),shore=(cx,cy)=>{let d=3;for(let oy=-3;oy<=2;oy++)for(let ox=-3;ox<=2;ox++){const x=Math.floor(cx)+ox,y=Math.floor(cy)+oy;if(L.has(x+','+y))continue;const dx=Math.max(x-cx,0,cx-x-1),dy=Math.max(y-cy,0,cy-y-1);d=Math.min(d,Math.hypot(dx,dy))}return d};
+ const pos=[],uv=[],cl=[],idx=[];for(const [x,y] of cells){const b=pos.length/3;for(const [vx,vy] of [[x,y],[x+1,y],[x,y+1],[x+1,y+1]]){pos.push(vx,Y,vy);uv.push(vx/RU,-vy/RU);const d=shore(vx,vy),v=deep?1.1-.4*Math.min(d,2.5)/2.5:1-.12*Math.min(d,1.5)/1.5;cl.push(v,v,v)}idx.push(b,b+2,b+1,b+1,b+2,b+3)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setAttribute('color',new THREE.Float32BufferAttribute(cl,3));g.setIndex(idx);g.computeVertexNormals();
+ const mat=liquidMat({map:lt,color:col,vertexColors:true,shininess:deep?36:26,specular:deep?0x1e2a38:0x161c1c},2),mesh=new THREE.Mesh(g,mat);mesh.castShadow=false;mesh.receiveShadow=true;ROOT.add(mesh);
+ WATER_ALL=WATER_ALL.filter(o=>!(o.ch===CH&&o.deep===deep&&o.Y===Y));const o={ch:CH,tex:lt,deep,Y,mesh};WATER_ALL.push(o);return o}
+// głębokie środki bagien w rozdz. IV: tylko tam, gdzie nie odetnie to żadnej części mapy
+function deepMarsh(w){const M=w.map,at=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?21:M[y*MW+x],cand=[];
+ for(let y=2;y<MH-2;y++)for(let x=2;x<MW-2;x++){if(at(x,y)!==65)continue;let ok=true;for(let dy=-2;dy<=2&&ok;dy++)for(let dx=-2;dx<=2;dx++)if(at(x+dx,y+dy)!==65){ok=false;break}if(ok)cand.push(y*MW+x)}
+ if(!cand.length)return;const big=()=>{const seen=new Uint8Array(MW*MH);let best=0,tot=0;for(let i=0;i<MW*MH;i++){if(seen[i]||SOLID.has(M[i]))continue;let n=0;const q=[i];seen[i]=1;while(q.length){const c=q.pop();n++;const x=c%MW,y=(c/MW)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=MW||ny>=MH)continue;const j=ny*MW+nx;if(!seen[j]&&!SOLID.has(M[j])){seen[j]=1;q.push(j)}}}tot+=n;best=Math.max(best,n)}return [best,tot]};
+ const [b0]=big();for(const i of cand)M[i]=91;const [b1]=big();if(b1<b0-cand.length)for(const i of cand)M[i]=65}
+
 // Runda 213: wspólna lawa HD (ch II lawa, ch III kałuże): tekstura płynie, a druga kopia jako mapa świecenia płynie w inną stronę,
 // więc pęknięcia rozjaśniają się i gasną nierówno; wokół brzegów miękka łuna (warstwa addytywna, bez prawdziwych świateł).
 function lavaHD(li,cells,Y,RU){if(!li||!cells.length)return null;LAVA_ALL=LAVA_ALL.filter(o=>o.ch!==CH);
@@ -997,6 +1018,9 @@ function liquidMat(options,kind=0){const m=phong(options);m.onBeforeCompile=sh=>
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec2 vLiquid;').replace('#include <project_vertex>','#include <project_vertex>\nvec4 lp=vec4(transformed,1.);\n#ifdef USE_INSTANCING\nlp=instanceMatrix*lp;\n#endif\nvLiquid=(modelMatrix*lp).xz;');
   sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec2 vLiquid;uniform float uFlow;uniform float uLiquid;').replace('#include <dithering_fragment>',`float drift=sin(vLiquid.x*4.8+vLiquid.y*2.1+uFlow*.65)+sin(vLiquid.y*7.1-vLiquid.x*1.3-uFlow*.9);
     float glint=pow(max(0.,sin(vLiquid.x*9.+vLiquid.y*5.+sin(vLiquid.y*2.+uFlow*.45))),12.);
+    if(uLiquid>1.5){float w1=sin(vLiquid.x*3.1+vLiquid.y*1.7+uFlow*.8),w2=sin(vLiquid.y*4.3-vLiquid.x*2.2-uFlow*.6);
+    float n=sin(vLiquid.x*11.3+w1*2.1)*sin(vLiquid.y*9.7-w2*1.9+uFlow*.7)*sin((vLiquid.x+vLiquid.y)*5.3+uFlow*.37);
+    gl_FragColor.rgb+=vec3(.08,.10,.13)*pow(max(0.,n),9.)*.9+vec3(.006,.009,.013)*(w1+w2);}else
     gl_FragColor.rgb+=uLiquid>.5?vec3(.065,.025,.008)*(drift*.25+.4):vec3(.035,.055,.07)*(glint*.55+drift*.12);
     #include <dithering_fragment>`)};m.customProgramCacheKey=()=> 'nightbrand-liquid-'+kind;return m}
 const groundFxGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
@@ -1191,7 +1215,7 @@ function buildBrzeznica(I){
   const fc=canvas(WW,WH),fg=fc.getContext('2d');
   const tile=(c,row,tx,ty)=>groundTile(fg,F,c,row,tx,ty);
   const ROW={40:0,41:1,42:2,43:3,44:4,46:6,47:7,48:3,21:2};
-  for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){let t=tileAt(tx,ty);if(t===31)t=W.under[ty*MW+tx]||42;if(t===45)continue;
+  for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){let t=tileAt(tx,ty);if(t===31)t=W.under[ty*MW+tx]||42;if(t===45||t===90)continue;
     tile((r()*8)|0,ROW[t]??2,tx,ty);if(t===21){fg.fillStyle='rgba(3,3,6,.6)';fg.fillRect(tx*16,ty*16,16,16)}}
   // Natural boundaries blend continuously in the atlas material.
   floorAO(fg,new Set([31]));
@@ -1213,7 +1237,8 @@ function buildBrzeznica(I){
   // stagnant pond (row 5 animated)
   waterFrames=[0,1,2,3].map(i=>tcut(F,i,5));
   const wGeo=new THREE.PlaneGeometry(1,1);wGeo.rotateX(-Math.PI/2);
-  instanced(wGeo,liquidMat({map:waterTex,color:0x9aa6bc,shininess:54,specular:0x35465a}),waters,([x,y])=>M4.makeTranslation(x+.5,-.08,y+.5),false,true);
+  if(waterHD(I.cc0_water,waters,-.08,4,0x52648a,true)){waterHD(I.cc0_water,W.shallow,-.05,4,0x86907c,false)}else
+  instanced(wGeo,liquidMat({map:waterTex,color:0x9aa6bc,shininess:54,specular:0x35465a}),waters.concat(W.shallow||[]),([x,y])=>M4.makeTranslation(x+.5,-.08,y+.5),false,true);
   const R={dead_tree:[0,0,32,64],impaled_head:[32,0,32,32],grave_cross:[64,0,32,32],tombstone:[96,0,32,32],well:[32,32,32,32],stocks:[64,32,32,32],shrine:[96,32,32,32],gallows:[0,64,64,32],
     debris_fire_0:[64,64,32,32],debris_fire_1:[96,64,32,32],debris_fire_2:[0,96,32,32],debris_fire_3:[32,96,32,32],wheel:[64,96,32,32],barrel:[96,96,32,32],marga_cart:[0,128,64,32],
     crow_post:[64,128,32,32],covered_corpses:[96,128,32,32],order_bonfire:[0,160,32,32],order_banner:[32,160,32,32],burnt_hay:[64,160,32,32],dead_horse:[96,160,32,32]};
@@ -1328,11 +1353,11 @@ function buildCzarnobor(I){planGround(4);
   const r=rng((W.seed^0x5a5a)>>>0),G=I.cz_ground,WL=I.cz_walls,T=I.cz_trees;
   const fc=canvas(WW,WH),fg=fc.getContext('2d');
   const ROW={60:0,61:1,62:2,63:3,64:4,65:5,66:6,67:7,21:0,68:3,69:7};
-  const WET=new Set([64,65]),D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  const WET=new Set([64,65,91]),D4=[[1,0],[-1,0],[0,1],[0,-1]];
   const gcode=(x,y)=>{let t=tileAt(x,y);if(t===31)t=W.under[y*MW+x]||60;return t};
-  W.fords=[];W.marsh=[];
+  W.fords=[];W.marsh=[];W.deepw=[];
   for(let ty=0;ty<MH;ty++)for(let tx=0;tx<MW;tx++){const t=gcode(tx,ty);let c=(r()*8)|0,row=ROW[t]??0;
-    if(WET.has(t)){const edge=D4.some(([dx,dy])=>!WET.has(gcode(tx+dx,ty+dy)));if(t===65&&edge)c=4+(c&3);else{c&=3;(t===64?W.fords:W.marsh).push([tx,ty])}}
+    if(WET.has(t)){const edge=D4.some(([dx,dy])=>!WET.has(gcode(tx+dx,ty+dy)));if(t===65&&edge)c=4+(c&3);else{c&=3;(t===64?W.fords:t===91?W.deepw:W.marsh).push([tx,ty])}}
     else if(D4.some(([dx,dy])=>gcode(tx+dx,ty+dy)===64)&&r()<.85){row=4;c=4+(c&3)}
     else if(t===67&&W.region(tx,ty)==='camp'){const q=r();if(q<.35){row=1}else c=q<.75?0:q<.92?2:1}
     groundTile(fg,G,c,row,tx,ty);
@@ -1342,7 +1367,8 @@ function buildCzarnobor(I){planGround(4);
   groundDetails(fg);
   const floor=new THREE.Mesh(floorGeo,groundMaterial(phong({map:surfaceTex(fc),alphaTest:.5,color:0x8e98a6})));floor.position.set(MW/2,0,MH/2);floor.receiveShadow=true;ROOT.add(floor);
   // animated ford and marsh water on top of the ground (K1 rows 4 and 5, frames 0-3)
-  W.water=[[4,W.fords,0x7c8a9c],[5,W.marsh,0x6c7c7a]].map(([row,list,col])=>{const c=canvas(64,64),tex=texFrom(c,true);const o={frames:[0,1,2,3].map(i=>tcut(G,i,row)),g:c.getContext('2d'),tex,f:-1};
+  if(I.cc0_water){W.water=[];waterHD(I.cc0_water,W.fords,.012,4,0x86907c,false);waterHD(I.cc0_water,W.marsh,.013,4,0x7c8a70,false);waterHD(I.cc0_water,W.deepw,.014,4,0x4a5c80,true)}
+  else W.water=[[4,W.fords,0x7c8a9c],[5,W.marsh,0x6c7c7a]].map(([row,list,col])=>{const c=canvas(64,64),tex=texFrom(c,true);const o={frames:[0,1,2,3].map(i=>tcut(G,i,row)),g:c.getContext('2d'),tex,f:-1};
     const wg=new THREE.PlaneGeometry(1,1);wg.rotateX(-Math.PI/2);instanced(wg,liquidMat({map:tex,color:col,shininess:38,specular:0x293d40}),list,([x,y])=>M4.makeTranslation(x+.5,.012,y+.5),false,true).frustumCulled=false;return o});
   // walls: rock rim of the valley topped with forest canopy, log palisade of the camp, the ruined watchtower
   const box=h=>{const g=new THREE.BoxGeometry(1,h,1);g.translate(0,h/2,0);return g};
@@ -1567,15 +1593,15 @@ function enrich(w,ch){
 function initWorld(ch){setGrid(ch);if((ch===4||ch===5)&&WORLD_SEEDS[ch]===undefined)WORLD_SEEDS[ch]=(Math.random()*2147483647)|0;
   const w=upscaleWorld(ch===1?genBrzeznica():ch===2?genDolne():ch===3?genStolica():ch===9?genDungeon((Math.random()*2147483647)|0):ch===5?genCytadela(WORLD_SEEDS[ch]):genCzarnobor(WORLD_SEEDS[ch]));if(ch<4)enrich(w,ch);
   if(ch===9)w.rooms=w.rooms.map(R=>Object.assign(SR(R),{k:R.k}));
-  Object.assign(w,{ch,group:new THREE.Group(),propObjs:[],npcMeshes:{},walls:[],cliffs:[],pillars:[],lavas:[],braziers:[],waters:[],rots:[],LSRC:[]});
-  for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;
+  Object.assign(w,{ch,group:new THREE.Group(),propObjs:[],npcMeshes:{},walls:[],cliffs:[],pillars:[],lavas:[],braziers:[],waters:[],rots:[],shallow:[],LSRC:[]});
+  for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;if(ch===4)deepMarsh(w);
   scene.add(w.group);
   const ta=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?21:w.map[y*MW+x];
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const t=ta(x,y);
     if(t===21){let near=false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const n=ta(x+dx,y+dy);if(n!==21&&!(x+dx<0||y+dy<0||x+dx>=MW||y+dy>=MH))near=true}if(near)w.walls.push([x,y,21])}
     if(t===48||t===58||t===59||t===68||t===69||t===78||t===80)w.walls.push([x,y,t]);if(t===54)w.rots.push([x,y]);
     if(!VOID.has(t)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>VOID.has(ta(x+dx,y+dy))))w.cliffs.push([x,y]);
-    if(t===22)w.pillars.push([x,y]);if(t===24)w.lavas.push([x,y]);if(t===27)w.braziers.push([x,y]);if(t===45)w.waters.push([x,y])}
+    if(t===22)w.pillars.push([x,y]);if(t===24)w.lavas.push([x,y]);if(t===27)w.braziers.push([x,y]);if(t===45)w.waters.push([x,y]);if(t===90)w.shallow.push([x,y])}
   const lsrc=(col,int,dist,x,y,z,kind,extra)=>{const o=Object.assign({col,base:int,dist,x,y,z,kind,ph:Math.random()*9},extra||{});w.LSRC.push(o);return o};
   if(ch===2){
     w.braziers.forEach(([x,y])=>lsrc(0xff6a1a,1.35,7,x+.5,1.6,y+.6,'fire'));
@@ -3246,6 +3272,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
   LPOOL.forEach((l,i)=>{const L=i<lightCap?nearL[i]:null;if(!L||L.d>26){l.intensity=0;return}l.color.setHex(L.col);l.distance=L.dist;l.position.set(L.x,L.y,L.z);l.intensity=L.k*Math.min(1,(26-L.d)/4)});
   if(S&&S.t>0&&Math.random()<dt*(SETT.quality==='low'?12:22)){const a=Math.random()*Math.PI*2,d=Math.random()*200;S.parts.push(CH===4?(Math.random()<.35?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(4,26),vx:rnd(-4,4),vy:rnd(-2,2),vz:rnd(-1.5,1.5),c:Math.random()<.5?'#c8e070':'#7fffd0',life:rnd(1.5,3.5)}:{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(1,8),vx:rnd(-5,-1),vy:rnd(-1,1),vz:rnd(-.5,.5),c:Math.random()<.6?'#4a5660':'#5e6a72',life:rnd(3,6)}):CH===3?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(30,70),vx:rnd(-3,3),vy:rnd(-1,1),vz:rnd(-5,-2),c:Math.random()<.6?'#c8a040':'#7a6030',life:rnd(4,7)}:CH===1?{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(30,70),vx:rnd(-6,2),vy:rnd(-1,1),vz:rnd(-9,-5),c:Math.random()<.6?'#6a6670':'#8a8490',life:rnd(3,6)}:{k:'m',x:pl.x+Math.cos(a)*d,y:pl.y+Math.sin(a)*d*.6,z:rnd(4,40),vx:rnd(-3,3),vy:rnd(-2,2),vz:rnd(-1,2),c:Math.random()<.7?'#5c5566':'#7d6a58',life:rnd(2,4)})}
   if(S&&CH===2&&Math.abs(pl.x/16-MP(37.5))<16&&Math.random()<dt*14)S.parts.push({k:'e',x:rnd(MP(35.2),MP(39.8))*16,y:(camTarget.z+rnd(-7,7))*16,z:-rnd(20,90),vx:rnd(-2,2),vy:0,vz:rnd(14,30),c:Math.random()<.6?'#ff6a1a':'#ffb347',life:rnd(2,4)});
+  for(const o of WATER_ALL)if(o.ch===CH)o.tex.offset.set(clock*(o.deep?.0022:.004),clock*(o.deep?.0015:.0028));
   for(const o of LAVA_ALL){if(o.ch!==CH)continue;o.tex.offset.set(clock*.008,clock*.005);o.etex.offset.set(.37-clock*.006,.61+clock*.009);const p=Math.sin(clock*1.7)*.5+Math.sin(clock*.63+1.3)*.35+Math.sin(clock*4.1)*.15;o.mat.emissiveIntensity=.78+.22*p;if(o.halo)o.halo.material.opacity=.45+.2*p}
   const lf=((clock*5)|0)%4;if(CH===2&&!LAVA_HD&&lf!==lavaFrame&&lavaFrames.length){lavaFrame=lf;lavaG.clearRect(0,0,64,64);lavaG.drawImage(lavaFrames[lf],0,0);lavaTex.needsUpdate=true}
   if(CH===3&&W.rotTex){const rf=((clock*2.5)|0)%4;if(rf!==W.rotF){W.rotF=rf;W.rotG.clearRect(0,0,64,64);W.rotG.drawImage(W.rotFrames[rf],0,0);W.rotTex.needsUpdate=true}}
