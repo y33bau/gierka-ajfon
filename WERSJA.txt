@@ -306,3 +306,5 @@ cache229 (test): ekran tytulowy: przelacznik "2 graczy (dwa pady)" (tylko na kom
 cache230 (test): ekran tytulowy na komputerze: przelaczniki z powrotem w zwyklym rozmiarze (powiekszone zostaja tylko na ekranach dotykowych), zeby miescil sie przelacznik 2 graczy. Nie sprawdzono: telefon, pady.
 
 cache231 (test): ekran tytulowy na komputerze: trzy przelaczniki w jednym rzedzie (bez zawijania), krotsza podpowiedz "brak pad 2". Nie sprawdzono: telefon, pady.
+
+cache232 (test): ekran tytulowy na komputerze: rzad przelacznikow ma trzy kolumny (2 graczy miesci sie w jednym rzedzie). Nie sprawdzono: telefon, pady.
