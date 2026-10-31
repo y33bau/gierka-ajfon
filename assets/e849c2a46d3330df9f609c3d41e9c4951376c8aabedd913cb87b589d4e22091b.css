@@ -943,8 +943,10 @@ body:has(#pause:not([hidden])) #miniF{visibility:hidden}
 /* Phone landscape title: larger logo, compact level card and mode switch (<=85% of wordmark). */
 @media(max-width:1000px) and (max-height:500px) and (orientation:landscape){
 #orient#orient#orient #title .title-left{left:1.5vw;top:calc(50% - 9px);width:52vw;gap:3px}
-#orient#orient#orient #title .logo{height:calc(100vh - 118px);max-height:none;margin:-8px 0 -20px}
-#orient#orient#orient #title .chcard,#orient#orient#orient #title .storycorner{width:calc((100vh - 118px) * 1.224)}
+#orient#orient#orient #title .logo{height:calc(100vh - 176px);max-height:none;margin:-8px 0 -20px}
+#orient#orient#orient #title .chcard,#orient#orient#orient #title .storycorner{width:calc((100vh - 176px) * 1.224)}
+#orient#orient#orient #title .title-left .titleassist{font-size:11px}
+#orient#orient#orient #title .title-left .titleassist .tgl{min-height:38px}
 #orient#orient#orient #title .chlab{font-size:16px;letter-spacing:.03em}
 #orient#orient#orient #title .chn{width:26px;height:26px;font-size:19px}
 #orient#orient#orient #title .xpbar.big{height:16px}
