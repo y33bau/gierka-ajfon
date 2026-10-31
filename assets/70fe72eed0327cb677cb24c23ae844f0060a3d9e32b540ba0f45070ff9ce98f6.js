@@ -2744,15 +2744,22 @@ function strzygaAI(e,dx,dy,d,dt){
   return false}
 const warningColor=()=>SETT.contrast?'#ffe270':'#ff5a4e';
 function telegraph(e){S.parts.push({k:'e',x:e.x,y:e.y,z:26,vx:0,vy:0,vz:4,c:warningColor(),life:.45});e.atkA=.2}
+// Runda 212: sparowany pocisk wroga wraca i zawsze trafia najbliższego wroga (naprowadzany, przelatuje nad ścianami).
+function nearestFoe(x,y){let b=null,bd=1e9;for(const e of S.enemies){if(e.dead||e.rise>0||e.trans>0||e.type==='jerzak')continue;const d=Math.hypot(e.x-x,e.y-y);if(d<bd){bd=d;b=e}}return b}
 function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
   if(f.bolt){const ar=!!(f.source&&(f.source.type==='xbow'||f.source.type==='scribe'));if(!f.vfe&&skFrames(ar?'bolt':'boss')){addVfx(skLoop(skFrames(ar?'bolt':'boss'),f.life,10),f.life,f.x,f.y,.5,ar?.95:.8,'bill',-screenAng(f.vx,f.vy));f.vfe=S.vfx[S.vfx.length-1]}if(f.vfe){f.vfe.x=f.x;f.vfe.y=f.y}}
   if(f.bolt)S.parts.push({k:'d',x:f.x,y:f.y,z:9,vx:0,vy:0,vz:0,c:'#d8cfb8',life:.12});
   else for(let k=0;k<(f.mesh?1:3);k++)S.parts.push({k:'e',x:f.x+rnd(-2,2),y:f.y+rnd(-1,1),z:9+rnd(-2,2),vx:rnd(-4,4),vy:0,vz:rnd(2,8),c:k?'#ff6a1a':'#ffb347',life:rnd(.15,.35)});
   let gone=f.life<=0||solidAt(f.x,f.y);
+  if(f.ref){let e=f.tgt;if(!e||e.dead||!S.enemies.includes(e))e=f.tgt=nearestFoe(f.x,f.y);gone=!e;
+    if(e){const dx=e.x-f.x,dy=e.y-f.y,d=Math.hypot(dx,dy)||1;f.vx=dx/d*f.spd;f.vy=dy/d*f.spd;f.life=Math.max(f.life,.2);if(f.vfe)f.vfe.rot=-screenAng(f.vx,f.vy);
+      if(d<(e.r||6)+5){const oM=ftMelee,oC=ftCrit;ftMelee=false;ftCrit=true;try{damageEnemy(e,f.dmg,dx/d,dy/d,.6,'parry')}finally{ftMelee=oM;ftCrit=oC}gone=true}}
+    if(!gone)continue}
   {const G=S.swordGuardian;if(!gone&&G&&!G.gone&&Math.hypot(G.x-f.x,G.y-f.y)<SL.guard.r+3){golemHurt(G,enemyDamage(f.bolt?6:7,SL.projDiv));gone=true}}
   if(!gone&&!pl.dead&&Math.hypot(pl.x-f.x,pl.y-f.y)<8){const sp=Math.hypot(f.vx,f.vy)||1,nx=f.vx/sp,ny=f.vy/sp;
-    if(pl.block&&pl.inv<=0&&-(pl.fx*nx+pl.fy*ny)>.3&&pl.blockT<parryWin()+.06){onParry();pl.parryT=.45;S.hitstop=.12;padRumble(.6,.3,140);guardFeedback('parry',nx,ny,f);shake(.15,.15);ftInfo((EN?'Deflected!':'Odbicie!'))}
-    else hurtPlayer(enemyDamage(f.bolt?6:7,SL.projDiv),nx,ny,f.source||(f.bolt?'night':'fire'));gone=true}
+    if(pl.block&&pl.inv<=0&&-(pl.fx*nx+pl.fy*ny)>.3&&pl.blockT<parryWin()+.06){onParry();pl.parryT=.45;S.hitstop=.12;padRumble(.6,.3,140);guardFeedback('parry',nx,ny,f);shake(.15,.15);ftInfo((EN?'Deflected!':'Odbicie!'));
+      const tg=nearestFoe(f.x,f.y);if(tg){f.ref=1;f.tgt=tg;f.spd=Math.max(240,sp*1.4);f.dmg=SL.light.dmg[0]*(1+.07*(S.lvl-1))*(S.str||1)*might()*riMul();f.life=5;f.x=pl.x;f.y=pl.y;if(f.vfe){f.vfe.t=f.vfe.dur;f.vfe=null}}}
+    else hurtPlayer(enemyDamage(f.bolt?6:7,SL.projDiv),nx,ny,f.source||(f.bolt?'night':'fire'));gone=!f.ref}
   if(gone&&f.bolt){if(f.vfe)f.vfe.t=f.vfe.dur;if(f.source&&(f.source.type==='xbow'||f.source.type==='scribe'))skAdd('boltHit',.3,f.x,f.y,.5,.7,'bill');for(let k=0;k<5;k++)S.parts.push({k:'d',x:f.x,y:f.y,z:8,vx:rnd(-30,30),vy:rnd(-15,15),vz:rnd(5,20),c:'#9d9584',life:.3});S.eproj.splice(i,1);continue}
   if(gone){for(let k=0;k<12;k++)S.parts.push({k:'e',x:f.x,y:f.y,z:8,vx:rnd(-40,40),vy:rnd(-25,25),vz:rnd(5,30),c:Math.random()<.5?'#ff6a1a':'#ffb347',life:rnd(.2,.5)});if(f.mesh)scene.remove(f.mesh);if(f.vfe)f.vfe.t=f.vfe.dur;S.eproj.splice(i,1)}}}
 // player sword strikes (light/heavy, cascade, whirl) are stopped only by walls/cliffs, not by prop tiles (31) whose collision box is bigger than the sprite (cache 200)
