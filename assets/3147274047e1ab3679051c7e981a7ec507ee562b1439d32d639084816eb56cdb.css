@@ -53,7 +53,7 @@ body{background:var(--void);color:var(--bone);font-family:var(--text);overflow:h
 #badge{position:absolute;right:.9em;bottom:.7em;font-size:.6em;letter-spacing:.16em;text-transform:uppercase;color:var(--bone-dim);text-shadow:0 1px 0 #000}
 #boss{position:absolute;left:25%;right:25%;bottom:8%;text-align:center;pointer-events:none}
 #boss .name{font-family:var(--display);font-size:1.1em;text-shadow:0 2px 0 #000}
-#boss .fb{margin-top:.1em}
+#boss .fb{margin-top:.1em}#boss .poise{margin:.3em auto 0;width:56%;height:.5em;max-width:none}#boss .poise i{width:0;transition:width .12s}#boss .poise.brk i{background:#fff4c8;box-shadow:0 0 .6em #ffd770}
 #msg{position:absolute;left:0;right:0;top:22%;padding:0 1em;text-align:center;font-size:1.55em;line-height:1.2;text-wrap:balance;text-shadow:0 2px 0 #000,0 0 14px #000;opacity:0;transition:opacity .7s;pointer-events:none}
 #msg.on{opacity:1}
 /* Pion: komunikaty fabularne i bossów jako przewijany pasek (jedna linijka, bez zatrzymywania gry) */

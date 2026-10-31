@@ -324,3 +324,4 @@ cache242 (test): kociolek mniejszy (wysokosc 1,6 pola); nazwa Ognisko mocy -> Sy
 cache243 (test): podpowiedz nad NPC/kociolkiem pokazuje Y przy ostatnim uzyciu pada, Enter przy klawiaturze, Enter / Y gdy pad podlaczony a nic jeszcze nie nacisnieto. Nie sprawdzono: pad.
 cache244 (test): dachy dwuspadowe (lamane) zamiast plaskich; kalenica ma maks. 0,9 pola wysokosci, zeby malo zaslaniac mape; ten sam brazowy wzor z mchem. Nie sprawdzono w grze.
 cache245 (test): okno parowania 0,18 s (bylo 0,15 s); pociski/strzaly maja to samo okno 0,18 s (bylo +0,06 s luzu, czyli 0,21 s). Nie sprawdzono w grze.
+cache246 (test): pasek postawy bossa (zloty, pod paskiem zycia; bije biale przy przelamaniu). Postawa bossa dalej nie regeneruje sie. Nie sprawdzono w grze.
