@@ -303,7 +303,8 @@ function upscaleWorld(w){const sm=w.map,su=w.under,map=new Uint8Array(MW*MH),und
     if(POINT_T.has(t)){if(X!==FT(sx)||Y!==FT(sy))v=floorNear(sx,sy)}
     else if(LINE_T[t]){const hz=LINE_T[t]&&(sat(sx-1,sy)===t||sat(sx+1,sy)===t),vt=sat(sx,sy-1)===t||sat(sx,sy+1)===t;
       if(!((X===FT(sx)||hz)&&(Y===FT(sy)||vt)))v=LINE_T[t]}
-    else if(t===31)under[i]=su[sy*GW+sx];
+    // prop collision: the art stands at the bottom of the stretched block, so only its lowest row stays solid (unless the prop continues above)
+    else if(t===31){if(sat(sx,sy-1)!==31&&Y<FT(sy+1)-1)v=su[sy*GW+sx]||floorNear(sx,sy);else under[i]=su[sy*GW+sx]}
     map[i]=v}
   for(const p of w.PROPS){p.x=MP(p.x);p.y=MP(p.y)}
   const px=v=>MP(v/TS)*TS;
