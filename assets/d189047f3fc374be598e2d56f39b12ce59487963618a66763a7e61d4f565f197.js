@@ -2041,11 +2041,11 @@ function breakPoise(e,amount){if(e.dead||e.inv>0||e.trans>0)return;e.poise=(e.po
 const STONE_N=6,DZIADY_AT=540;
 const XP_BASE=5,XP_GROW=1.05,xpNeed=l=>Math.ceil(XP_BASE*l*Math.pow(XP_GROW,l-1));
 let STORY=true;// fabuła jest zawsze włączona (przełącznik usunięty)
-let S=null,pl=null,pl2=null,mesh2=null;const keys={};let rollPress=false,talkPress=false;const tj={x:0,y:0};
+let S=null,pl=null,pl1=null,pl2=null,mesh2=null;const keys={};let rollPress=false,talkPress=false;const tj={x:0,y:0};
 /* ===== tryb 2 graczy (etap 1): gracz 2 = drugi pad, kamera na graczu 1 ===== */
 const PAD2={cur:[],prev:[],x:0,y:0,ax:0,ay:0,aimT:-99,atk:false,blk:false,roll:false,heavy:false,g:null};
 function mpWanted(){return /[?&]mp=1/.test(location.search)&&!!PAD2.g}
-function spawnP2(){pl2=Object.assign({},pl,{x:pl.x+14,y:pl.y+6,visualGuard:null,atk:null});if(!mesh2){mesh2=new THREE.Mesh(geo32,A.hero.idle_down[0].n);scene.add(mesh2)}mesh2.visible=true}
+function spawnP2(){pl2=Object.assign({},pl,{x:pl.x+14,y:pl.y+6,visualGuard:null,atk:null});pl2.revT=0;pl.revT=0;if(!mesh2){mesh2=new THREE.Mesh(geo32,A.hero.idle_down[0].n);scene.add(mesh2)}mesh2.visible=true}
 const P2TEX=new WeakMap();
 function recolorTex(t){if(P2TEX.has(t))return P2TEX.get(t);let out=t;try{const im=t.image,w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),a=d.data;for(let i=0;i<a.length;i+=4){const r=a[i],g=a[i+1],b=a[i+2];if(a[i+3]>8&&r>60&&r>b*1.5&&r>g*1.5){a[i]=b;a[i+2]=r;a[i+1]=Math.min(255,g*1.15)}}x.putImageData(d,0,0);out=t.clone();out.image=c;out.needsUpdate=true}catch(e){}P2TEX.set(t,out);return out}
 function asP2(fn){if(!pl2)return;const sPl=pl,sx=PAD.x,sy=PAD.y,sa=PAD.atk,sb=PAD.blk,sax=PAD.ax,say=PAD.ay,sat=PAD.aimT,sKeys={...keys},sTjx=tj.x,sTjy=tj.y,sRoll=rollPress,sHeavy=heavyPress,sTalk=talkPress,sML=mouseL,sMR=mouseR,sTA=tAtk,sTB=tBlock,sMT=mouseT,sBuf=S.bufRoll;
@@ -2062,13 +2062,33 @@ function pad2Tick(g2){if(!g2){PAD2.g=null;PAD2.cur=[];PAD2.prev=[];PAD2.x=PAD2.y
 function drawP2(){if(!pl2||!mesh2)return;const p1=pl;pl=pl2;try{const hf=heroFrame();setFrame(mesh2,hf,'p2');
   const hs=pl.roll>0||pl.dead?pl.s:A.heroD&&A.heroD.v2&&!pl.atk&&(pl.parryT>0||pl.broken>0||(pl.hurtT>0&&!pl.block))?(pl.fx>=0?1:-1):pl.swingT>0?(pl.swingDir===2?pl.swingS:1):(pl.charging||pl.block)&&Math.abs(pl.fx)>Math.abs(pl.fy)?(pl.fx>0?1:-1):(pl.dir===2?pl.s:1);
   mesh2.position.set(pl.x/16,0,pl.y/16);mesh2.scale.set(hs,SQ,1);mesh2.visible=!(SETT.flash&&pl.inv>0&&pl.roll<=0&&!pl.dead&&Math.floor(clock*24)%2)}finally{pl=p1}}
+function allDead(){return pl1.dead&&(!pl2||pl2.dead)}
+function pickTarget(e){if(!pl2)return pl1;const a=pl1.dead,b=pl2.dead;if(a&&b)return pl1;if(a)return pl2;if(b)return pl1;return Math.hypot(e.x-pl2.x,e.y-pl2.y)<Math.hypot(e.x-pl1.x,e.y-pl1.y)?pl2:pl1}
+function mpReviveTick(dt){if(!pl2)return;for(const [d,o] of [[pl1,pl2],[pl2,pl1]]){if(!d.dead)continue;if(o.dead){d.revT=0;continue}
+    let near=Math.hypot(d.x-o.x,d.y-o.y)<28;if(!near)for(const sh of SHRINES)if(Math.hypot(d.x-sh.x,d.y-sh.y)<26){near=true;break}
+    d.revT=near?(d.revT||0)+dt:Math.max(0,(d.revT||0)-dt*2);
+    if(d.revT>=3){d.dead=false;d.hp=d.max*.5;d.inv=2;d.deadT=0;d.revT=0;d.atk=null;d.roll=0;d.block=false;d.broken=0;d.sta=d.staMax;play('bless',0);for(let k=0;k<14;k++)S.parts.push({k:'e',x:d.x+rnd(-6,6),y:d.y,z:rnd(2,14),vx:rnd(-8,8),vy:0,vz:rnd(12,30),c:'#7fd0ff',life:rnd(.5,1)})}}}
+let mpEls=null;const MPV=new THREE.Vector3();
+function mpHudTick(){const show=!!(S&&pl2&&S.phase==='play'&&!S.paused&&!S.choosing&&!S.shop&&!S.dialog&&!S.intro&&!S.notice);
+  if(!mpEls){if(!show)return;const left=document.querySelector('#hud .left');if(!left)return;
+    const panel=document.createElement('div');panel.style.cssText='margin-top:6px;pointer-events:none';
+    panel.innerHTML='<span style="font-size:11px;color:#8fb4ff;text-shadow:0 1px 2px #000">'+(EN?'Player 2':'Gracz 2')+'</span><div style="width:150px;height:10px;background:#1a1315;border:1px solid #4a2f31"><i style="display:block;height:100%;width:100%;background:#4f7fd8"></i></div><div style="width:110px;height:5px;background:#1a1315;margin-top:2px"><i style="display:block;height:100%;width:100%;background:#d8c15a"></i></div>';
+    left.appendChild(panel);const mkBar=col=>{const b=document.createElement('div');b.style.cssText='position:fixed;z-index:50;width:38px;height:5px;background:rgba(0,0,0,.45);pointer-events:none;transform:translate(-50%,-100%);opacity:.7;display:none';b.innerHTML='<i style="display:block;height:100%;width:100%;background:'+col+'"></i>';document.body.appendChild(b);return b};
+    mpEls={panel,hp:panel.children[1].firstChild,st:panel.children[2].firstChild,b1:mkBar('#d84a4a'),b2:mkBar('#4f8fd8')}}
+  mpEls.panel.style.display=pl2&&S&&S.phase==='play'?'block':'none';
+  if(!show){mpEls.b1.style.display=mpEls.b2.style.display='none';return}
+  mpEls.hp.style.width=Math.max(0,pl2.hp)/pl2.max*100+'%';mpEls.st.style.width=Math.max(0,Math.min(1,pl2.sta/pl2.staMax))*100+'%';
+  const r=$('screen').getBoundingClientRect();
+  for(const [p,el] of [[pl1,mpEls.b1],[pl2,mpEls.b2]]){MPV.set(p.x/16,2.1,p.y/16).project(cam);const inView=MPV.z<1&&Math.abs(MPV.x)<1.05&&Math.abs(MPV.y)<1.05;
+    el.style.display=inView?'block':'none';if(!inView)continue;el.style.left=(r.left+(MPV.x*.5+.5)*r.width)+'px';el.style.top=(r.top+(-MPV.y*.5+.5)*r.height)+'px';
+    const f=p.dead?Math.min(1,(p.revT||0)/3):Math.max(0,p.hp)/p.max;el.firstChild.style.width=f*100+'%';el.firstChild.style.background=p.dead?'#e8c85a':(p===pl1?'#d84a4a':'#4f8fd8')}}
 function clearScene(){if(!S)return;for(const f of S.vfx)if(f.ownMat)for(const a of f.anim)a.n.dispose();clearSwordTransient();if(swordGlow)swordGlow.visible=false;const all=[...S.enemies.map(e=>e.mesh),...S.picks.flatMap(p=>[p.mesh,p.glow]),...S.vfx.map(f=>f.mesh),...S.corpses.map(c=>c.mesh),...S.golems.map(g=>g.mesh),...S.zones.map(z=>z.mesh),...(S.eproj||[]).map(f=>f.mesh),...(S.deathPurses||[]).map(p=>p.mesh)];for(const m of all)if(m)scene.remove(m);for(const c of S.corpses)if(c.own)c.mesh.material.dispose()}
 function newGame(){
   clearScene();dg.clearRect(0,0,WW,WH);decalDirty=true;resetFog();MINI.t=0;
   S={t:0,kills:0,coins:0,lvl:1,xp:0,need:xpNeed(1),pendLv:0,choosing:false,phase:'play',enemies:[],parts:[],picks:[],vfx:[],corpses:[],quakes:[],golems:[],zones:[],delayed:[],
     waves:[],sk:{sword:1},cd:{sword:.6},spawnT:1,hurt:0,shakeT:0,shakeM:0,endT:0,stage:'p1',merchant:null,collector:null,bought:{},whet:0,magnet:0,ev:new Set(),shr:SHRINES.map(()=>60),eproj:[],stones:[0,0,0,0,0],boom:new Set(),trapCd:new Map(),dialog:null,dlg:0,npc:Object.fromEntries(W.npcs.map(n=>[n.id,{state:'alive',t:0}])),flash:0,nextBolt:9};
   pl={x:START.x,y:START.y,fx:1,fy:0,dir:2,s:1,hp:100,max:100,inv:0,roll:0,rollT:0,rvx:0,rvy:0,walk:0,moving:false,dead:false,deadT:0,rollCd:0,swingT:0,swingDir:2,swingS:1,hurtT:0};
-  S.activeSlots=[null,null,null,null];S.activeWind=null;S.combatLock=0;S.cascade=null;S.cascadeCd=0;S.swordShots=[];S.mainEnchant=null;S.elementMain=null;S.elementSupport=null;S.shotCd=0;S.manaHitCd=0;S.manaFlash=0;S.enemyShotCd=0;S.swordGuardian=null;S.shotWind=null;S.swordTrails=[];S.sk={};S.cd={};S.str=1;S.dex=1;S.int=1;Object.assign(pl,{mana:SL.mana.max,manaMax:SL.mana.max,manaDelay:0,sta:100,staMax:100,staDelay:0,atk:null,block:false,blockT:0,broken:0,riposte:0,atkHeld:false,charge:0,charging:false,comboT:0,nextCombo:0,queue:false});pl2=null;if(mesh2)mesh2.visible=false;if(mpWanted())spawnP2()
+  S.activeSlots=[null,null,null,null];S.activeWind=null;S.combatLock=0;S.cascade=null;S.cascadeCd=0;S.swordShots=[];S.mainEnchant=null;S.elementMain=null;S.elementSupport=null;S.shotCd=0;S.manaHitCd=0;S.manaFlash=0;S.enemyShotCd=0;S.swordGuardian=null;S.shotWind=null;S.swordTrails=[];S.sk={};S.cd={};S.str=1;S.dex=1;S.int=1;Object.assign(pl,{mana:SL.mana.max,manaMax:SL.mana.max,manaDelay:0,sta:100,staMax:100,staDelay:0,atk:null,block:false,blockT:0,broken:0,riposte:0,atkHeld:false,charge:0,charging:false,comboT:0,nextCombo:0,queue:false});pl1=pl;pl2=null;if(mesh2)mesh2.visible=false;if(mpWanted())spawnP2()
   S.deathCause=null;S.pk=PK0();S.hitsT=0;S.parries=0;S.cEarn=0;S.coinFrac=0;S.dealt=0;S.chal=null;S.perkIds=[];S.actions={attack:0,dodge:0,block:0,parry:0,collect:0};S.firstNight=CH===1&&!tutorialDone();S.noticeQueue=[];S.rebirth=null;S.rebirthUsed=false;S.deaths=0;S.deathPurses=[];S.finalDeathLoss=false;
   heroMesh.visible=true;chipsDirty=true;
 }
@@ -2644,7 +2664,7 @@ function hurtPlayer(dmg,nx,ny,source='night'){if(S.notice||pl.inv>0||pl.dead)ret
     if(pl.sta>=0){pl.inv=.18;moveBox(pl,nx*6,ny*4,4,3);return}
     pl.sta=0;pl.broken=SL.guardBreak;pl.block=false;dmg*=.5;play('empty',0);ftInfo((EN?'Guard broken':'Garda przełamana'))}
   S.combatLock=4;S.hitsT++;pl.hp-=dmg;padRumble(.8,.5,200);pl.inv=.45;pl.hurtT=.22;S.hurt=.3;shake(.25,.18);blood(pl.x,pl.y,10,nx,ny);play('hurt',.1);
-  if(pl.hp<=0){if(tryRebirth())return true;S.deathCause=deathCauseName(source);loseSecondLife();clearSwordTransient();S.swordTrails=[];pl.hp=0;pl.dead=true;pl.deadT=0;blood(pl.x,pl.y,70,nx,ny,3);play('kill',0);S.endT=2.6;pool(pl.x,pl.y,20,8)}return true}
+  if(pl.hp<=0){{const o=pl===pl2?pl1:pl2;if(o&&!o.dead){pl.hp=0;pl.dead=true;pl.deadT=0;pl.revT=0;blood(pl.x,pl.y,40,nx,ny,3);play('kill',0);return true}}if(tryRebirth())return true;S.deathCause=deathCauseName(source);loseSecondLife();clearSwordTransient();S.swordTrails=[];pl.hp=0;pl.dead=true;pl.deadT=0;blood(pl.x,pl.y,70,nx,ny,3);play('kill',0);S.endT=2.6;pool(pl.x,pl.y,20,8)}return true}
 function updEnemy(e,dt){
   keepEnemyDistance(e);const ox=e.x,oy=e.y,dx=pl.x-e.x,dy=pl.y-e.y,d=Math.hypot(dx,dy);
   if(d>.001){e.contactNX=dx/d;e.contactNY=dy/d}
@@ -2829,7 +2849,8 @@ const warningColor=()=>SETT.contrast?'#ffe270':'#ff5a4e';
 function telegraph(e){S.parts.push({k:'e',x:e.x,y:e.y,z:26,vx:0,vy:0,vz:4,c:warningColor(),life:.45});e.atkA=.2}
 // Runda 212: sparowany pocisk wroga wraca i zawsze trafia najbliższego wroga (naprowadzany, przelatuje nad ścianami).
 function nearestFoe(x,y){let b=null,bd=1e9;for(const e of S.enemies){if(e.dead||e.rise>0||e.trans>0||e.type==='jerzak')continue;const d=Math.hypot(e.x-x,e.y-y);if(d<bd){bd=d;b=e}}return b}
-function updEproj(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
+function updEproj(dt){const _pl=pl;try{updEprojX(dt)}finally{pl=_pl}}
+function updEprojX(dt){S.enemyShotCd=Math.max(0,(S.enemyShotCd||0)-dt);for(let i=S.eproj.length-1;i>=0;i--){const f=S.eproj[i];if(pl2)pl=pickTarget(f);f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
   if(f.bolt){const ar=!!(f.source&&(f.source.type==='xbow'||f.source.type==='scribe'));if(!f.vfe&&skFrames(ar?'bolt':'boss')){addVfx(skLoop(skFrames(ar?'bolt':'boss'),f.life,10),f.life,f.x,f.y,.5,ar?.95:.8,'bill',-screenAng(f.vx,f.vy));f.vfe=S.vfx[S.vfx.length-1]}if(f.vfe){f.vfe.x=f.x;f.vfe.y=f.y}}
   if(f.bolt)S.parts.push({k:'d',x:f.x,y:f.y,z:9,vx:0,vy:0,vz:0,c:'#d8cfb8',life:.12});
   else for(let k=0;k<(f.mesh?1:3);k++)S.parts.push({k:'e',x:f.x+rnd(-2,2),y:f.y+rnd(-1,1),z:9+rnd(-2,2),vx:rnd(-4,4),vy:0,vz:rnd(2,8),c:k?'#ff6a1a':'#ffb347',life:rnd(.15,.35)});
@@ -3114,16 +3135,16 @@ function update(dt){
   if(S&&S.phase==='play')pumpNotice();if(!S||S.phase!=='play'||S.notice||S.choosing||S.shop||S.paused)return;
   if(S.hitstop>0){S.hitstop-=dt;if(rollPress)S.bufRoll=1;return}
   if(S.dialog){if(talkPress||rollPress)advanceDialog();return}
-  if(S.stage!=='break'&&S.stage!=='collector'&&!S.dg&&!pl.dead){S.t+=dt;if(!pl.dead){S.surv=(S.surv||0)+dt;if(S.surv>=SL.coinSurvive){S.surv-=SL.coinSurvive;S.coins++;play('coin',.02)}}}
+  if(S.stage!=='break'&&S.stage!=='collector'&&!S.dg&&!allDead()){S.t+=dt;if(!allDead()){S.surv=(S.surv||0)+dt;if(S.surv>=SL.coinSurvive){S.surv-=SL.coinSurvive;S.coins++;play('coin',.02)}}}
   stageTick(dt);if(S.notice)return;if(S.dg)dungeonTick(dt);if(S.notice)return;
   if(selectedNpcAction){const q=selectedNpcAction,n=q.npc;if(q.state!==S||pl.dead||!W.npcs.includes(n)||!['alive','offered'].includes(S.npc[n.id]?.state))selectedNpcAction=null;else if(Math.hypot(pl.x-n.x,pl.y-n.y)<30){selectedNpcAction=null;openDialog(n);return}}
   const nm=nearMerchant();if(talkPress&&nm){openShop();return}
   const nn=nearNpc();if(talkPress&&nn){openDialog(nn);return}
   const nf=!nn&&!nm?nearPowerFire():null;if(talkPress&&nf){activatePowerFire(nf);return}const nx=!nn&&!nm&&!nf?nearExit():null;if(talkPress&&nx){useExit(nx);return}
   updPlayer(dt);recoverPurses();if(S.notice)return;events();if(S.notice)return;spawnTick(dt);miniTick();if(S.notice)return;chTick();
-  slashUpdate(dt);if(pl2)asP2(()=>{updPlayer(dt);slashUpdate(dt,true)});for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
+  slashUpdate(dt);if(pl2){asP2(()=>{updPlayer(dt);slashUpdate(dt,true)});mpReviveTick(dt)}for(const d of S.delayed)d.t-=dt;const ready=S.delayed.filter(d=>d.t<=0);S.delayed=S.delayed.filter(d=>d.t>0);ready.forEach(d=>d.fn());
   updZones(dt);
-  buildEnemyGrid();for(const e of S.enemies)if(!e.dead){if(pl2&&!pl2.dead&&!pl.dead&&Math.hypot(e.x-pl2.x,e.y-pl2.y)<Math.hypot(e.x-pl.x,e.y-pl.y)){const p1=pl;pl=pl2;try{updEnemy(e,dt)}finally{pl2=pl;pl=p1}}else updEnemy(e,dt)}
+  buildEnemyGrid();for(const e of S.enemies)if(!e.dead){const tg=pl2?pickTarget(e):pl;if(tg!==pl){const p1=pl;pl=tg;try{updEnemy(e,dt)}finally{pl=p1}}else updEnemy(e,dt)}
   S.enemies=S.enemies.filter(e=>!e.dead);
   musTick(dt);
   updEproj(dt);updPicks(dt);
@@ -3149,7 +3170,7 @@ function update(dt){
     if(S.trial.k>=20){S.trial=null;st.state='talked';S.fury=120;play('bless',0);shake(.1,.4);say((EN?'Mila raises her bow in salute: "You fight like one of us." +20% damage for 2 minutes.':'Mila unosi łuk w salucie: „Walczysz jak jedna z nas”. +20% obrażeń na 2 minuty.'))}
     else if(S.trial.t<=0){S.trial=null;st.state='alive';st.retry=true;say((EN?'Mila shakes her head: "Too slow. Come back when you are ready."':'Mila kręci głową: „Za wolno. Wróć, gdy będziesz gotów”.'))}}
   S.stamFlash=Math.max(0,(S.stamFlash||0)-dt);S.hurt=Math.max(0,S.hurt-dt);S.shakeT=Math.max(0,S.shakeT-dt);if(S.shakeT<=0)S.shakeM=0;
-  if(pl.dead){S.endT-=dt;if(S.endT<=0)endGame(false)}
+  if(allDead()){S.endT-=dt;if(S.endT<=0)endGame(false)}
   else if(S.won&&!S.opening){S.opening=3.4;for(const e of S.enemies){scene.remove(e.mesh);for(let i=0;i<8;i++)S.parts.push({k:'d',x:e.x,y:e.y,z:rnd(0,14),vx:rnd(-7,7),vy:0,vz:rnd(12,30),c:P.bone2,life:2})}S.enemies=[];if(CH===1){say((EN?'Dawn breaks. The dead crumble to ash.':'Świta. Martwi rozsypują się w popiół.'))}else if(CH===3){say((EN?'The beast falls silent. A pale, golden dawn rises above the domes.':'Bestia milknie. Nad kopułami wstaje blady, złoty świt.'));play('rumble',0)}else if(CH===4){say((EN?'Dawn spreads across the valley. The mist settles, the barrows fall silent.':'Świt rozlewa się po dolinie. Mgła opada, kurhany milkną.'));play('rumble',0)}else{say((EN?'The forge gates groan open.':'Wrota kuźni rozwierają się z jękiem.'));play('rumble',0);shake(.2,1.5)}}
   else if(S.opening){S.opening-=dt;if(S.opening<=0)endGame(true)}
 }
@@ -3298,7 +3319,7 @@ let threatPool=null;
 function syncThreatRings(){if(!threatPool){const geo=new THREE.RingGeometry(.96,1,48).rotateX(-Math.PI/2);threatPool=Array.from({length:8},()=>{const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xffd267,transparent:true,opacity:.65,depthWrite:false,fog:false,side:THREE.DoubleSide}));m.renderOrder=3;scene.add(m);return m})}for(const m of threatPool)m.visible=false;if(!S||S.phase!=='play')return;let i=0;for(const e of S.enemies){if(i>=threatPool.length||e.dead||e.rise>0)continue;let radius=0,x=e.x,y=e.y;if(e.type==='collector')radius=e.hamT>0?56:56;else if(e.atkT>0)radius=54;else if(e.mode==='root'){radius=32;x=e.tx;y=e.ty}else if(e.mode==='up'){radius=e.type==='beast'?70:62;x=e.tx;y=e.ty}if(!radius)continue;const m=threatPool[i++];m.visible=true;m.position.set(x/16,.045,y/16);m.scale.setScalar(radius/16);m.material.color.set(SETT.contrast?'#ffe270':e.type==='collector'?'#e0b84a':'#ff6655');m.material.opacity=e.type==='collector'&&!(e.hamT>0)?.3:.7}}
 function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
   let tx,tz;
-  if(S){tx=pl.x/16;tz=pl.y/16}else{idleA+=dt*.08;const I=W.idle;tx=I[0]+Math.sin(idleA)*I[2];tz=I[1]+Math.cos(idleA*.7)*I[3]}
+  if(S){const cp=pl.dead&&pl2&&!pl2.dead?pl2:pl;tx=cp.x/16;tz=cp.y/16}else{idleA+=dt*.08;const I=W.idle;tx=I[0]+Math.sin(idleA)*I[2];tz=I[1]+Math.cos(idleA*.7)*I[3]}
   camTarget.x+=(tx-camTarget.x)*Math.min(1,dt*8);camTarget.z+=(tz-camTarget.z)*Math.min(1,dt*8);if(!S||S.t<.1){camTarget.x=tx;camTarget.z=tz}
   let sx=0,sz=0;if(SETT.shake&&S&&S.shakeT>0){const pxw=2*DIST*Math.tan(12*Math.PI/180)/RT_H;S.shkT=(S.shkT||0)-dt;if(S.shkT<=0||!S.shk){S.shkT=.04;S.shk=[Math.round(rnd(-1,1)*S.shakeM/pxw)*pxw,Math.round(rnd(-1,1)*S.shakeM/pxw)*pxw/Math.sin(PITCH)]}sx=S.shk[0];sz=S.shk[1]}
   cam.position.set(camTarget.x+sx,Math.sin(PITCH)*DIST,camTarget.z+Math.cos(PITCH)*DIST+sz);cam.lookAt(camTarget.x+sx,.8,camTarget.z+sz);syncSwordGlow();syncCombatEffects(dt);syncWhirlVisual(dt);
@@ -3347,7 +3368,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     heroMesh.visible=!(SETT.flash&&pl.inv>0&&pl.roll<=0&&!pl.dead&&Math.floor(clock*24)%2);
     {const hf=heroFrame(),ek=encLevel()[0];S.heroHF=hf;setFrame(heroMesh,hf);const hv=ek&&hf?heroBladeMat(hf,ek):null;if(hv&&heroMesh.material===hf.n){hv.emissiveIntensity=.8+.35*Math.sin(clock*6);heroMesh.material=hv}}
     const hs=pl.roll>0||pl.dead?pl.s:A.heroD&&A.heroD.v2&&!pl.atk&&(pl.parryT>0||pl.broken>0||(pl.hurtT>0&&!pl.block))?(pl.fx>=0?1:-1):pl.swingT>0?(pl.swingDir===2?pl.swingS:1):(pl.charging||pl.block)&&Math.abs(pl.fx)>Math.abs(pl.fy)?(pl.fx>0?1:-1):(pl.dir===2?pl.s:1);
-    const guardRecoil=!pl.dead?recoilAmount(pl.visualGuard):0;heroMesh.position.set((pl.x+(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.7)/16,0,(pl.y+(pl.visualGuard?pl.visualGuard.dy:0)*guardRecoil*.7)/16);heroMesh.rotation.z=-(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.018;heroMesh.scale.set(hs,SQ,1);twinDraw(hs);drawP2();
+    const guardRecoil=!pl.dead?recoilAmount(pl.visualGuard):0;heroMesh.position.set((pl.x+(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.7)/16,0,(pl.y+(pl.visualGuard?pl.visualGuard.dy:0)*guardRecoil*.7)/16);heroMesh.rotation.z=-(pl.visualGuard?pl.visualGuard.dx:0)*guardRecoil*.018;heroMesh.scale.set(hs,SQ,1);twinDraw(hs);drawP2();mpHudTick();
     S.qBreak=Math.max(0,(S.qBreak||0)-dt);S.qPop=Math.max(0,(S.qPop||0)-dt);
     // charges orbit the hero as sparks; runes of time and reach leave their own orbiting motes
     const orbit=(n,r,sp,col,z)=>{if(dt<=0)return;for(let i=0;i<n;i++){const a=clock*sp+i*Math.PI*2/n;S.parts.push({k:'e',x:pl.x+Math.cos(a)*r,y:pl.y+Math.sin(a)*r*.6,z,vx:0,vy:0,vz:0,c:col,life:.05})}};
@@ -3393,7 +3414,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
     let n=0;for(const p of S.parts){if(n>=MAXP)break;pPos[n*3]=p.x/16;pPos[n*3+1]=p.z/16+.02;pPos[n*3+2]=p.y/16;const c=col(p.c);let a=p.life!==undefined?Math.max(0,Math.min(1,p.life)):1;pCol[n*3]=c.r*a;pCol[n*3+1]=c.g*a;pCol[n*3+2]=c.b*a;n++}
     pGeo.setDrawRange(0,n);pGeo.attributes.position.needsUpdate=true;pGeo.attributes.color.needsUpdate=true;
     postMat.uniforms.hurt.value=SETT.flash?Math.max(S.hurt*1.2,pl.dead?.25:0,(!pl.dead&&pl.hp<pl.max*.3)?(.12+.08*Math.sin(clock*5)):0):pl.dead?.18:pl.hp<pl.max*.3?.1:0;
-  }else{heroMesh.visible=false;if(mesh2)mesh2.visible=false;pGeo.setDrawRange(0,0);postMat.uniforms.hurt.value=0}
+  }else{heroMesh.visible=false;if(mesh2)mesh2.visible=false;mpHudTick();pGeo.setDrawRange(0,0);postMat.uniforms.hurt.value=0}
   blobs.count=bi;blobs.instanceMatrix.needsUpdate=true;
   decalT-=dt;if(decalDirty&&decalT<=0){decalTex.needsUpdate=true;decalDirty=false;decalT=.15}
   updatePowerVisuals();
