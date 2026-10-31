@@ -335,7 +335,7 @@ function upscaleWorld(w){const sm=w.map,su=w.under,map=new Uint8Array(MW*MH),und
   for(const n of w.npcs){n.x=px(n.x);n.y=px(n.y);if(n.solid)n.solid=[FT(n.solid[0]),FT(n.solid[1])]}
   const reg=w.region,gx=GTX,gy=GTY,mk=MK;w.region=(x,y)=>reg(gx[x]??Math.floor(x/mk),gy[y]??Math.floor(y/mk));
   if(w.clearways){const keep=w.clearways;w.clearways=new Set();for(let Y=0;Y<MH;Y++)for(let X=0;X<MW;X++)if(keep.has(GTY[Y]*GW+GTX[X]))w.clearways.add(Y*MW+X)}
-  w.idle=[MP(w.idle[0]),MP(w.idle[1]),w.idle[2]*MK,w.idle[3]*MK];w.map=map;w.under=under;return w}
+  if(w.roofs)w.roofs=w.roofs.map(([x,y,a,b])=>({x:FT(x),y:FT(y),w:FT(x+a)-FT(x),h:FT(y+b)-FT(y)}));w.idle=[MP(w.idle[0]),MP(w.idle[1]),w.idle[2]*MK,w.idle[3]*MK];w.map=map;w.under=under;return w}
 setGrid(1);
 
 // Chapter II: the Lower City (layout from the M9 concept)
@@ -399,7 +399,7 @@ function genBrzeznica(){
     const mx=hx+(w>>1),my=hy+(h>>1);
     if(door==='s'){fill(mx-1,hy+h-1,3,1,43);reserve(mx-1,hy+h-3,3,5)}
     if(door==='n'){fill(mx-1,hy,3,1,43);reserve(mx-1,hy-2,3,5)}
-    if(door==='e'){fill(hx+w-1,my-1,1,3,43);reserve(hx+w-3,my-1,5,3)}
+    if(door==='e'){fill(hx+w-1,my-1,1,4,43);reserve(hx+w-3,my-1,5,4);if(w>=13){fill(mx-1,hy,3,1,43);reserve(mx-1,hy-2,3,5);fill(mx-1,hy+h-1,3,1,43);reserve(mx-1,hy+h-3,3,5)}}
   }
   // blood-soaked mud around the gallows, the stakes and the barn
   for(let i=0;i<90;i++){const c=[[35,32],[31,44],[17,20],[12,48],[28,25]][i%5],x=c[0]+((r()-.5)*7)|0,y=c[1]+((r()-.5)*5)|0;if(at(x,y)===40||at(x,y)===41||at(x,y)===42)set(x,y,47)}
@@ -426,7 +426,7 @@ function genBrzeznica(){
   // dead trees along the palisade and in the corners
   for(let i=0;i<500;i++){const side=i%4,t=r();let x,y;if(side===0){x=3+((t*(GW-6))|0);y=3+((r()*2)|0)}else if(side===1){x=3+((t*(GW-6))|0);y=GH-4-((r()*2)|0)}else if(side===2){x=3+((r()*2)|0);y=3+((t*(GH-6))|0)}else{x=GW-4-((r()*2)|0);y=3+((t*(GH-6))|0)}
     if(r()>.22)continue;const c=at(x,y);if(c!==42&&c!==41)continue;if(PROPS.some(p=>p.k==='dead_tree'&&Math.abs(p.x-x)<3.5&&Math.abs(p.y-y)<3.5))continue;prop('dead_tree',x+.5,y+.92,[[x,y]])}
-  return{map,under,PROPS,clearways,start:{x:31*TS+8,y:51*TS+8},shrines:[{x:24*TS+8,y:14*TS+8},{x:47*TS+8,y:48*TS+8}],region:()=>'village',
+  return{map,under,PROPS,clearways,roofs:H,start:{x:31*TS+8,y:51*TS+8},shrines:[{x:24*TS+8,y:14*TS+8},{x:47*TS+8,y:48*TS+8}],region:()=>'village',
     npcs:[{id:'elder',art:'elder',name:(EN?'Dying Old Man':'Umierający przy studni'),x:29.6*TS,y:26.4*TS,lines:ELDER_LINES},
           {id:'marga',art:'marga',name:(EN?'Marga, The Bone Trader':'Marga, handlarka kości'),x:54.4*TS,y:26.8*TS,lines:MARGA_LINES},
           {id:'wit',art:'wit',name:(EN?'Brother Wit, Prisoner in the Stocks':'Brat Wit, więzień w dybach'),x:14.5*TS,y:30.92*TS,lines:WIT_LINES,solid:[14,30]},
@@ -1090,7 +1090,19 @@ function dressSettlementsHD(w){
   }
  }
 }
-function finishWorldArt(w){preparePowerFires(w);composeWorldProps(w);dressSettlementsHD(w);settleWorldProps(w);const flat=new Set(['dwarf_bones','covered_corpses','beggar_bodies','doorway_bones','wheel','burnt_hay','cz_bones','cz_pelts','cz_walk','cz_wisp','cz_crow','mushrooms','ferns','brambles','reeds','scroll','book','pages','keys','seal','purse','shackles','skull']);
+function buildRoofs(w){if(!w.roofs||!w.group)return;
+ const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#2a201b';g.fillRect(0,0,64,64);
+ for(let r=0;r<8;r++){const y=r*8;g.fillStyle=r%2?'#33271f':'#241b16';g.fillRect(0,y,64,7);g.fillStyle='#120e0b';g.fillRect(0,y+7,64,1);const off=(r*21)%32;for(let k=0;k<2;k++)g.fillRect((off+k*32)%64,y,1,7)}
+ for(let i=0;i<26;i++){g.fillStyle=i%3?'#7a2c14':'#c4521c';g.fillRect((i*37)%64,(i*53)%64,1+(i%2),1)}
+ for(const r of w.roofs){const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.NearestFilter;t.repeat.set((r.w+.6)/2,(r.h+.6)/2);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(r.w+.6,r.h+.6).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({map:t,transparent:true,opacity:1,color:0xcfc0b4}));
+  m.position.set(r.x+r.w/2,1.93,r.y+r.h/2);m.castShadow=false;m.receiveShadow=false;m.renderOrder=3;w.group.add(m);r.mesh=m;r.a=1}}
+let roofT=0;
+function roofTick(){const rs=W&&W.roofs;if(!rs||!S)return;const ps=[pl1||pl,pl2].filter(p=>p&&!p.dead),dt=Math.min(.1,Math.max(0,clock-roofT));roofT=clock;
+ for(const r of rs){if(!r.mesh)continue;let inside=false;for(const p of ps){const tx=p.x/16,ty=p.y/16;if(tx>r.x-.3&&tx<r.x+r.w+.3&&ty>r.y-.3&&ty<r.y+r.h+.3){inside=true;break}}
+  r.a+=((inside?0:1)-r.a)*Math.min(1,dt*7);r.mesh.material.opacity=r.a;r.mesh.visible=r.a>.02}}
+
+function finishWorldArt(w){buildRoofs(w);preparePowerFires(w);composeWorldProps(w);dressSettlementsHD(w);settleWorldProps(w);const flat=new Set(['dwarf_bones','covered_corpses','beggar_bodies','doorway_bones','wheel','burnt_hay','cz_bones','cz_pelts','cz_walk','cz_wisp','cz_crow','mushrooms','ferns','brambles','reeds','scroll','book','pages','keys','seal','purse','shackles','skull']);
   const props=w.PROPS.filter(p=>!flat.has(p.k)&&!VOID.has(tileAt(Math.floor(p.x),Math.floor(p.y-.2))));
   w.groundShadows=instanced(groundFxGeo,groundShadowMat,props,p=>{const m=p.obj&&p.obj.mesh,s=p.k==='sacred_oak'?2.2:p.tree?.8:m?Math.min(2,Math.max(.3,m.geometry.parameters.width*Math.abs(m.scale.x)*.5)):.65;return M4.compose(V.set(p.x,.024,p.y-.1),Q.identity(),SC.set(s,1,s*.5))},false,false);
   const lights=w.LSRC.filter(l=>['fire','shrine','rune','npc'].includes(l.kind)&&l.base>0&&[-1,0,1].every(dy=>[-1,0,1].every(dx=>!VOID.has(tileAt(Math.floor(l.x)+dx,Math.floor(l.z)+dy))))).slice(0,32);
@@ -2262,7 +2274,7 @@ let _fgt=null;function fireGlowTex(){if(_fgt)return _fgt;const c=document.create
 function preparePowerFires(w){if(!A.powerFire)A.powerFire=[[64,64],[96,64],[0,96],[32,96]].map(([x,y])=>procFrame(IMGS.br_props,x,y,32,32,'prop'));
   w.fireMarkers=[];for(const o of w.propObjs)if(o.kind==='shrine'){o.frames=A.powerFire;o.fps=6;o.mesh.geometry=geo32;o.mesh.material=o.frames[0].n;o.mesh.castShadow=false;const mat=new THREE.MeshBasicMaterial({map:fireGlowTex(),color:0xffad55,transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}),ring=new THREE.Mesh(new THREE.PlaneGeometry(3.4,3.4).rotateX(-Math.PI/2),mat);ring.position.set(o.mesh.position.x,.035,o.mesh.position.z);w.group.add(ring);w.fireMarkers.push({mesh:ring,index:o.si})}for(const l of w.LSRC)if(l.kind==='shrine')l.col=0xffa355}
 function makeDeathPurse(x,y,amount){if(!(amount>0))return;const mesh=new THREE.Mesh(geoC,A.pick.c.n);mesh.scale.setScalar(.8);mesh.position.set(x/16,.2,y/16);scene.add(mesh);(S.deathPurses||(S.deathPurses=[])).push({ch:CH,x,y,amount,mesh,ready:false})}
-function updatePowerVisuals(){fireFxTick();if(!S)return;for(const f of W.fireMarkers||[]){const armed=S.rebirth&&S.rebirth.ch===CH&&S.rebirth.index===f.index;f.mesh.material.color.setHex(S.rebirthUsed||S.rebirth&&!armed?0x766b65:armed?0x8cead4:0xffad55);f.mesh.material.opacity=(S.rebirthUsed||S.rebirth&&!armed)?.18:armed?.85:.48+.18*Math.sin(clock*2);if(S.fxHeal!=null&&f.index===S.fxHealIdx&&clock-S.fxHeal<.25){f.mesh.material.color.setHex(0x9dffc0);f.mesh.material.opacity=.95;f.mesh.scale.setScalar(1.15+.12*Math.sin(clock*8))}else f.mesh.scale.setScalar(1)}for(const p of S.deathPurses||[]){p.mesh.visible=p.ch===CH;p.mesh.position.set(p.x/16,.2+Math.sin(clock*3)*.035,p.y/16)}}
+function updatePowerVisuals(){fireFxTick();roofTick();if(!S)return;for(const f of W.fireMarkers||[]){const armed=S.rebirth&&S.rebirth.ch===CH&&S.rebirth.index===f.index;f.mesh.material.color.setHex(S.rebirthUsed||S.rebirth&&!armed?0x766b65:armed?0x8cead4:0xffad55);f.mesh.material.opacity=(S.rebirthUsed||S.rebirth&&!armed)?.18:armed?.85:.48+.18*Math.sin(clock*2);{const pv=S.pot&&S.pot[CH+':'+f.index];if(pv!=null&&pv<=0){f.mesh.material.color.setHex(0x555555);f.mesh.material.opacity=.15}}if(S.fxHeal!=null&&f.index===S.fxHealIdx&&clock-S.fxHeal<.25){f.mesh.material.color.setHex(0x9dffc0);f.mesh.material.opacity=.95;f.mesh.scale.setScalar(1.15+.12*Math.sin(clock*8))}else f.mesh.scale.setScalar(1)}for(const p of S.deathPurses||[]){p.mesh.visible=p.ch===CH;p.mesh.position.set(p.x/16,.2+Math.sin(clock*3)*.035,p.y/16)}}
 function recoverPurses(){for(let i=(S.deathPurses||[]).length-1;i>=0;i--){const p=S.deathPurses[i];if(p.ch!==CH)continue;const distance=Math.hypot(pl.x-p.x,pl.y-p.y);if(!p.ready){if(distance>24)p.ready=true;continue}if(distance>16)continue;S.coins+=p.amount;scene.remove(p.mesh);S.deathPurses.splice(i,1);play('coin',0);say((EN?'You recover the purse from where you died: ':'Odzyskujesz sakwę z miejsca śmierci: ')+p.amount+(EN?' coins.':' monet.'))}}
 function tryRebirth(){if(!S.rebirth||S.rebirthUsed)return false;clearSwordTransient();S.swordTrails=[];const f=S.rebirth;makeDeathPurse(pl.x,pl.y,S.coins);S.coins=0;S.rebirthUsed=true;S.deaths=1;let x=f.ch===CH?f.x:START.x,y=f.ch===CH?f.y:START.y;
   if(boxSolid(x,y,4,3)){x=START.x;y=START.y}Object.assign(pl,{x,y,hp:Math.max(1,Math.round(pl.max*.7)),dead:false,deadT:0,inv:3,roll:0,rollCd:0,atk:null,block:false,charging:false,atkHeld:false,queue:false,swingT:0,broken:0,hurtT:0,sta:pl.staMax,mana:pl.manaMax,manaDelay:0});S.endT=0;S.hurt=0;S.hitstop=0;S.snare=0;S.slowT=0;camTarget.set(x/16,0,y/16);resetInput();play('bless',0);say((EN?'The power fire brings you back to life. Character experience for this night: −50%. Your purse waits where you fell. Another death will end the night without its rewards.':'Ognisko przywraca cię do życia. Doświadczenie postaci za tę noc: −50%. Sakwa czeka tam, gdzie upadłeś. Kolejna śmierć zakończy noc bez jej nagród.'));return true}
@@ -3196,7 +3208,7 @@ function updPlayer(dt){
   if(ml>.1&&hold>0){if(!(pl.block||pl.charging)){pl.fx=mx/ml;pl.fy=my/ml}const ox=pl.x,oy=pl.y;moveBox(pl,mx*72*slow*hold*S.pk.spd*dt,my*72*slow*hold*S.pk.spd*dt,4,3);const distance=Math.hypot(pl.x-ox,pl.y-oy);pl.walk+=distance/72;pl.moving=distance>.001}else pl.moving=false;
   if(Math.abs(pl.fx)>Math.abs(pl.fy)){pl.dir=2;pl.s=pl.fx>0?1:-1}else{pl.dir=pl.fy>0?0:1}
   for(let si=0;si<SHRINES.length;si++){const sh=SHRINES[si],sd=Math.hypot(pl.x-sh.x,pl.y-sh.y);
-  if(sd<26&&pl.hp<pl.max*.6){const hh=heal(Math.min(pl.max*.04*dt,pl.max*.6-pl.hp));play('heal',.6);S.fxHeal=clock;S.fxHealIdx=si;pl.healAcc=(pl.healAcc||0)+hh;pl.healT=(pl.healT||0)+dt;if(pl.healT>=.9){pl.healT=0;if(pl.healAcc>=1)ftInfo('+'+Math.round(pl.healAcc)+' HP');pl.healAcc=0}if(Math.random()<dt*46)S.parts.push({k:'i',x:pl.x+rnd(-6,6),y:pl.y+rnd(-2,2),z:rnd(0,8),vx:0,vy:0,vz:rnd(16,34),c:Math.random()<.5?'#7dffb0':'#d8ffe8',life:rnd(.7,1.2)})}}
+  const pk=CH+':'+si;if(!S.pot)S.pot={};if(S.pot[pk]==null)S.pot[pk]=1.2;const left=S.pot[pk];if(sd<26&&pl.hp<pl.max*.6&&left<=0){pl.potEmptyT=(pl.potEmptyT||0)-dt;if(pl.potEmptyT<=0){pl.potEmptyT=4;ftInfo(EN?'The cauldron is empty':'Kociołek jest pusty')}}if(sd<26&&pl.hp<pl.max*.6&&left>0){const hh=heal(Math.min(pl.max*.04*dt,pl.max*.6-pl.hp,left*pl.max));S.pot[pk]=Math.max(0,left-hh/pl.max);play('heal',.6);S.fxHeal=clock;S.fxHealIdx=si;pl.healAcc=(pl.healAcc||0)+hh;pl.healT=(pl.healT||0)+dt;if(pl.healT>=.9){pl.healT=0;if(pl.healAcc>=1)ftInfo('+'+Math.round(pl.healAcc)+' HP · '+(EN?'cauldron ':'kociołek ')+Math.round(S.pot[pk]/1.2*100)+'%');pl.healAcc=0}if(Math.random()<dt*46)S.parts.push({k:'i',x:pl.x+rnd(-6,6),y:pl.y+rnd(-2,2),z:rnd(0,8),vx:0,vy:0,vz:rnd(16,34),c:Math.random()<.5?'#7dffb0':'#d8ffe8',life:rnd(.7,1.2)})}}
 }
 function updParts(dt){
   const ps=S.parts;
