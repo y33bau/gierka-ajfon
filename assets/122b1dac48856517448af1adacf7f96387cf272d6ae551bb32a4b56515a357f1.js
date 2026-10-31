@@ -3519,7 +3519,7 @@ function syncScene(dt){SURFACE_TIME.value=clock;syncThreatRings();
   // talk prompt
   const pr=$('prompt'),free=S&&S.phase==='play'&&!S.notice&&!S.dialog&&!S.choosing&&!S.shop,nmc=free?nearMerchant():null,near=free?(nmc||nearNpc()):null;
   const nf=free&&!near?nearPowerFire():null,nex=free&&!near&&!nf?nearExit():null,lbl=nf?(EN?'Nourishing Cauldron · activate revival':'Sycący Kociołek · aktywuj odrodzenie'):nex?{enter:(EN?'Descend into the crypt':'Zejdź do krypty'),leave:(EN?'Go back up':'Wyjdź na górę'),sealed:(EN?'Crypt sealed':'Krypta zamknięta')}[nex.kind]:nmc?(EN?'Trade':'Handluj'):(EN?'Talk':'Rozmawiaj'),tgt=near||nf||nex;
-  if(tgt){V.set(tgt.x/16,2.1,tgt.y/16).project(cam);pr.hidden=false;pr.textContent=(nex&&nex.kind==='sealed')?lbl:coarse?(EN?'Tap: ':'Dotknij: ')+lbl:(EN?'Enter · ':'Enter · ')+lbl;pr.style.left=((V.x+1)/2*100)+'%';pr.style.top=((1-V.y)/2*100)+'%'}else pr.hidden=true;
+  if(tgt){V.set(tgt.x/16,2.1,tgt.y/16).project(cam);pr.hidden=false;pr.textContent=(nex&&nex.kind==='sealed')?lbl:coarse?(EN?'Tap: ':'Dotknij: ')+lbl:(PAD.g&&INPUT_LAST==='p'?'Y · ':PAD.g&&!INPUT_LAST?'Enter / Y · ':'Enter · ')+lbl;pr.style.left=((V.x+1)/2*100)+'%';pr.style.top=((1-V.y)/2*100)+'%'}else pr.hidden=true;
   // Marga at her stall during the break
   const mc=S&&S.merchant;margaMesh.visible=!!mc;if(mc){setFrame(margaMesh,at(A.marga,clock,3));margaMesh.position.set(mc.x/16,0,mc.y/16);const k=mc.state==='in'?1-mc.t:mc.state==='out'?mc.t:1;margaMesh.scale.set(1,SQ*Math.max(.05,k),1);blob(mc.x/16,mc.y/16,1);W.merchantLight.x=mc.x/16;W.merchantLight.z=mc.y/16+.3}
   if(S&&S.collector&&!S.collector.dead&&Math.random()<dt*10){const c=S.collector,a=Math.random()*Math.PI*2;S.parts.push({k:'e',x:c.x+Math.cos(a)*14,y:c.y+Math.sin(a)*8,z:rnd(6,26),vx:-Math.sin(a)*10,vy:Math.cos(a)*6,vz:rnd(2,8),c:Math.random()<.6?'#e0b84a':'#fff0b0',life:rnd(.6,1.2)})}
@@ -4081,11 +4081,12 @@ function padNav(id,dt,pr,g){
   if(pr(9)){if(id==='prep')$('prepGo').click();else if(id==='shop')closeShop()}
 }
 function padMark(){for(const e of document.querySelectorAll('.pf'))e.classList.remove('pf');if(!PAD.menu||!document.body.classList.contains('padnav'))return;const a=document.activeElement,root=$(PAD.menu);if(!a||!root||!root.contains(a))return;const t=a.type==='range'?a.parentNode:a.type==='checkbox'?(a.closest('label')||a):a;t.classList.add('pf')}
+let INPUT_LAST='';window.addEventListener('keydown',()=>{INPUT_LAST='k'},true);
 function padTick(dt){
   let g=null,g2=null;try{const l=navigator.getGamepads?navigator.getGamepads():[];for(const p of l)if(p&&p.connected){if(!g)g=p;else{g2=p;break}}}catch(e){}
   pad2Tick(g2);PAD.prev=PAD.cur;PAD.g=g;
   if(!g){PAD.cur=[];PAD.x=PAD.y=0;PAD.atk=PAD.blk=PAD.skillHeld=PAD.skillConsumed=false;return}
-  PAD.cur=g.buttons.map(b=>!!b&&(b.pressed||b.value>.5));
+  PAD.cur=g.buttons.map(b=>!!b&&(b.pressed||b.value>.5));if(PAD.cur.some(Boolean))INPUT_LAST='p';
   // krzyżak w nietypowych padach: oś hat (axes[9]) albo osie 6/7
   if(g.mapping!=='standard'||g.buttons.length<16){const ax=g.axes||[];let u=0,d=0,l=0,r=0;
     if(ax.length>9&&Math.abs(ax[9])<=1.01){const v=Math.round((ax[9]+1)*3.5);u=v===0||v===1||v===7;r=v===1||v===2||v===3;d=v===3||v===4||v===5;l=v===5||v===6||v===7}
