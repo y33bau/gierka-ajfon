@@ -1542,6 +1542,15 @@ const plLight=new THREE.PointLight(0xffd2a0,2.1,13,2);plLight.castShadow=true;pl
 
 // Chapters I-III keep their hand-made layouts, stretched to the bigger map; enrich() fills the new room
 // with extra buildings, props, four "altars" for the kill-next-to-it event, traps and the 9:00 wave (big-map coordinates)
+// Runda 216: dodatkowe dekoracje bez kolizji na każdej mapie. Stawiane tylko na wolnej posadzce (bez cieczy, z dala od ścian),
+// z dala od innych obiektów, NPC, kapliczek, startu i korytarzy (clearways); nie zmieniają mapy kolizji.
+const DECOR={1:[['covered_corpses',8],['burnt_hay',9],['wheel',7]],2:[['dwarf_bones',30]],3:[['beggar_bodies',12],['doorway_bones',10],['rot_bloom',8,{anim:'bloom'}]],4:[['cz_bones',22],['wolf_skull_bush',14]],5:[['ledgers',8],['chair',6],['rack',5],['armour',4],['cage',3]]};
+function decorFill(w,ch){const L=DECOR[ch];if(!L)return;const r=rng(ch*104729+77),M=w.map,P=w.PROPS,keep=w.clearways||new Set(),NO=new Set([23,24,25,43,45,54,64,65,90,91]);
+ const T=(x,y)=>(x<1||y<1||x>=MW-1||y>=MH-1)?21:M[y*MW+x],st=w.start||{x:-999,y:-999},others=[...(w.npcs||[]),...(w.shrines||[])];
+ const ok=(x,y)=>{const t=T(x,y);if(NO.has(t)||SOLID.has(t))return false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const u=T(x+dx,y+dy);if(SOLID.has(u)||NO.has(u))return false}
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(keep.has((y+dy)*MW+x+dx))return false;if(Math.hypot(st.x/16-x,st.y/16-y)<7)return false;
+  if(others.some(n=>Math.abs(n.x/16-x)<3&&Math.abs(n.y/16-y)<3))return false;return !P.some(p=>Math.abs(p.x-x-.5)<2.2&&Math.abs(p.y-y-.92)<2.2)};
+ for(const [k,n,extra] of L)for(let i=0,c=0;i<n*60&&c<n;i++){const x=2+((r()*(MW-4))|0),y=2+((r()*(MH-4))|0);if(!ok(x,y))continue;P.push(Object.assign({k,x:x+.5,y:y+.92,flip:r()<.5,decor:1},extra||{}));c++}}
 function enrich(w,ch){
   const r=rng(ch*7919+13),M=w.map,U=w.under,P=w.PROPS;
   const keep=w.clearways||(w.clearways=new Set()),keepRect=(x,y,ww,hh)=>{for(let Y=y;Y<y+hh;Y++)for(let X=x;X<x+ww;X++)keep.add(Y*MW+X)};
@@ -1594,7 +1603,7 @@ function initWorld(ch){setGrid(ch);if((ch===4||ch===5)&&WORLD_SEEDS[ch]===undefi
   const w=upscaleWorld(ch===1?genBrzeznica():ch===2?genDolne():ch===3?genStolica():ch===9?genDungeon((Math.random()*2147483647)|0):ch===5?genCytadela(WORLD_SEEDS[ch]):genCzarnobor(WORLD_SEEDS[ch]));if(ch<4)enrich(w,ch);
   if(ch===9)w.rooms=w.rooms.map(R=>Object.assign(SR(R),{k:R.k}));
   Object.assign(w,{ch,group:new THREE.Group(),propObjs:[],npcMeshes:{},walls:[],cliffs:[],pillars:[],lavas:[],braziers:[],waters:[],rots:[],shallow:[],LSRC:[]});
-  for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;if(ch===4)deepMarsh(w);
+  for(const n of w.npcs)if(n.solid)w.map[n.solid[1]*MW+n.solid[0]]=31;if(ch===4)deepMarsh(w);if(ch>=1&&ch<=5)decorFill(w,ch);
   // runda 215: bez ognisk (koksowników) tuż przy lawie w rozdz. II
   if(ch===2)for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const i=y*MW+x;if(w.map[i]!==27)continue;let n=false;for(let dy=-3;dy<=3&&!n;dy++)for(let dx=-3;dx<=3;dx++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<MW&&Y<MH&&w.map[Y*MW+X]===24){n=true;break}}if(n)w.map[i]=(w.under&&w.under[i]&&w.under[i]!==27)?w.under[i]:20}
   scene.add(w.group);
