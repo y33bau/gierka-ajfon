@@ -41,6 +41,21 @@ const SPRITE_GROUPS={
   "cc0_lava": [
     "r2"
   ],
+  "cc0_ash": [
+    "core"
+  ],
+  "cc0_moss1": [
+    "core"
+  ],
+  "cc0_zl_moss": [
+    "r3"
+  ],
+  "cc0_forestmoss": [
+    "r4"
+  ],
+  "cc0_abyss": [
+    "r2"
+  ],
   "cc0_blackrock": [
     "r2",
     "r5"
@@ -840,16 +855,21 @@ function groundTile(g,img,col,row,tx,ty){const n=groundHash(tx,ty),plan=W.ground
 }
 // Keep one small atlas and tile index map instead of allocating a 6656 x 5824 texture per chapter.
 // CC0 floors: full-resolution repeating textures; IDs change appearance only.
-const CC0_FLOORS={1:{names:['dirt2','cracks','charcoal','ground1'],tint:[1,.97,.92]},2:{names:['ground1','blackrock','charcoal'],tint:[.84,.88,.96]},3:{names:['zl_place','zl_street'],tint:[1,.96,.88]},4:{names:['mud','dirt3','leaves','darkrock'],tint:[.9,.96,.88]},5:{names:['ground2','blackrock','ground1'],tint:[.68,.69,.74]},9:{names:['ground2','ground1'],tint:[.73,.75,.81]}};
+const CC0_FLOORS={1:{names:['dirt2','cracks','charcoal','ground1','ash','moss1'],tint:[1,.97,.92]},2:{names:['ground1','blackrock','charcoal'],tint:[.84,.88,.96]},3:{names:['zl_place','zl_street','zl_moss'],tint:[1,.96,.88]},4:{names:['mud','dirt3','leaves','darkrock','forestmoss'],tint:[.9,.96,.88]},5:{names:['ground2','blackrock','ground1'],tint:[.68,.69,.74]},9:{names:['ground2','ground1'],tint:[.73,.75,.81]}};
 function cc0FloorCells(info,ch){const cells=info.cells.slice(),plan=W.groundPlan;if(!plan)return cells;
  const burns=W.PROPS.filter(p=>p.fire||/debris_fire|burnt_hay|furnace|brazier/.test(p.k||''));
+ // extra CC0 floors (folder 'skille claude'): ash around the burned houses, moss patches, mossy cobbles in the slums, moss in the forest
+ const capId=renderer.capabilities.maxTextures-5,nz=(x,y)=>Math.sin(x*.19+1.3)+Math.cos(y*.23+.7)+Math.sin((x-y)*.11);let ashM=null;
+ if(ch===1){ashM=new Uint8Array(MW*MH);for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const t=tileAt(x,y);if(t===44||t===48||t===43)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<MW&&Y<MH&&dx*dx+dy*dy<=5)ashM[Y*MW+X]=1}}}
  for(let i=0;i<MW*MH;i++){const a=i*4,row=cells[a+1],flags=cells[a+3],x=i%MW,y=i/MW|0;if(!cells[a]||!(flags&64))continue;let id=-1;
-  if(ch===1&&![3,5].includes(row)){id=row===4?3:row===1?1:0;if(row!==4&&burns.some(p=>Math.hypot(p.x-x-.5,p.y-y-.5)<2.1))id=2;}
+  if(ch===1&&![3,5].includes(row)){id=row===4?3:row===1?1:0;if(id!==3){if(ashM[i])id=4;else if(nz(x,y)>1.25)id=5}if(row!==4&&burns.some(p=>Math.hypot(p.x-x-.5,p.y-y-.5)<2.1))id=2;}
   if(ch===2&&![1,5,7].includes(row)){id=row===2&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>SOLID.has(tileAt(x+dx,y+dy)))?1:0;if(burns.some(p=>Math.hypot(p.x-x-.5,p.y-y-.5)<2))id=2;}
   if(ch===3&&![1,4].includes(row))id=plan.road[i]||row===3?1:0;
-  if(ch===4&&![4,5,7].includes(row)){const r=W.region(x,y);id=r==='camp'?0:row===1?1:(r==='hill'||r==='stones')?3:r==='forest'?2:0;}
+  if(ch===3&&id>=0&&W.region(x,y)==='slums'&&(nz(x,y)>.4||[[2,0],[-2,0],[0,2],[0,-2],[1,1],[-1,-1],[1,-1],[-1,1]].some(([dx,dy])=>tileAt(x+dx,y+dy)===54)))id=2;
+  if(ch===4&&![4,5,7].includes(row)){const r=W.region(x,y);id=r==='camp'?0:row===1?1:(r==='hill'||r==='stones')?3:r==='forest'?2:0;if(id===2&&nz(x,y)>.6)id=4;}
   if(ch===5&&![3,4,6,7].includes(row))id=row===2?2:row===5?1:0;
   if(ch===9&&![1,5,7].includes(row))id=row===2?1:0;
+  if(id>capId)id=ch===4?2:0;
   if(id>=0)cells[a+2]=(cells[a+2]%8)+128+id*8;
  }return cells;
 }
@@ -860,11 +880,11 @@ function cc0FloorOverlay(tex,info,cells){const c=tex.image,g=c.getContext('2d'),
  }g.putImageData(d,0,0);tex.needsUpdate=true;
 }
 function groundMaterial(m){const info=m.map&&m.map.userData&&m.map.userData.ground;if(!info)return m;
-  const groundChapter=CH,cc0=CC0_FLOORS[groundChapter],cc0Count=cc0?cc0.names.length:0,compactSamplers=renderer.capabilities.maxTextures<cc0Count+5;
+  const groundChapter=CH,cc0=CC0_FLOORS[groundChapter],cc0Count=cc0?Math.min(cc0.names.length,renderer.capabilities.maxTextures-4):0,compactSamplers=renderer.capabilities.maxTextures<cc0Count+5;
   for(let i=0;i<cc0Count;i++){const t=new THREE.Texture(IMGS['cc0_'+cc0.names[i]]);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());t.needsUpdate=true;m['cc0Texture'+i]=t;}
   const cc0Cells=cc0?cc0FloorCells(info,groundChapter):info.cells;if(cc0)cc0FloorOverlay(m.map,info,cc0Cells);
-  const cc0Uniforms=cc0?cc0.names.map((_,i)=>'uniform sampler2D nbCC'+i+';').join('\n'):'';
-  const cc0Sample=cc0?cc0.names.map((_,i)=>'if(id<'+(i+.5).toFixed(1)+'){\n#ifdef NB_STABLE_GRAD\nreturn texture2DGradEXT(nbCC'+i+',world/12.,nbDx/12.,nbDy/12.).rgb;\n#else\nreturn texture2D(nbCC'+i+',world/12.).rgb;\n#endif\n}').join('\n'):'';
+  const cc0Uniforms=cc0?cc0.names.slice(0,cc0Count).map((_,i)=>'uniform sampler2D nbCC'+i+';').join('\n'):'';
+  const cc0Sample=cc0?cc0.names.slice(0,cc0Count).map((_,i)=>'if(id<'+(i+.5).toFixed(1)+'){\n#ifdef NB_STABLE_GRAD\nreturn texture2DGradEXT(nbCC'+i+',world/12.,nbDx/12.,nbDy/12.).rgb;\n#else\nreturn texture2D(nbCC'+i+',world/12.).rgb;\n#endif\n}').join('\n'):'';
   m.bumpMap=null;m.bumpScale=0;delete m.userData.surfaceDetail;
   m.groundAtlas=surfaceTex(groundPadded(info.image));m.groundCoarse=surfaceTex(groundCoarse(info.image));
   // Stable derivatives across tile-index jumps; retain minification without neighbouring-cell bleed.
@@ -1094,7 +1114,7 @@ function buildDolne(I){planGround(2);
     const mat=liquidMat({map:lt,emissiveMap:lt,emissive:0xff7a30,emissiveIntensity:.75},1),mesh=new THREE.Mesh(g,mat);mesh.castShadow=false;mesh.receiveShadow=false;ROOT.add(mesh);LAVA_HD={tex:lt,mat}}
   else{const lavaGeo=new THREE.PlaneGeometry(1,1);lavaGeo.rotateX(-Math.PI/2);
   instanced(lavaGeo,liquidMat({map:lavaTex,emissiveMap:lavaTex,emissive:0xff8a46,emissiveIntensity:.65},1),lavas,([x,y])=>M4.makeTranslation(x+.5,-.32,y+.5),false,false)}}
-  const abT=texFrom(tcut(F,3,6),true);abT.repeat.set(5*MK,MH);
+  let abT;{const ai=I.cc0_abyss||(IMGS&&IMGS.cc0_abyss);if(ai){abT=new THREE.Texture(ai);abT.wrapS=abT.wrapT=THREE.RepeatWrapping;abT.generateMipmaps=true;abT.minFilter=THREE.LinearMipmapLinearFilter;abT.magFilter=THREE.LinearFilter;abT.needsUpdate=true;abT.repeat.set((FT(40)-FT(35))/4,MH/4)}else{abT=texFrom(tcut(F,3,6),true);abT.repeat.set(5*MK,MH)}}
   const abyss=new THREE.Mesh(new THREE.PlaneGeometry(FT(40)-FT(35),MH),new THREE.MeshBasicMaterial({map:abT,color:0x8a6a6a}));abyss.rotation.x=-Math.PI/2;abyss.position.set((FT(35)+FT(40))/2,-10,MH/2);ROOT.add(abyss);
   const brT=texFrom(tcut(F,2,4),true);brT.repeat.set(5,2);
   const bridge=new THREE.Mesh(new THREE.BoxGeometry(FT(40)-FT(35),.3,FT(26)-FT(22)),phong({map:brT}));bridge.position.set((FT(35)+FT(40))/2,-.15,(FT(22)+FT(26))/2);bridge.receiveShadow=true;bridge.castShadow=true;ROOT.add(bridge);
