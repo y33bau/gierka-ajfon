@@ -322,3 +322,4 @@ cache240 (test): leczenie przy kociolku bez gornej granicy 60% HP (do pelna, ogr
 cache241 (test): kociolek (grafika od autora, gulasz) zamiast ognia na kaplicach mocy; zar, ogniki i zielone leczenie bez zmian. Nie sprawdzono w grze.
 cache242 (test): kociolek mniejszy (wysokosc 1,6 pola); nazwa Ognisko mocy -> Sycacy Kociolek (EN: Nourishing Cauldron) we wszystkich tekstach i w podreczniku; dachy z tekstury autora (rooftiles_base_color_0), niebieski zmieniony na braz, mech zostaje. Nie sprawdzono w grze.
 cache243 (test): podpowiedz nad NPC/kociolkiem pokazuje Y przy ostatnim uzyciu pada, Enter przy klawiaturze, Enter / Y gdy pad podlaczony a nic jeszcze nie nacisnieto. Nie sprawdzono: pad.
+cache244 (test): dachy dwuspadowe (lamane) zamiast plaskich; kalenica ma maks. 0,9 pola wysokosci, zeby malo zaslaniac mape; ten sam brazowy wzor z mchem. Nie sprawdzono w grze.

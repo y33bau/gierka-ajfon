@@ -1090,14 +1090,15 @@ function dressSettlementsHD(w){
   }
  }
 }
-function buildRoofs(w){if(!w.roofs||!w.group)return;
- const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#2a201b';g.fillRect(0,0,64,64);
- for(let r=0;r<8;r++){const y=r*8;g.fillStyle=r%2?'#33271f':'#241b16';g.fillRect(0,y,64,7);g.fillStyle='#120e0b';g.fillRect(0,y+7,64,1);const off=(r*21)%32;for(let k=0;k<2;k++)g.fillRect((off+k*32)%64,y,1,7)}
- for(let i=0;i<26;i++){g.fillStyle=i%3?'#7a2c14':'#c4521c';g.fillRect((i*37)%64,(i*53)%64,1+(i%2),1)}
- const rm=[];for(const r of w.roofs){const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.magFilter=THREE.NearestFilter;t.repeat.set((r.w+.6)/2,(r.h+.6)/2);
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(r.w+.6,r.h+.6).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({map:t,transparent:true,opacity:1,color:0xcfc0b4}));
-  m.position.set(r.x+r.w/2,1.93,r.y+r.h/2);m.castShadow=false;m.receiveShadow=false;m.renderOrder=3;w.group.add(m);r.mesh=m;r.a=1;rm.push(r)}
- roofImg(im=>{for(const r of rm){const t=new THREE.Texture(im);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.repeat.set((r.w+.6)/4,(r.h+.6)/4);t.needsUpdate=true;r.mesh.material.map=t;r.mesh.material.color.setHex(0xd8c8bc);r.mesh.material.needsUpdate=true}})}
+function roofGeo(W,D,rise){const ax=W>=D,L=ax?W:D,T=ax?D:W,hT=T/2,sl=Math.hypot(rise,hT),P=[],U=[],vx=(a,b,y,u,v)=>{if(ax)P.push(a,y,b);else P.push(b,y,a);U.push(u/4,v/4)};
+ for(const sg of[-1,1]){const A=[-L/2,sg*hT,0,0,0],B=[L/2,sg*hT,0,L,0],C=[L/2,0,rise,L,sl],E=[-L/2,0,rise,0,sl];for(const q of[A,B,C,A,C,E])vx(...q)}
+ for(const e of[-1,1]){vx(e*L/2,-hT,0,0,0);vx(e*L/2,hT,0,T,0);vx(e*L/2,0,rise,T/2,rise)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(P),3));g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(U),2));g.computeVertexNormals();return g}
+function buildRoofs(w){if(!w.roofs||!w.group)return;const rm=[];
+ for(const r of w.roofs){const W=r.w+.7,D=r.h+.7,rise=Math.min(.9,Math.min(r.w,r.h)*.14);
+  const m=new THREE.Mesh(roofGeo(W,D,rise),new THREE.MeshLambertMaterial({color:0x4a382c,transparent:true,opacity:1,side:THREE.DoubleSide}));
+  m.position.set(r.x+r.w/2,1.9,r.y+r.h/2);m.castShadow=false;m.receiveShadow=false;m.renderOrder=3;w.group.add(m);r.mesh=m;r.a=1;rm.push(r)}
+ roofImg(im=>{const t=new THREE.Texture(im);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;t.needsUpdate=true;for(const r of rm){r.mesh.material.map=t;r.mesh.material.color.setHex(0xd8c8bc);r.mesh.material.needsUpdate=true}})}
 const ROOF_PNG='./assets/517905a0e4feadfa5ba42b536be2720a1d736e68e81eba922eedcc53d16acee0.png';let _roofIm=null,_roofCbs=[];function roofImg(cb){if(_roofIm&&_roofIm.complete&&_roofIm.naturalWidth){cb(_roofIm);return}_roofCbs.push(cb);if(_roofIm)return;_roofIm=new Image();_roofIm.onload=()=>{const l=_roofCbs;_roofCbs=[];for(const f of l)f(_roofIm)};_roofIm.src=ROOF_PNG}
 let roofT=0;
 function roofTick(){const rs=W&&W.roofs;if(!rs||!S)return;const ps=[pl1||pl,pl2].filter(p=>p&&!p.dead),dt=Math.min(.1,Math.max(0,clock-roofT));roofT=clock;
