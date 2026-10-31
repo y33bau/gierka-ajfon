@@ -296,3 +296,5 @@ cache224 (test): Drzewo Szeptuchy (duze drzewo z rozdz. 4) jako totem wskrzeszan
 cache225 (test): Drzewo Szeptuchy mniejsze (ok. polowa), zamiast ostrego okregu miekka poswiata na ziemi, totem omija NPC, kapliczki i start (min. 9 kratek, wiec nie stoi przy studni), gracz 2 widzi nad soba napis "Odrodzenie gotowe". Nie sprawdzono: prawdziwe pady.
 
 cache226 (test): ognisko (kapliczka): zamiast ostrego pierscienia miekka cieplo-pomaranczowa poswiata na ziemi (tak samo jak przy Drzewie Szeptuchy); kolory stanow bez zmian (gotowe, aktywowane, zuzyte). Nie sprawdzono: telefon, pady.
+
+cache227 (test): Drzewo Szeptuchy zastapione totemem z Gemini (wariant 3: krwawy slup z czaszkami, 15 KB, nowy plik w assets/). Zar, ogniki i poswiata bez zmian; gdyby obrazek sie nie wczytal, pojawi sie prosty slup. Nazwa w grze nadal Drzewo Szeptuchy (do decyzji autora). Nie sprawdzono: telefon, pady.
